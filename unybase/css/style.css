@@ -156,6 +156,64 @@ p { margin: 0; }
 
 .header-actions { display: flex; align-items: center; gap: 20px; }
 
+/* Hamburger toggle — hidden by default (desktop), shown at <=860px */
+.nav-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.nav-toggle:hover { border-color: var(--muted); }
+.nav-toggle span,
+.nav-toggle span::before,
+.nav-toggle span::after {
+  display: block;
+  position: absolute;
+  left: 50%;
+  width: 18px;
+  height: 2px;
+  background: var(--paper);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: transform 0.2s ease, top 0.2s ease, opacity 0.15s ease;
+}
+.nav-toggle span { top: 50%; transform: translate(-50%, -50%); }
+.nav-toggle span::before { content: ""; top: -6px; }
+.nav-toggle span::after  { content: ""; top: 6px; }
+.nav-toggle[aria-expanded="true"] span { background: transparent; }
+.nav-toggle[aria-expanded="true"] span::before { top: 0; transform: translateX(-50%) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span::after  { top: 0; transform: translateX(-50%) rotate(-45deg); }
+
+/* Mobile nav sheet — hidden by default, dropped from header when .is-open */
+.mobile-nav {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 20px 24px 28px;
+  background: rgba(10, 18, 32, 0.98);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--line);
+  flex-direction: column;
+  gap: 14px;
+}
+.mobile-nav.is-open { display: flex; }
+.mobile-nav .nav-item {
+  font-size: 1rem;
+  color: var(--paper);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-nav .nav-item:last-of-type { border-bottom: 0; }
+.mobile-nav .btn { margin-top: 6px; text-align: center; }
+
 /* ---------- Hero ---------- */
 
 .hero {
@@ -565,6 +623,8 @@ section { padding-top: clamp(56px, 8vw, 100px); padding-bottom: clamp(56px, 8vw,
 
 @media (max-width: 860px) {
   .nav-links { display: none; }
+  .nav-toggle { display: inline-block; }
+  .header-actions > .btn { display: none; } /* CTA lives in the mobile menu instead */
   .hero .wrap { grid-template-columns: 1fr; }
   .stack-diagram { margin-top: 8px; }
   .feature-grid { grid-template-columns: 1fr; }
