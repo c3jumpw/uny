@@ -45,7 +45,48 @@ The API surface (`getUserRole`, `canAccessAdmin`, `roleLabel` in
 the implementation to read from a `user_roles` table without
 touching callers.
 
-## Phase 2 — Subscription admin dashboard
+## Phase 2 — Subscription admin dashboard ✅
+
+### What shipped
+- `subscription_events` table: raw log of every webhook event, matched or not.
+- `subscription_status` table: per-user state (active/lapsed/cancelled/never_paid,
+  automations_active, cut_off_at/by/reason).
+- `api_keys` table: stub `unyb_live_<hex>` per user, auto-issued on signup via
+  trigger, `revoked_at` set by cutoff toggle.
+- `admin_actions` table: full audit trail of every cutoff/restore.
+- `technical_admin_grants` table: workspace-owner grants tech admin access.
+- `user_roles` table (public schema): super_admin / technical_admin / client.
+  **Do not use `auth.users.is_super_admin`** — GoTrue uses that column for
+  Postgres superuser privileges; setting it to `true` breaks login with
+  "database error querying schema".
+- Webhook `/api/webhooks/systeme`: validates token, logs all events, updates
+  status on payment.succeeded / payment.failed / subscription.cancelled.
+  Systeme.io does not support manual test API calls — real payment events from
+  subscribers will populate the log automatically.
+- Admin dashboard `/admin`: real user table, worst-first sort, six-tier status
+  matrix (grace/warning/escalated/cutoff-recommended/cut-off/active), cutoff
+  toggle with type-CUTOFF confirmation modal, audit trail table.
+- Client dashboard `/dashboard`: live subscription status pill + API key card.
+- Three-tier RLS: super_admin (via user_roles) sees everything; technical_admin
+  sees only workspaces granted to them; client sees only own rows.
+
+### Known gotcha: SQL-inserted users
+When seeding accounts directly into `auth.users` via SQL (not the signup flow),
+all `text` / `character varying` token columns must be `''` (empty string),
+not `NULL`. GoTrue's Go scanner panics on NULL→string conversion and returns
+"error finding user: sql: Scan error on column index N, name
+\"confirmation_token\": converting NULL to string is unsupported".
+Fix: `UPDATE auth.users SET confirmation_token='', recovery_token='', ...`
+for any SQL-inserted row.
+
+### What still needs to happen before phase 2 is production-ready
+- SMTP config (Supabase → Auth → SMTP) so cutoff/restore emails send to
+  clients. Currently stubbed to console.log.
+- Admin alert email on payment.failed (currently just updates DB; no outbound).
+- Client-side grant UI (phase 4+) so clients can grant/revoke tech admin access
+  from workspace settings instead of needing SQL.
+
+## Phase 2 (original spec — kept for reference)
 
 Route: `/admin`, gated by `canAccessAdmin(role)`. Scaffolded in phase
 1; wire up in phase 2.
