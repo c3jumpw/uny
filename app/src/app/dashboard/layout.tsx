@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminEmail } from "@/lib/admin";
+import { getUserRole } from "@/lib/admin";
 import { DashboardNav } from "@/components/DashboardNav";
 
 export default async function DashboardLayout({
@@ -15,11 +15,11 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/login");
 
-  const admin = isAdminEmail(user.email);
+  const role = getUserRole(user.email);
 
   return (
     <>
-      <DashboardNav isAdmin={admin} email={user.email ?? null} />
+      <DashboardNav role={role} email={user.email ?? null} />
       <main className="wrap" style={{ paddingTop: 32, paddingBottom: 64 }}>
         {children}
       </main>

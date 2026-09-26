@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminEmail } from "@/lib/admin";
+import { getUserRole, canAccessAdmin } from "@/lib/admin";
 import { DashboardNav } from "@/components/DashboardNav";
 
 export default async function AdminLayout({
@@ -14,11 +14,13 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-  if (!isAdminEmail(user.email)) redirect("/dashboard");
+
+  const role = getUserRole(user.email);
+  if (!canAccessAdmin(role)) redirect("/dashboard");
 
   return (
     <>
-      <DashboardNav isAdmin={true} email={user.email ?? null} />
+      <DashboardNav role={role} email={user.email ?? null} />
       <main className="wrap" style={{ paddingTop: 32, paddingBottom: 64 }}>
         {children}
       </main>

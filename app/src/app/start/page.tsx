@@ -7,14 +7,14 @@ const PLANS = [
     name: "Basic",
     price: "$29.95",
     period: "/month",
-    desc: "Single web apps and early-stage products.",
+    desc: "Single web apps and early-stage products. Standard processing and memory limits.",
   },
   {
     id: "premium",
     name: "Premium",
     price: "$49.95",
     period: "/month",
-    desc: "Growing products and teams running multiple apps.",
+    desc: "Higher processing speeds and larger memory limits. Best for AI-powered and integrated workspaces that need headroom for embeddings, background jobs, and multi-service pipelines.",
   },
 ];
 
@@ -41,6 +41,7 @@ export default function StartPage() {
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "space-between",
+              gap: 16,
               padding: 16,
               border: "1px solid var(--line)",
               borderRadius: 10,

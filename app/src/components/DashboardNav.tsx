@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { type UserRole, roleLabel } from "@/lib/admin";
 
 const LINKS = [
   { href: "/dashboard", label: "Overview" },
@@ -12,7 +13,13 @@ const LINKS = [
   { href: "/dashboard/vault", label: "Vault" },
 ];
 
-export function DashboardNav({ isAdmin, email }: { isAdmin: boolean; email: string | null }) {
+export function DashboardNav({
+  role,
+  email,
+}: {
+  role: UserRole;
+  email: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -22,6 +29,8 @@ export function DashboardNav({ isAdmin, email }: { isAdmin: boolean; email: stri
     router.push("/login");
     router.refresh();
   }
+
+  const isAdmin = role === "super_admin" || role === "technical_admin";
 
   return (
     <header
@@ -90,7 +99,10 @@ export function DashboardNav({ isAdmin, email }: { isAdmin: boolean; email: stri
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {email ? (
-            <span style={{ color: "var(--paper-dim)", fontSize: "0.85rem" }}>{email}</span>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.2 }}>
+              <span style={{ color: "var(--paper)", fontSize: "0.85rem" }}>{email}</span>
+              <span style={{ color: "var(--muted)", fontSize: "0.75rem" }}>{roleLabel(role)}</span>
+            </div>
           ) : null}
           <button
             type="button"
