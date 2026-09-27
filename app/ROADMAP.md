@@ -225,7 +225,31 @@ turns a reactive triage problem into a proactive dashboard-driven
 one, and at agency scale (managing dozens or hundreds of client
 apps) it is the difference between operational sanity and chaos.
 
-## Phase 4+ (backlog)
+## Phase 4 — Notifications, grants, onboarding, imports ✅
+
+Shipped: email system (Resend, 11 branded templates, every send logged
+to `public.notifications` with a dedupe key for audit + idempotency);
+cutoff/restore/payment-failed emails wired; client-facing grants UI at
+`/dashboard/settings` with optional expiry; real onboarding content
+replacing both "coming back soon" stubs; signup-completion tracking with
+day 1/3/7 nudges; bulk subscriber import at `/admin`; vault empty states;
+nightly sweep at `/api/cron/sweep` (health re-checks, expiry warnings at
+14/7/1 days, failure alerts on transition, signup nudges);
+`scripts/rotate-encryption-key.mjs` for credential key rotation.
+
+### Operator setup still required
+1. **Resend**: create an account, verify `unywebs.com` as a sending
+   domain (DNS records), create an API key, add it to Vercel as
+   `RESEND_API_KEY`. Until then every send records as
+   `skipped_no_provider` — nothing breaks, nothing sends.
+2. **Supabase auth emails** (signup confirmation, password reset) are
+   separate from the app's own emails and still come from Supabase.
+   Point them at Resend's SMTP under Supabase → Project Settings →
+   Auth → SMTP, then restyle under Authentication → Email Templates.
+3. `vercel.json` schedules the sweep at 07:00 UTC daily. Vercel Hobby
+   allows one cron per project; confirm the plan supports it.
+
+## Phase 5+ (backlog)
 
 - Rebuild `/dashboard/domains` with real domain-management UX.
 - Rebuild `/dashboard/team` with invites (uses `/invite/[token]`).
