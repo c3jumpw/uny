@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendNotification } from "@/lib/email";
 
 // systeme.io webhook endpoint.
 //
@@ -167,6 +168,39 @@ export async function POST(req: NextRequest) {
           updated_at: now,
         })
         .eq("user_id", userId);
+
+      // Two emails on a failed payment, deliberately different:
+      //   - the client gets an early, low-drama heads-up while
+      //     nothing has actually been switched off yet
+      //   - every admin gets an alert so they know to start the
+      //     clock, because nothing here cuts off automatically
+      //
+      // Deduped per user per day: a retrying processor can fire
+      // payment.failed repeatedly and the client should not get
+      // five identical emails in an afternoon.
+      const day = now.slice(0, 10);
+      if (customerEmail) {
+        await sendNotification({
+          to: customerEmail,
+          toUserId: userId,
+          template: "payment_failed_client",
+          dedupeKey: `payment_failed_client:${userId}:${day}`,
+          metadata: { eventType },
+        });
+      }
+      const adminList = (process.env.SUPER_ADMIN_EMAILS || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const adminEmail of adminList) {
+        await sendNotification({
+          to: adminEmail,
+          template: "payment_failed_admin",
+          vars: { clientEmail: customerEmail ?? "unknown" },
+          dedupeKey: `payment_failed_admin:${adminEmail}:${userId}:${day}`,
+          metadata: { eventType },
+        });
+      }
     } else if (CANCELLED_EVENTS.has(eventType)) {
       await supabase
         .from("subscription_status")

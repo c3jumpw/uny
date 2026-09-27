@@ -21,6 +21,7 @@ export type DisplayStatus =
   | "grace"
   | "active"
   | "never_paid"
+  | "signup_incomplete"
   | "cancelled";
 
 export type StatusRow = {
@@ -30,7 +31,49 @@ export type StatusRow = {
   subscription_state: string; // 'active' | 'lapsed' | 'cancelled' | 'never_paid'
   automations_active: boolean;
   cut_off_at: string | null;
+  intended_plan?: string | null;
+  plan_selected_at?: string | null;
+  created_at?: string | null;
 };
+
+// Someone who signed up and never picked a plan is a different
+// problem from someone who picked one and never paid. The first is
+// a stalled funnel we can nudge; the second is a billing issue.
+// Collapsing both into "never_paid" hides the one we can actually
+// act on, so it gets its own state and its own clock.
+export type SignupState = {
+  incomplete: boolean;
+  daysSinceSignup: number | null;
+  /** Which nudge step is due, or null if none is. */
+  nudgeStep: 1 | 2 | 3 | null;
+};
+
+const NUDGE_DAYS: Array<{ day: number; step: 1 | 2 | 3 }> = [
+  { day: 1, step: 1 },
+  { day: 3, step: 2 },
+  { day: 7, step: 3 },
+];
+
+export function signupState(row: StatusRow): SignupState {
+  const hasPlan = Boolean(row.intended_plan || row.plan_selected_at);
+  const hasPaid = Boolean(row.last_payment_at) || row.subscription_state === "active";
+  if (hasPlan || hasPaid) {
+    return { incomplete: false, daysSinceSignup: null, nudgeStep: null };
+  }
+  if (!row.created_at) {
+    return { incomplete: true, daysSinceSignup: null, nudgeStep: null };
+  }
+  const days = Math.floor(
+    (Date.now() - new Date(row.created_at).getTime()) / (24 * 60 * 60 * 1000)
+  );
+  // The due step is the largest threshold the account has passed.
+  // After day 7 we stop: three unanswered emails is enough.
+  let nudgeStep: 1 | 2 | 3 | null = null;
+  for (const n of NUDGE_DAYS) {
+    if (days >= n.day) nudgeStep = n.step;
+  }
+  return { incomplete: true, daysSinceSignup: days, nudgeStep };
+}
 
 export type StatusMeta = {
   status: DisplayStatus;
@@ -70,14 +113,30 @@ export function computeStatus(row: StatusRow): StatusMeta {
   }
 
   if (row.subscription_state === "never_paid" && !row.last_payment_at) {
+    const signup = signupState(row);
+    if (signup.incomplete) {
+      const d = signup.daysSinceSignup;
+      return {
+        status: "signup_incomplete",
+        label: d === null ? "No plan chosen" : `No plan chosen — ${d}d`,
+        color: "#8fb8d8",
+        bg: "rgba(90,169,230,.14)",
+        daysLapsed: d,
+        // Above "never paid" but below any billing problem: worth a
+        // nudge, not worth interrupting a cutoff review for.
+        priority: d !== null && d >= 7 ? 35 : 15,
+        actionHint:
+          "Signed up but never chose a plan. Automated nudges go out on days 1, 3 and 7.",
+      };
+    }
     return {
       status: "never_paid",
-      label: "Never paid",
+      label: "Awaiting first payment",
       color: "#7c7568",
       bg: "rgba(60,60,60,.15)",
       daysLapsed: null,
       priority: 1,
-      actionHint: "Awaiting first payment",
+      actionHint: "Plan chosen, first payment not received yet",
     };
   }
 

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserRole } from "@/lib/admin";
 import { computeStatus, sortByPriority } from "@/lib/subscriptionStatus";
 import { CutoffButton } from "@/components/CutoffButton";
+import { ImportClients } from "@/components/ImportClients";
 
 // Admin dashboard — phase 2.
 //
@@ -19,9 +20,17 @@ import { CutoffButton } from "@/components/CutoffButton";
 // Sort: worst-status-first so "cutoff recommended" rows float to
 // the top for daily glance-review.
 
-type UserRow = { user_id: string; email: string; is_super_admin: boolean };
+type UserRow = {
+  user_id: string;
+  email: string;
+  is_super_admin: boolean;
+  created_at?: string | null;
+};
 type StatusRow = {
   user_id: string;
+  intended_plan?: string | null;
+  plan_selected_at?: string | null;
+  created_at?: string | null;
   last_payment_at: string | null;
   last_payment_failed_at: string | null;
   subscription_state: string;
@@ -82,7 +91,7 @@ export default async function AdminPage() {
   }
 
   const rows = users.map((u) => {
-    const status = statusMap.get(u.user_id) ?? {
+    const base = statusMap.get(u.user_id) ?? {
       user_id: u.user_id,
       last_payment_at: null,
       last_payment_failed_at: null,
@@ -90,6 +99,9 @@ export default async function AdminPage() {
       automations_active: true,
       cut_off_at: null,
     };
+    // created_at comes from the users RPC, not subscription_status,
+    // and the signup-incomplete clock needs it.
+    const status = { ...base, created_at: u.created_at ?? null };
     const meta = computeStatus(status);
     return {
       user: u,
@@ -129,14 +141,16 @@ export default async function AdminPage() {
           borderRadius: 10,
           background: "var(--surface)",
           border: "1px solid var(--line)",
+          flexWrap: "wrap",
         }}
       >
         <span className={isSuperAdmin ? "pill pill-good" : "pill pill-warn"}>
           {isSuperAdmin ? "Super Admin" : "Technical Admin"}
         </span>
-        <div style={{ fontSize: "0.9rem", color: "var(--paper-dim)" }}>
+        <div style={{ fontSize: "0.9rem", color: "var(--paper-dim)", flex: 1 }}>
           <strong style={{ color: "var(--paper)" }}>Scope:</strong> {scopeLabel}.
         </div>
+        {isSuperAdmin ? <ImportClients /> : null}
       </div>
 
       <StatusLegend />
@@ -294,6 +308,7 @@ export default async function AdminPage() {
 function StatusLegend() {
   const items = [
     { label: "Active", color: "#7CC084", bg: "rgba(120,180,120,.15)" },
+    { label: "No plan chosen", color: "#8fb8d8", bg: "rgba(90,169,230,.14)" },
     { label: "Grace (0-3d)", color: "#ffd76a", bg: "rgba(200,170,50,.15)" },
     { label: "Warning (4-7d)", color: "#ffb066", bg: "rgba(200,120,40,.2)" },
     { label: "Escalated (8-14d)", color: "#ff8080", bg: "rgba(180,60,60,.25)" },

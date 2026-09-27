@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/dashboard/domains", label: "Domains" },
   { href: "/dashboard/team", label: "Team" },
   { href: "/dashboard/vault", label: "Vault" },
+  { href: "/dashboard/settings", label: "Settings" },
 ];
 
 export function DashboardNav({

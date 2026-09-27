@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getUserRole, canAccessAdmin } from "@/lib/admin";
+import { sendNotification } from "@/lib/email";
 
 // Cutoff / restore endpoint.
 //
@@ -107,14 +108,40 @@ export async function POST(req: NextRequest) {
     metadata: { role },
   });
 
-  // Client email notification: phase 4+ when SMTP is configured.
-  // Log for now so we can see the outbound queue building up.
-  if (action === "cutoff" && targetEmail) {
-    console.log(
-      `[admin_action] would email ${targetEmail}: automations paused by ${user.email}${
-        reason ? ` (reason: ${reason})` : ""
-      }`
-    );
+  // Tell the client what happened. A cutoff without an explanation
+  // is the single most support-ticket-generating event in this whole
+  // system, so the email is not optional. We deliberately do NOT
+  // dedupe these: if an admin cuts off, restores and cuts off again,
+  // the client should hear about each one.
+  if (targetEmail) {
+    const { data: statusForEmail } = await supabase
+      .from("subscription_status")
+      .select("last_payment_failed_at")
+      .eq("user_id", targetUserId)
+      .maybeSingle();
+
+    let daysLapsed = "";
+    const failedAt = (statusForEmail as { last_payment_failed_at: string | null } | null)
+      ?.last_payment_failed_at;
+    if (failedAt) {
+      daysLapsed = String(
+        Math.floor((Date.now() - new Date(failedAt).getTime()) / 86_400_000)
+      );
+    }
+
+    const result = await sendNotification({
+      to: targetEmail,
+      toUserId: targetUserId,
+      template: action === "cutoff" ? "cutoff" : "restore",
+      vars: {
+        ...(reason ? { reason } : {}),
+        ...(daysLapsed ? { daysLapsed } : {}),
+      },
+      metadata: { action, by: user.email },
+    });
+    if (!result.ok) {
+      console.error(`[admin_action] client email failed for ${targetEmail}`, result.detail);
+    }
   }
 
   return NextResponse.json({ ok: true });

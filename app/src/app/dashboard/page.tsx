@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { computeStatus } from "@/lib/subscriptionStatus";
+import { computeStatus, signupState } from "@/lib/subscriptionStatus";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -18,8 +18,14 @@ export default async function DashboardPage() {
       .maybeSingle(),
     supabase.from("api_keys").select("key, revoked_at").eq("user_id", user!.id).maybeSingle(),
   ]);
-  const status = statusRow
-    ? computeStatus(statusRow)
+  const withCreated = statusRow
+    ? { ...statusRow, created_at: user!.created_at }
+    : null;
+  const signup = withCreated
+    ? signupState(withCreated)
+    : { incomplete: false, daysSinceSignup: null, nudgeStep: null };
+  const status = withCreated
+    ? computeStatus(withCreated)
     : {
         label: "Never paid",
         color: "#7c7568",
@@ -30,6 +36,42 @@ export default async function DashboardPage() {
 
   return (
     <>
+      {signup.incomplete ? (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: "16px 18px",
+            borderRadius: 10,
+            background: "rgba(90,169,230,.1)",
+            border: "1px solid rgba(90,169,230,.3)",
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>
+            You haven&apos;t chosen a plan yet
+          </div>
+          <p
+            style={{
+              margin: "0 0 12px",
+              color: "var(--paper-dim)",
+              fontSize: "0.9rem",
+              lineHeight: 1.6,
+            }}
+          >
+            Your account is set up
+            {signup.daysSinceSignup !== null && signup.daysSinceSignup > 0
+              ? ` (${signup.daysSinceSignup} day${
+                  signup.daysSinceSignup === 1 ? "" : "s"
+                } ago)`
+              : ""}
+            , but your workspace won&apos;t be active until you pick a plan. It takes about
+            a minute.
+          </p>
+          <Link href="/start" className="btn btn-amber" style={{ padding: "9px 18px" }}>
+            Choose your plan
+          </Link>
+        </div>
+      ) : null}
+
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 600 }}>
           Welcome back, {name}.

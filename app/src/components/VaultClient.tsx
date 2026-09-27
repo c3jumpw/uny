@@ -310,30 +310,28 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
                         gap: 2,
                       }}
                     >
-                      {i.credential_hint ? (
-                        <div>
-                          Credential:{" "}
-                          <code style={{ color: "var(--paper)" }}>{i.credential_hint}</code>
-                        </div>
-                      ) : (
-                        <div style={{ color: "var(--muted)" }}>No credential stored</div>
-                      )}
-                      {i.account_identifier ? (
-                        <div>Account: {i.account_identifier}</div>
-                      ) : null}
-                      {i.env_var_name ? (
-                        <div>
-                          Env var: <code>{i.env_var_name}</code>
-                        </div>
-                      ) : null}
-                      {i.base_url ? <div>URL: {i.base_url}</div> : null}
-                      {i.callback_url ? <div>Callback: {i.callback_url}</div> : null}
-                      <div style={{ color: exp.color }}>{exp.label}</div>
-                      {i.last_regenerated_at ? (
-                        <div style={{ color: "var(--muted)" }}>
-                          Rotated {new Date(i.last_regenerated_at).toLocaleDateString()}
-                        </div>
-                      ) : null}
+                      <Field
+                        label="Credential"
+                        value={i.credential_hint}
+                        mono
+                      />
+                      <Field label="Account" value={i.account_identifier} />
+                      <Field label="Env var" value={i.env_var_name} mono />
+                      <Field label="URL" value={i.base_url} />
+                      <Field label="Callback" value={i.callback_url} />
+                      <div>
+                        <span style={{ color: "var(--muted)" }}>Expiry: </span>
+                        <span style={{ color: exp.color }}>{exp.label}</span>
+                      </div>
+                      <Field
+                        label="Last rotated"
+                        value={
+                          i.last_regenerated_at
+                            ? new Date(i.last_regenerated_at).toLocaleDateString()
+                            : null
+                        }
+                      />
+                      <Field label="Notes" value={i.notes} />
                     </div>
 
                     {i.health_detail ? (
@@ -457,7 +455,8 @@ function IntegrationForm({
           {editing ? "Edit integration" : "Add integration"}
         </h2>
         <p style={{ margin: "0 0 20px", color: "var(--paper-dim)", fontSize: "0.85rem" }}>
-          {provider.hint}
+          {provider.hint} Only a name is required &mdash; every other field is optional,
+          since what each integration needs depends on how the account is set up.
         </p>
 
         <div className="field" style={{ marginBottom: 14 }}>
@@ -641,3 +640,36 @@ const labelStyle: React.CSSProperties = {
   color: "var(--paper-dim)",
   marginBottom: 4,
 };
+
+
+// Every field renders whether or not it has a value. Which
+// credentials and URLs an integration needs varies by provider and
+// by how the client's system is wired, so a blank field is normal
+// rather than an error — but hiding it entirely makes the card look
+// like the information was never asked for. Showing "Not set" keeps
+// the shape of the record visible.
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: string | null | undefined;
+  mono?: boolean;
+}) {
+  const has = Boolean(value && String(value).trim());
+  return (
+    <div>
+      <span style={{ color: "var(--muted)" }}>{label}: </span>
+      {has ? (
+        mono ? (
+          <code style={{ color: "var(--paper)" }}>{value}</code>
+        ) : (
+          <span style={{ color: "var(--paper)" }}>{value}</span>
+        )
+      ) : (
+        <span style={{ color: "var(--muted)", fontStyle: "italic" }}>Not set</span>
+      )}
+    </div>
+  );
+}
