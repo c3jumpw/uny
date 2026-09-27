@@ -1,0 +1,643 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import {
+  PROVIDERS,
+  HEALTH_DISPLAY,
+  expiryState,
+  integrationPriority,
+  type Integration,
+  type IntegrationType,
+} from "@/lib/integrations";
+
+type FormState = {
+  id?: string;
+  name: string;
+  integration_type: IntegrationType;
+  credential: string;
+  env_var_name: string;
+  callback_url: string;
+  base_url: string;
+  expires_at: string;
+  account_identifier: string;
+  account_ownership: "agency_master" | "client_own";
+  notes: string;
+};
+
+const EMPTY_FORM: FormState = {
+  name: "",
+  integration_type: "github_pat",
+  credential: "",
+  env_var_name: "",
+  callback_url: "",
+  base_url: "",
+  expires_at: "",
+  account_identifier: "",
+  account_ownership: "client_own",
+  notes: "",
+};
+
+export function VaultClient({ integrations }: { integrations: Integration[] }) {
+  const router = useRouter();
+  const [form, setForm] = useState<FormState | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const sorted = useMemo(
+    () =>
+      [...integrations].sort(
+        (a, b) => integrationPriority(b) - integrationPriority(a)
+      ),
+    [integrations]
+  );
+
+  const needsAttention = sorted.filter(
+    (i) =>
+      i.health_status === "failed" ||
+      i.health_status === "degraded" ||
+      expiryState(i.expires_at).urgent
+  ).length;
+
+  async function checkHealth(id?: string) {
+    setBusy(id ?? "all");
+    setErr(null);
+    try {
+      const res = await fetch("/api/integrations/health", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(id ? { id } : { all: true }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setErr((j as { error?: string }).error ?? "Health check failed.");
+      }
+      router.refresh();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Health check failed.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function save() {
+    if (!form || !form.name.trim()) {
+      setErr("Name is required.");
+      return;
+    }
+    setBusy("save");
+    setErr(null);
+    try {
+      const editing = Boolean(form.id);
+      const payload: Record<string, unknown> = {
+        name: form.name,
+        integration_type: form.integration_type,
+        env_var_name: form.env_var_name,
+        callback_url: form.callback_url,
+        base_url: form.base_url,
+        expires_at: form.expires_at || null,
+        account_identifier: form.account_identifier,
+        account_ownership: form.account_ownership,
+        notes: form.notes,
+      };
+      if (editing) payload.id = form.id;
+      if (form.credential.trim()) payload.credential = form.credential;
+
+      const res = await fetch("/api/integrations", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErr((j as { error?: string }).error ?? "Save failed.");
+        setBusy(null);
+        return;
+      }
+      setForm(null);
+      router.refresh();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function remove(id: string, name: string) {
+    if (!confirm(`Delete "${name}"? The stored credential will be destroyed.`)) return;
+    setBusy(id);
+    try {
+      await fetch(`/api/integrations?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      router.refresh();
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function startEdit(i: Integration) {
+    setErr(null);
+    setForm({
+      id: i.id,
+      name: i.name,
+      integration_type: i.integration_type,
+      credential: "",
+      env_var_name: i.env_var_name ?? "",
+      callback_url: i.callback_url ?? "",
+      base_url: i.base_url ?? "",
+      expires_at: i.expires_at ? i.expires_at.slice(0, 10) : "",
+      account_identifier: i.account_identifier ?? "",
+      account_ownership: i.account_ownership,
+      notes: i.notes ?? "",
+    });
+  }
+
+  return (
+    <>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 20,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ fontSize: "0.9rem", color: "var(--paper-dim)" }}>
+          {integrations.length === 0 ? (
+            "No integrations yet."
+          ) : needsAttention > 0 ? (
+            <>
+              <strong style={{ color: "#ffb066" }}>
+                {needsAttention} need{needsAttention === 1 ? "s" : ""} attention
+              </strong>{" "}
+              of {integrations.length} tracked.
+            </>
+          ) : (
+            <>All {integrations.length} integrations look healthy.</>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => checkHealth()}
+            disabled={busy !== null || integrations.length === 0}
+            style={{ padding: "8px 14px", fontSize: "0.85rem" }}
+          >
+            {busy === "all" ? "Checking…" : "Check all"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-amber"
+            onClick={() => {
+              setErr(null);
+              setForm({ ...EMPTY_FORM });
+            }}
+            style={{ padding: "8px 14px", fontSize: "0.85rem" }}
+          >
+            Add integration
+          </button>
+        </div>
+      </div>
+
+      {err ? (
+        <div
+          style={{
+            padding: "10px 14px",
+            marginBottom: 16,
+            border: "1px solid rgba(240,80,80,.3)",
+            background: "rgba(240,80,80,.1)",
+            color: "#ffb3b3",
+            borderRadius: 8,
+            fontSize: "0.85rem",
+          }}
+        >
+          {err}
+        </div>
+      ) : null}
+
+      {sorted.length === 0 ? (
+        <div className="card" style={{ textAlign: "center", padding: 40 }}>
+          <p style={{ margin: "0 0 6px", color: "var(--paper)" }}>
+            Nothing stored yet.
+          </p>
+          <p style={{ margin: 0, color: "var(--paper-dim)", fontSize: "0.9rem" }}>
+            Add the API keys, tokens and URLs your app depends on. UnyBase will check
+            they still work and warn you before they expire.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {sorted.map((i) => {
+            const health = HEALTH_DISPLAY[i.health_status];
+            const exp = expiryState(i.expires_at);
+            const provider = PROVIDERS[i.integration_type];
+            return (
+              <div key={i.id} className="card">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ minWidth: 220, flex: "1 1 320px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <strong style={{ fontSize: "1rem" }}>{i.name}</strong>
+                      <span
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: 999,
+                          fontSize: "0.7rem",
+                          color: "var(--paper-dim)",
+                          border: "1px solid var(--line)",
+                        }}
+                      >
+                        {provider?.label ?? i.integration_type}
+                      </span>
+                      <span
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: 999,
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          color: health.color,
+                          background: health.bg,
+                          border: `1px solid ${health.color}33`,
+                        }}
+                      >
+                        {health.label}
+                      </span>
+                      <span
+                        style={{
+                          padding: "2px 8px",
+                          borderRadius: 999,
+                          fontSize: "0.7rem",
+                          color:
+                            i.account_ownership === "agency_master"
+                              ? "var(--amber)"
+                              : "var(--paper-dim)",
+                          border: `1px solid ${
+                            i.account_ownership === "agency_master"
+                              ? "rgba(242,169,59,.35)"
+                              : "var(--line)"
+                          }`,
+                        }}
+                      >
+                        {i.account_ownership === "agency_master"
+                          ? "Agency account"
+                          : "Client account"}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--paper-dim)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      {i.credential_hint ? (
+                        <div>
+                          Credential:{" "}
+                          <code style={{ color: "var(--paper)" }}>{i.credential_hint}</code>
+                        </div>
+                      ) : (
+                        <div style={{ color: "var(--muted)" }}>No credential stored</div>
+                      )}
+                      {i.account_identifier ? (
+                        <div>Account: {i.account_identifier}</div>
+                      ) : null}
+                      {i.env_var_name ? (
+                        <div>
+                          Env var: <code>{i.env_var_name}</code>
+                        </div>
+                      ) : null}
+                      {i.base_url ? <div>URL: {i.base_url}</div> : null}
+                      {i.callback_url ? <div>Callback: {i.callback_url}</div> : null}
+                      <div style={{ color: exp.color }}>{exp.label}</div>
+                      {i.last_regenerated_at ? (
+                        <div style={{ color: "var(--muted)" }}>
+                          Rotated {new Date(i.last_regenerated_at).toLocaleDateString()}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {i.health_detail ? (
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: "0.75rem",
+                          color: "var(--muted)",
+                          borderLeft: `2px solid ${health.color}55`,
+                          paddingLeft: 8,
+                        }}
+                      >
+                        {i.health_detail}
+                        {i.last_health_check_at ? (
+                          <> &middot; checked {new Date(i.last_health_check_at).toLocaleString()}</>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => checkHealth(i.id)}
+                      disabled={busy !== null}
+                      style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                    >
+                      {busy === i.id ? "Checking…" : "Check"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => startEdit(i)}
+                      disabled={busy !== null}
+                      style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => remove(i.id, i.name)}
+                      disabled={busy !== null}
+                      style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {form ? (
+        <IntegrationForm
+          form={form}
+          setForm={setForm}
+          onSave={save}
+          onCancel={() => {
+            setForm(null);
+            setErr(null);
+          }}
+          busy={busy === "save"}
+          error={err}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function IntegrationForm({
+  form,
+  setForm,
+  onSave,
+  onCancel,
+  busy,
+  error,
+}: {
+  form: FormState;
+  setForm: (f: FormState) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  busy: boolean;
+  error: string | null;
+}) {
+  const provider = PROVIDERS[form.integration_type];
+  const editing = Boolean(form.id);
+
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,.65)",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        zIndex: 100,
+        padding: 24,
+        overflowY: "auto",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "var(--ink)",
+          border: "1px solid var(--line)",
+          borderRadius: 12,
+          padding: 24,
+          maxWidth: 560,
+          width: "100%",
+          marginTop: 24,
+          marginBottom: 24,
+        }}
+      >
+        <h2 style={{ margin: "0 0 4px", fontSize: "1.2rem" }}>
+          {editing ? "Edit integration" : "Add integration"}
+        </h2>
+        <p style={{ margin: "0 0 20px", color: "var(--paper-dim)", fontSize: "0.85rem" }}>
+          {provider.hint}
+        </p>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Name</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="e.g. Acme Corp GitHub deploy token"
+            style={{ width: "100%" }}
+            autoFocus
+          />
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Provider</label>
+          <select
+            value={form.integration_type}
+            onChange={(e) =>
+              setForm({ ...form, integration_type: e.target.value as IntegrationType })
+            }
+            style={{ width: "100%" }}
+            disabled={editing}
+          >
+            {Object.entries(PROVIDERS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v.label}
+              </option>
+            ))}
+          </select>
+          {editing ? (
+            <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+              Provider can&apos;t change after creation. Delete and re-add instead.
+            </small>
+          ) : null}
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>
+            {provider.credentialLabel}
+            {editing ? " (leave blank to keep current)" : ""}
+          </label>
+          <input
+            type="password"
+            value={form.credential}
+            onChange={(e) => setForm({ ...form, credential: e.target.value })}
+            placeholder={editing ? "••••••••  unchanged" : "Paste the token or key"}
+            style={{ width: "100%" }}
+            autoComplete="new-password"
+          />
+          <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+            Encrypted before it reaches the database. Never shown again after saving.
+          </small>
+        </div>
+
+        {provider.needsBaseUrl ? (
+          <div className="field" style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>{provider.baseUrlLabel ?? "URL"}</label>
+            <input
+              type="text"
+              value={form.base_url}
+              onChange={(e) => setForm({ ...form, base_url: e.target.value })}
+              placeholder="https://…"
+              style={{ width: "100%" }}
+            />
+          </div>
+        ) : null}
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Account this belongs to</label>
+          <input
+            type="text"
+            value={form.account_identifier}
+            onChange={(e) => setForm({ ...form, account_identifier: e.target.value })}
+            placeholder="e.g. c3jumpw, billing@acme.com"
+            style={{ width: "100%" }}
+          />
+          <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+            The login on the provider&apos;s side. Matters when offboarding.
+          </small>
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Who owns that account?</label>
+          <select
+            value={form.account_ownership}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                account_ownership: e.target.value as "agency_master" | "client_own",
+              })
+            }
+            style={{ width: "100%" }}
+          >
+            <option value="client_own">Client&apos;s own account</option>
+            <option value="agency_master">Agency master account</option>
+          </select>
+          <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+            Drives who gets billed and what has to be handed over if the client leaves.
+          </small>
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Environment variable name</label>
+          <input
+            type="text"
+            value={form.env_var_name}
+            onChange={(e) => setForm({ ...form, env_var_name: e.target.value })}
+            placeholder="e.g. GITHUB_TOKEN"
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Callback URL</label>
+          <input
+            type="text"
+            value={form.callback_url}
+            onChange={(e) => setForm({ ...form, callback_url: e.target.value })}
+            placeholder="Where the provider sends requests back, if any"
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Expires on</label>
+          <input
+            type="date"
+            value={form.expires_at}
+            onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+            style={{ width: "100%" }}
+          />
+          <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+            Leave blank if the credential doesn&apos;t expire.
+          </small>
+        </div>
+
+        <div className="field" style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Notes</label>
+          <textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            rows={2}
+            style={{ width: "100%", resize: "vertical" }}
+            placeholder="Anything the next person needs to know"
+          />
+        </div>
+
+        {error ? (
+          <div
+            style={{
+              padding: "10px 12px",
+              marginBottom: 12,
+              border: "1px solid rgba(240,80,80,.3)",
+              background: "rgba(240,80,80,.1)",
+              color: "#ffb3b3",
+              borderRadius: 8,
+              fontSize: "0.85rem",
+            }}
+          >
+            {error}
+          </div>
+        ) : null}
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
+            Cancel
+          </button>
+          <button type="button" className="btn btn-amber" onClick={onSave} disabled={busy}>
+            {busy ? "Saving…" : editing ? "Save changes" : "Add integration"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.85rem",
+  color: "var(--paper-dim)",
+  marginBottom: 4,
+};
