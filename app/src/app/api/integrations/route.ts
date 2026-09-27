@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
     .insert({
       workspace_owner_id: ownerId,
       name: body.name.trim().slice(0, 120),
+      associated_system: body.associated_system?.trim()?.slice(0, 120) || null,
       integration_type: integrationType,
       ...encFields,
       env_var_name: body.env_var_name?.trim()?.slice(0, 120) || null,
@@ -137,6 +138,7 @@ export async function PATCH(req: NextRequest) {
     changedFields.push("name");
   }
   for (const f of [
+    "associated_system",
     "env_var_name",
     "callback_url",
     "base_url",

@@ -28,6 +28,7 @@ export type Integration = {
   id: string;
   workspace_owner_id: string;
   name: string;
+  associated_system: string | null;
   integration_type: IntegrationType;
   credential_ciphertext: string | null;
   credential_iv: string | null;

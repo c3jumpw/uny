@@ -14,6 +14,7 @@ import {
 type FormState = {
   id?: string;
   name: string;
+  associated_system: string;
   integration_type: IntegrationType;
   credential: string;
   env_var_name: string;
@@ -27,6 +28,7 @@ type FormState = {
 
 const EMPTY_FORM: FormState = {
   name: "",
+  associated_system: "",
   integration_type: "github_pat",
   credential: "",
   env_var_name: "",
@@ -43,16 +45,49 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
   const [form, setForm] = useState<FormState | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [systemFilter, setSystemFilter] = useState<string>("all");
+
+  // Existing values double as the suggestion list in the form and
+  // as the filter options here, so the vocabulary stays consistent
+  // without having to be enforced.
+  const systems = useMemo(() => {
+    const set = new Set<string>();
+    for (const i of integrations) {
+      if (i.associated_system?.trim()) set.add(i.associated_system.trim());
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [integrations]);
+
+  const visible = useMemo(() => {
+    if (systemFilter === "all") return integrations;
+    if (systemFilter === "__untagged")
+      return integrations.filter((i) => !i.associated_system?.trim());
+    return integrations.filter(
+      (i) => i.associated_system?.trim() === systemFilter
+    );
+  }, [integrations, systemFilter]);
 
   const sorted = useMemo(
     () =>
-      [...integrations].sort(
-        (a, b) => integrationPriority(b) - integrationPriority(a)
-      ),
-    [integrations]
+      [...visible].sort((a, b) => {
+        // Health and expiry urgency still win — a dead credential
+        // matters more than tidy grouping. Within equal urgency,
+        // fall back to grouping by system so related credentials
+        // sit next to each other.
+        const p = integrationPriority(b) - integrationPriority(a);
+        if (p !== 0) return p;
+        const as = a.associated_system ?? "";
+        const bs = b.associated_system ?? "";
+        if (as !== bs) return as.localeCompare(bs);
+        return a.name.localeCompare(b.name);
+      }),
+    [visible]
   );
 
-  const needsAttention = sorted.filter(
+  // Attention count is deliberately over ALL integrations, not the
+  // filtered view: a failure hiding under a filter you aren't
+  // looking at is exactly the thing this page exists to prevent.
+  const needsAttention = integrations.filter(
     (i) =>
       i.health_status === "failed" ||
       i.health_status === "degraded" ||
@@ -91,6 +126,7 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
       const editing = Boolean(form.id);
       const payload: Record<string, unknown> = {
         name: form.name,
+        associated_system: form.associated_system,
         integration_type: form.integration_type,
         env_var_name: form.env_var_name,
         callback_url: form.callback_url,
@@ -139,6 +175,7 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
     setForm({
       id: i.id,
       name: i.name,
+      associated_system: i.associated_system ?? "",
       integration_type: i.integration_type,
       credential: "",
       env_var_name: i.env_var_name ?? "",
@@ -177,7 +214,30 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
             <>All {integrations.length} integrations look healthy.</>
           )}
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          {systems.length > 0 ? (
+            <select
+              value={systemFilter}
+              onChange={(e) => setSystemFilter(e.target.value)}
+              aria-label="Filter by system"
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid var(--line)",
+                background: "var(--ink-2)",
+                color: "var(--paper)",
+                fontSize: "0.85rem",
+              }}
+            >
+              <option value="all">All systems</option>
+              {systems.map((sys) => (
+                <option key={sys} value={sys}>
+                  {sys}
+                </option>
+              ))}
+              <option value="__untagged">Untagged</option>
+            </select>
+          ) : null}
           <button
             type="button"
             className="btn btn-ghost"
@@ -266,6 +326,30 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
                       >
                         {provider?.label ?? i.integration_type}
                       </span>
+                      {i.associated_system?.trim() ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSystemFilter(
+                              systemFilter === i.associated_system
+                                ? "all"
+                                : i.associated_system!.trim()
+                            )
+                          }
+                          title="Filter by this system"
+                          style={{
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            fontSize: "0.7rem",
+                            color: "var(--sky)",
+                            background: "rgba(90,169,230,.12)",
+                            border: "1px solid rgba(90,169,230,.3)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {i.associated_system}
+                        </button>
+                      ) : null}
                       <span
                         style={{
                           padding: "2px 8px",
@@ -315,6 +399,7 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
                         value={i.credential_hint}
                         mono
                       />
+                      <Field label="System" value={i.associated_system} />
                       <Field label="Account" value={i.account_identifier} />
                       <Field label="Env var" value={i.env_var_name} mono />
                       <Field label="URL" value={i.base_url} />
@@ -391,6 +476,7 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
       {form ? (
         <IntegrationForm
           form={form}
+          systems={systems}
           setForm={setForm}
           onSave={save}
           onCancel={() => {
@@ -407,6 +493,7 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
 
 function IntegrationForm({
   form,
+  systems,
   setForm,
   onSave,
   onCancel,
@@ -414,6 +501,7 @@ function IntegrationForm({
   error,
 }: {
   form: FormState;
+  systems: string[];
   setForm: (f: FormState) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -469,6 +557,28 @@ function IntegrationForm({
             style={{ width: "100%" }}
             autoFocus
           />
+        </div>
+
+        <div className="field" style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>App / tool / system</label>
+          <input
+            type="text"
+            list="vault-systems"
+            value={form.associated_system}
+            onChange={(e) => setForm({ ...form, associated_system: e.target.value })}
+            placeholder="e.g. Acme storefront, Internal CRM, Staging"
+            style={{ width: "100%" }}
+          />
+          <datalist id="vault-systems">
+            {systems.map((sys) => (
+              <option key={sys} value={sys} />
+            ))}
+          </datalist>
+          <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+            Which app or system this credential belongs to. Lets you tell two
+            credentials from the same provider apart, and group everything one app
+            depends on.
+          </small>
         </div>
 
         <div className="field" style={{ marginBottom: 14 }}>
