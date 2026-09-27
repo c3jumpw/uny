@@ -137,7 +137,38 @@ technical-admin view into a real one.
    specific to how UnyBase provisions infrastructure.
 2. Which systeme.io webhook events was the old system subscribed to?
 
-## Phase 3 — Integration health & credentials hub
+## Phase 3 — Integration health & credentials hub ✅
+
+### What shipped
+- `integrations` table: per-workspace credential store. Encrypted with
+  AES-256-GCM **in the app layer** (`src/lib/crypto.ts`, key in
+  `CREDENTIAL_ENCRYPTION_KEY`) before it reaches Postgres, so a DB dump
+  or a leaked service-role key is not enough to read credentials.
+- `integration_events` table: change history. Records that a credential
+  rotated, never the value.
+- Live health checks for GitHub, Supabase, systeme.io, ClickUp, Vercel
+  and a generic HTTP mode. 401/403 → `failed`; other non-2xx →
+  `degraded`; 10s timeout; `Promise.allSettled` so one bad provider
+  cannot break the batch.
+- Expiry tracking as the secondary signal, escalating at 14d / 7d / 1d
+  / past-due. `integrationPriority()` combines health + expiry so the
+  vault sorts worst-first.
+- Account-ownership field (`agency_master` vs `client_own`) plus the
+  provider-side login, for billing and offboarding.
+- UI at `/dashboard/vault` with check-all, per-row check, add/edit/delete.
+- RLS mirrors phase 2: owner / super admin / granted technical admin.
+
+### Still open in this area
+- Health checks are on-demand only (button). No scheduler yet, so the
+  expiry emails below are the thing that would catch a rot-in-the-night.
+- Expiry reminder emails (14/7/1 days) need SMTP + a cron. Vercel Cron
+  is the obvious home for the sweep.
+- `CREDENTIAL_ENCRYPTION_KEY` has no rotation procedure yet. Rotating it
+  today would orphan every stored ciphertext (the app reports this as a
+  distinct actionable error rather than crashing). A re-encrypt script
+  is needed before any key rotation.
+
+## Phase 3 — original spec (kept for reference)
 
 Route TBD (candidates: `/dashboard/vault` — already scaffolded — or
 `/dashboard/integrations`). One place per workspace for every
