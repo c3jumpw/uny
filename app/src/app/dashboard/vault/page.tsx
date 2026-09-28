@@ -1,36 +1,51 @@
 import { createClient } from "@/lib/supabase/server";
 import { VaultClient } from "@/components/VaultClient";
+import { VaultSharing, type VaultShare } from "@/components/VaultSharing";
 import type { Integration } from "@/lib/integrations";
 
-// Integration health & credentials hub (phase 3).
+// Integration health & credentials hub.
 //
-// One place per workspace for every credential the client's app
-// depends on: API keys, tokens, project URLs, callbacks. Each one
-// carries the metadata that actually matters when things break at
-// 2am — which account it lives under, whether that account is ours
-// or the client's, when it expires, and whether it worked the last
-// time we asked.
-//
-// RLS scopes what comes back: owners see their own, super admins
-// see everything, technical admins see workspaces granted to them.
+// RLS decides what comes back: your own credentials, anything a
+// super admin can see, workspaces granted via technical-admin
+// grants, and anything shared with your email address through
+// vault_shares. A shared row looks like any other except for the
+// owner label, so a contractor with access to one project sees a
+// vault containing exactly those credentials.
 
 export default async function VaultPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("integrations")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [{ data, error }, { data: shareData }, { data: ownerData }] =
+    await Promise.all([
+      supabase.from("integrations").select("*").order("created_at", { ascending: false }),
+      supabase.rpc("list_my_vault_shares"),
+      supabase.rpc("integration_owner_emails"),
+    ]);
 
   const integrations = (data as Integration[] | null) ?? [];
+  const shares = (shareData as VaultShare[] | null) ?? [];
+
+  const ownerEmails = new Map<string, string>();
+  for (const o of (ownerData as Array<{ owner_id: string; email: string }> | null) ?? []) {
+    ownerEmails.set(o.owner_id, o.email);
+  }
+
+  const mine = integrations.filter((i) => i.workspace_owner_id === user?.id);
+  const systems = Array.from(
+    new Set(
+      mine.map((i) => i.associated_system?.trim()).filter((s): s is string => Boolean(s))
+    )
+  ).sort((a, b) => a.localeCompare(b));
 
   return (
     <>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 600 }}>
-          Vault
-        </h1>
+        <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 600 }}>Vault</h1>
         <p style={{ margin: 0, color: "var(--paper-dim)" }}>
-          Every credential your app depends on, with live health checks and expiry
+          Every credential your apps depend on, with live health checks and expiry
           warnings. Credentials are encrypted before they reach the database.
         </p>
       </div>
@@ -51,7 +66,17 @@ export default async function VaultPage() {
         </div>
       ) : null}
 
-      <VaultClient integrations={integrations} />
+      <VaultSharing
+        shares={shares}
+        systems={systems}
+        integrations={mine.map((i) => ({ id: i.id, name: i.name }))}
+      />
+
+      <VaultClient
+        integrations={integrations}
+        currentUserId={user?.id ?? null}
+        ownerEmails={Object.fromEntries(ownerEmails)}
+      />
     </>
   );
 }

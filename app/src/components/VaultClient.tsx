@@ -40,7 +40,15 @@ const EMPTY_FORM: FormState = {
   notes: "",
 };
 
-export function VaultClient({ integrations }: { integrations: Integration[] }) {
+export function VaultClient({
+  integrations,
+  currentUserId,
+  ownerEmails,
+}: {
+  integrations: Integration[];
+  currentUserId?: string | null;
+  ownerEmails?: Record<string, string>;
+}) {
   const router = useRouter();
   const [form, setForm] = useState<FormState | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -326,6 +334,21 @@ export function VaultClient({ integrations }: { integrations: Integration[] }) {
                       >
                         {provider?.label ?? i.integration_type}
                       </span>
+                      {currentUserId && i.workspace_owner_id !== currentUserId ? (
+                        <span
+                          title="Shared with you by another workspace"
+                          style={{
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            fontSize: "0.7rem",
+                            color: "#b79be8",
+                            background: "rgba(150,110,220,.14)",
+                            border: "1px solid rgba(150,110,220,.3)",
+                          }}
+                        >
+                          Shared by {ownerEmails?.[i.workspace_owner_id] ?? "another workspace"}
+                        </span>
+                      ) : null}
                       {i.associated_system?.trim() ? (
                         <button
                           type="button"

@@ -98,7 +98,8 @@ export type TemplateName =
   | "credential_failed"
   | "imported_client"
   | "grant_granted"
-  | "grant_revoked";
+  | "grant_revoked"
+  | "vault_shared";
 
 type Built = { subject: string; html: string };
 
@@ -273,6 +274,27 @@ export function buildTemplate(
                  <p style="margin:0;">You can now see their subscription status and integrations from the admin dashboard.</p>`,
           ctaLabel: "Open admin dashboard",
           ctaUrl: `${APP_URL}/admin`,
+        }),
+      };
+
+    case "vault_shared":
+      return {
+        subject: `${vars.ownerEmail ?? "A UnyBase workspace"} shared credentials with you`,
+        html: shell({
+          heading: "Credentials shared with you",
+          body: `<p style="margin:0 0 12px;"><strong style="color:#e8eef7;">${
+            vars.ownerEmail ?? "A UnyBase workspace"
+          }</strong> has given you access to ${
+            vars.scopeLabel ?? "some credentials"
+          } in their UnyBase vault.</p>
+                 ${
+                   vars.expiresPhrase
+                     ? `<p style="margin:0 0 12px;">${vars.expiresPhrase}</p>`
+                     : ""
+                 }
+                 <p style="margin:0;">Sign in to view them. If you don't have a UnyBase account yet, create one with this email address and the shared credentials will be waiting.</p>`,
+          ctaLabel: "Open the vault",
+          ctaUrl: `${APP_URL}/dashboard/vault`,
         }),
       };
 
