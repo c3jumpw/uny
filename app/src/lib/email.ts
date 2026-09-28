@@ -99,7 +99,8 @@ export type TemplateName =
   | "imported_client"
   | "grant_granted"
   | "grant_revoked"
-  | "vault_shared";
+  | "vault_shared"
+  | "domain_expiring";
 
 type Built = { subject: string; html: string };
 
@@ -274,6 +275,34 @@ export function buildTemplate(
                  <p style="margin:0;">You can now see their subscription status and integrations from the admin dashboard.</p>`,
           ctaLabel: "Open admin dashboard",
           ctaUrl: `${APP_URL}/admin`,
+        }),
+      };
+
+    case "domain_expiring":
+      return {
+        subject: `Domain renewal due: ${vars.domainName ?? "a domain"}`,
+        html: shell({
+          heading: `${vars.whatExpires ?? "A domain"} expires ${vars.whenPhrase ?? "soon"}`,
+          body: `<p style="margin:0 0 12px;"><strong style="color:#e8eef7;">${
+            vars.domainName ?? "A domain"
+          }</strong> ${
+            vars.isSsl === "true" ? "has an SSL certificate that expires" : "expires"
+          } ${vars.whenPhrase ?? "soon"}.</p>
+                 ${
+                   vars.registrar
+                     ? `<p style="margin:0 0 12px;">Registrar: <strong style="color:#e8eef7;">${vars.registrar}</strong>${
+                         vars.registrarAccount ? ` (${vars.registrarAccount})` : ""
+                       }</p>`
+                     : ""
+                 }
+                 ${
+                   vars.autoRenew === "false"
+                     ? `<p style="margin:0 0 12px;padding:12px 14px;background:#131f33;border-left:3px solid #ff8080;border-radius:4px;color:#c8d6e8;">Auto-renew is switched off for this domain, so it will not renew on its own.</p>`
+                     : `<p style="margin:0 0 12px;">Auto-renew is on, so this should renew by itself &mdash; worth confirming the payment method on file is still valid.</p>`
+                 }
+                 <p style="margin:0;">An expired domain takes the whole site down, not just one feature.</p>`,
+          ctaLabel: "Open domains",
+          ctaUrl: `${APP_URL}/dashboard/domains`,
         }),
       };
 

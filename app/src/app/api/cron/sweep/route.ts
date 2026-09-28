@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { decryptCredential } from "@/lib/crypto";
-import { runHealthCheck, expiryState, type IntegrationType } from "@/lib/integrations";
+import {
+  runHealthCheck,
+  expiryState,
+  type IntegrationType,
+  type AuthScheme,
+} from "@/lib/integrations";
 import { signupState } from "@/lib/subscriptionStatus";
 import { sendNotification } from "@/lib/email";
 
@@ -43,6 +48,8 @@ type IntegrationRow = {
   credential_iv: string | null;
   credential_tag: string | null;
   base_url: string | null;
+  auth_scheme: AuthScheme | null;
+  auth_param_name: string | null;
   expires_at: string | null;
   health_status: string;
   account_identifier: string | null;
@@ -65,6 +72,7 @@ export async function GET(req: NextRequest) {
     integrations_checked: 0,
     health_alerts: 0,
     expiry_alerts: 0,
+    domain_alerts: 0,
     signup_nudges: 0,
     errors: [] as string[],
   };
@@ -105,7 +113,10 @@ export async function GET(req: NextRequest) {
             detail:
               "Stored credential could not be decrypted. The encryption key may have changed; re-enter the credential.",
           }
-        : await runHealthCheck(row.integration_type, credential, row.base_url);
+        : await runHealthCheck(row.integration_type, credential, row.base_url, {
+            scheme: row.auth_scheme ?? "bearer",
+            paramName: row.auth_param_name,
+          });
 
       const wasHealthy = row.health_status === "healthy";
       summary.integrations_checked += 1;
@@ -175,6 +186,63 @@ export async function GET(req: NextRequest) {
     summary.errors.push(
       `integrations: ${e instanceof Error ? e.message : "unknown"}`
     );
+  }
+
+  // ---------------------------------------------------------------
+  // 2b. Domain and SSL renewal warnings
+  //
+  // Wider thresholds than credentials (30 days as well as 14/7/1):
+  // a domain transfer or a disputed renewal can take weeks, and
+  // unlike a token you cannot simply regenerate one in a hurry.
+  // ---------------------------------------------------------------
+  try {
+    const { data } = await supabase.from("domains").select("*");
+    const rows =
+      (data as Array<Record<string, unknown>> | null) ?? [];
+
+    const ownerCache = new Map<string, string>();
+    for (const row of rows) {
+      const ownerId = row.workspace_owner_id as string;
+      if (!ownerCache.has(ownerId)) {
+        const { data: em } = await supabase.rpc("email_for_user", { p_user: ownerId });
+        if (typeof em === "string") ownerCache.set(ownerId, em);
+      }
+      const ownerEmail = ownerCache.get(ownerId);
+      if (!ownerEmail) continue;
+
+      const checks: Array<{ at: string | null; isSsl: boolean }> = [
+        { at: (row.expires_at as string | null) ?? null, isSsl: false },
+        { at: (row.ssl_expires_at as string | null) ?? null, isSsl: true },
+      ];
+
+      for (const c of checks) {
+        if (!c.at) continue;
+        const d = expiryState(c.at).daysLeft;
+        if (d === null || ![30, 14, 7, 1].includes(d)) continue;
+
+        const r = await sendNotification({
+          to: ownerEmail,
+          toUserId: ownerId,
+          template: "domain_expiring",
+          vars: {
+            domainName: (row.domain_name as string) ?? "a domain",
+            whatExpires: c.isSsl ? "An SSL certificate" : "A domain",
+            isSsl: String(c.isSsl),
+            whenPhrase: d === 1 ? "tomorrow" : `in ${d} days`,
+            autoRenew: String(Boolean(row.auto_renew)),
+            ...(row.registrar ? { registrar: row.registrar as string } : {}),
+            ...(row.registrar_account
+              ? { registrarAccount: row.registrar_account as string }
+              : {}),
+          },
+          dedupeKey: `domain_expiring:${row.id as string}:${c.isSsl ? "ssl" : "domain"}:${d}`,
+        });
+        if (r.status === "sent" || r.status === "skipped_no_provider")
+          summary.domain_alerts += 1;
+      }
+    }
+  } catch (e) {
+    summary.errors.push(`domains: ${e instanceof Error ? e.message : "unknown"}`);
   }
 
   // ---------------------------------------------------------------

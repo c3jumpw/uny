@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AuthShell({
   title,
@@ -21,8 +22,18 @@ export function AuthShell({
         alignItems: "center",
         justifyContent: "center",
         padding: "48px 24px",
+        position: "relative",
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+        }}
+      >
+        <ThemeToggle compact />
+      </div>
       <div style={{ width: "100%", maxWidth: 420 }}>
         <Link
           href="/"

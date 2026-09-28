@@ -8,7 +8,13 @@
    Matches the marketing site palette (deep navy background,
    amber accent, ink-blue surfaces). Keeping the app visually
    consistent with tryunybase.unywebs.com. */
-:root {
+/* Dark is the default and the brand's native look. Light exists
+   because a credential vault gets used in daylight, in shared
+   offices, and on projectors — and because some people simply
+   read better on it. Every token below has a light counterpart,
+   so nothing in the app needs to know which theme is active. */
+:root,
+:root[data-theme="dark"] {
   --ink: #0a1220;
   --ink-2: #0f1a2e;
   --surface: #12203a;
@@ -23,6 +29,31 @@
   --amber-ink: #1c1300;
   --danger: #e5484d;
   --good: #4cc38a;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --ink: #f6f4f0;
+  --ink-2: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f0eee9;
+  --line: #ddd8ce;
+  --line-2: #c9c2b4;
+  --paper: #1b2434;
+  --paper-dim: #4a5568;
+  --muted: #6d7686;
+  --sky: #1f6feb;
+  --amber: #d98510;
+  --amber-ink: #ffffff;
+  --danger: #c7262b;
+  --good: #1f7a4d;
+  color-scheme: light;
+}
+
+/* Cards read as raised on light and inset on dark, so the surface
+   token alone is not enough to separate them from the page. */
+:root[data-theme="light"] .card {
+  box-shadow: 0 1px 2px rgba(20, 24, 32, 0.06);
 }
 
 * {

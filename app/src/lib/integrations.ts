@@ -18,7 +18,20 @@ export type IntegrationType =
   | "systeme_io"
   | "clickup"
   | "vercel"
-  | "generic_http";
+  | "generic_http"
+  | "custom";
+
+// How the credential is attached to a health-check request for a
+// custom provider. Covers the shapes almost every REST API uses.
+export type AuthScheme = "bearer" | "header" | "query" | "basic" | "none";
+
+export const AUTH_SCHEMES: Array<{ value: AuthScheme; label: string; needsParam: boolean }> = [
+  { value: "bearer", label: "Authorization: Bearer <token>", needsParam: false },
+  { value: "header", label: "Custom header", needsParam: true },
+  { value: "query", label: "Query parameter", needsParam: true },
+  { value: "basic", label: "Authorization: Basic <token>", needsParam: false },
+  { value: "none", label: "No authentication", needsParam: false },
+];
 
 export type AccountOwnership = "agency_master" | "client_own";
 
@@ -29,6 +42,9 @@ export type Integration = {
   workspace_owner_id: string;
   name: string;
   associated_system: string | null;
+  custom_provider_name: string | null;
+  auth_scheme: AuthScheme;
+  auth_param_name: string | null;
   integration_type: IntegrationType;
   credential_ciphertext: string | null;
   credential_iv: string | null;
@@ -104,14 +120,35 @@ export const PROVIDERS: Record<
     hasExpiry: true,
     hint: "We GET the URL and treat any 2xx as healthy.",
   },
+  custom: {
+    label: "Custom provider",
+    credentialLabel: "Token, key or secret",
+    needsBaseUrl: true,
+    baseUrlLabel: "Health check URL",
+    hasExpiry: true,
+    hint: "Name the provider and tell us how it authenticates. We'll call the URL and treat any 2xx as healthy.",
+  },
 };
+
+// What to show as the provider name: a custom provider's own label
+// if it has one, otherwise the built-in label.
+export function providerLabel(i: {
+  integration_type: IntegrationType;
+  custom_provider_name?: string | null;
+}): string {
+  if (i.integration_type === "custom" && i.custom_provider_name?.trim()) {
+    return i.custom_provider_name.trim();
+  }
+  return PROVIDERS[i.integration_type]?.label ?? i.integration_type;
+}
 
 // Run a live check against the provider. Returns status + detail.
 // Never throws — a failed check is data, not an exception.
 export async function runHealthCheck(
   type: IntegrationType,
   credential: string | null,
-  baseUrl: string | null
+  baseUrl: string | null,
+  auth?: { scheme: AuthScheme; paramName: string | null }
 ): Promise<{ status: HealthStatus; detail: string }> {
   const timeout = AbortSignal.timeout(10_000);
 
@@ -202,6 +239,35 @@ export async function runHealthCheck(
         if (res.status === 401 || res.status === 403)
           return { status: "failed", detail: `Token rejected (${res.status}).` };
         return { status: "degraded", detail: `Vercel returned ${res.status}.` };
+      }
+
+      case "custom": {
+        if (!baseUrl) return { status: "unknown", detail: "No health check URL set." };
+        const scheme = auth?.scheme ?? "bearer";
+        const headers: Record<string, string> = { Accept: "application/json" };
+        let url = baseUrl;
+
+        if (credential && scheme !== "none") {
+          if (scheme === "bearer") {
+            headers.Authorization = `Bearer ${credential}`;
+          } else if (scheme === "basic") {
+            headers.Authorization = `Basic ${credential}`;
+          } else if (scheme === "header" && auth?.paramName) {
+            headers[auth.paramName] = credential;
+          } else if (scheme === "query" && auth?.paramName) {
+            const sep = url.includes("?") ? "&" : "?";
+            url = `${url}${sep}${encodeURIComponent(auth.paramName)}=${encodeURIComponent(credential)}`;
+          }
+        }
+
+        const res = await fetch(url, { headers, signal: timeout });
+        if (res.ok) return { status: "healthy", detail: `Returned ${res.status}.` };
+        if (res.status === 401 || res.status === 403)
+          return {
+            status: "failed",
+            detail: `Rejected (${res.status}). Credential may be wrong, expired, or sent the wrong way.`,
+          };
+        return { status: "degraded", detail: `Returned ${res.status}.` };
       }
 
       case "generic_http": {

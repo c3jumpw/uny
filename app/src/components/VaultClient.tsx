@@ -4,6 +4,9 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   PROVIDERS,
+  AUTH_SCHEMES,
+  providerLabel,
+  type AuthScheme,
   HEALTH_DISPLAY,
   expiryState,
   integrationPriority,
@@ -15,6 +18,9 @@ type FormState = {
   id?: string;
   name: string;
   associated_system: string;
+  custom_provider_name: string;
+  auth_scheme: AuthScheme;
+  auth_param_name: string;
   integration_type: IntegrationType;
   credential: string;
   env_var_name: string;
@@ -29,6 +35,9 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   name: "",
   associated_system: "",
+  custom_provider_name: "",
+  auth_scheme: "bearer",
+  auth_param_name: "",
   integration_type: "github_pat",
   credential: "",
   env_var_name: "",
@@ -135,6 +144,9 @@ export function VaultClient({
       const payload: Record<string, unknown> = {
         name: form.name,
         associated_system: form.associated_system,
+        custom_provider_name: form.custom_provider_name,
+        auth_scheme: form.auth_scheme,
+        auth_param_name: form.auth_param_name,
         integration_type: form.integration_type,
         env_var_name: form.env_var_name,
         callback_url: form.callback_url,
@@ -184,6 +196,9 @@ export function VaultClient({
       id: i.id,
       name: i.name,
       associated_system: i.associated_system ?? "",
+      custom_provider_name: i.custom_provider_name ?? "",
+      auth_scheme: i.auth_scheme ?? "bearer",
+      auth_param_name: i.auth_param_name ?? "",
       integration_type: i.integration_type,
       credential: "",
       env_var_name: i.env_var_name ?? "",
@@ -332,7 +347,7 @@ export function VaultClient({
                           border: "1px solid var(--line)",
                         }}
                       >
-                        {provider?.label ?? i.integration_type}
+                        {providerLabel(i)}
                       </span>
                       {currentUserId && i.workspace_owner_id !== currentUserId ? (
                         <span
@@ -626,6 +641,66 @@ function IntegrationForm({
             </small>
           ) : null}
         </div>
+
+        {form.integration_type === "custom" ? (
+          <>
+            <div className="field" style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Provider name</label>
+              <input
+                type="text"
+                value={form.custom_provider_name}
+                onChange={(e) =>
+                  setForm({ ...form, custom_provider_name: e.target.value })
+                }
+                placeholder="e.g. Stripe, Twilio, Airtable, internal API"
+                style={{ width: "100%" }}
+              />
+              <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+                Shown on the card in place of a built-in provider name.
+              </small>
+            </div>
+
+            <div className="field" style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>How it authenticates</label>
+              <select
+                value={form.auth_scheme}
+                onChange={(e) =>
+                  setForm({ ...form, auth_scheme: e.target.value as AuthScheme })
+                }
+                style={{ width: "100%" }}
+              >
+                {AUTH_SCHEMES.map((a) => (
+                  <option key={a.value} value={a.value}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+              <small style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+                Used only for the health check, so we send the credential the way
+                this provider expects.
+              </small>
+            </div>
+
+            {form.auth_scheme === "header" || form.auth_scheme === "query" ? (
+              <div className="field" style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>
+                  {form.auth_scheme === "header" ? "Header name" : "Query parameter name"}
+                </label>
+                <input
+                  type="text"
+                  value={form.auth_param_name}
+                  onChange={(e) =>
+                    setForm({ ...form, auth_param_name: e.target.value })
+                  }
+                  placeholder={
+                    form.auth_scheme === "header" ? "e.g. X-API-Key" : "e.g. api_key"
+                  }
+                  style={{ width: "100%" }}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : null}
 
         <div className="field" style={{ marginBottom: 14 }}>
           <label style={labelStyle}>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { decryptCredential } from "@/lib/crypto";
-import { runHealthCheck, type IntegrationType } from "@/lib/integrations";
+import { runHealthCheck, type IntegrationType, type AuthScheme } from "@/lib/integrations";
 
 // Run live health checks.
 //
@@ -25,6 +25,8 @@ type Row = {
   credential_iv: string | null;
   credential_tag: string | null;
   base_url: string | null;
+  auth_scheme: AuthScheme | null;
+  auth_param_name: string | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
   let query = supabase
     .from("integrations")
     .select(
-      "id, integration_type, credential_ciphertext, credential_iv, credential_tag, base_url"
+      "id, integration_type, credential_ciphertext, credential_iv, credential_tag, base_url, auth_scheme, auth_param_name"
     );
   if (single) query = query.eq("id", single);
 
@@ -76,7 +78,8 @@ export async function POST(req: NextRequest) {
       const result = await runHealthCheck(
         row.integration_type,
         credential,
-        row.base_url
+        row.base_url,
+        { scheme: row.auth_scheme ?? "bearer", paramName: row.auth_param_name }
       );
       return { id: row.id, status: result.status, detail: result.detail };
     })

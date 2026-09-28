@@ -89,6 +89,13 @@ export async function POST(req: NextRequest) {
       workspace_owner_id: ownerId,
       name: body.name.trim().slice(0, 120),
       associated_system: body.associated_system?.trim()?.slice(0, 120) || null,
+      custom_provider_name: body.custom_provider_name?.trim()?.slice(0, 120) || null,
+      auth_scheme:
+        typeof body.auth_scheme === "string" &&
+        ["bearer", "header", "query", "basic", "none"].includes(body.auth_scheme)
+          ? body.auth_scheme
+          : "bearer",
+      auth_param_name: body.auth_param_name?.trim()?.slice(0, 120) || null,
       integration_type: integrationType,
       ...encFields,
       env_var_name: body.env_var_name?.trim()?.slice(0, 120) || null,
@@ -137,8 +144,17 @@ export async function PATCH(req: NextRequest) {
     updates.name = body.name.trim().slice(0, 120);
     changedFields.push("name");
   }
+  if (
+    typeof body.auth_scheme === "string" &&
+    ["bearer", "header", "query", "basic", "none"].includes(body.auth_scheme)
+  ) {
+    updates.auth_scheme = body.auth_scheme;
+    changedFields.push("auth_scheme");
+  }
   for (const f of [
     "associated_system",
+    "custom_provider_name",
+    "auth_param_name",
     "env_var_name",
     "callback_url",
     "base_url",

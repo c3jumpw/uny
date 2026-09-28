@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { type UserRole, roleLabel } from "@/lib/admin";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const LINKS = [
   { href: "/dashboard", label: "Overview" },
@@ -99,6 +100,7 @@ export function DashboardNav({
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <ThemeToggle compact />
           {email ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.2 }}>
               <span style={{ color: "var(--paper)", fontSize: "0.85rem" }}>{email}</span>
