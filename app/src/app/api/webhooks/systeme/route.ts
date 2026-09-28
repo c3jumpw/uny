@@ -178,8 +178,20 @@ export async function POST(req: NextRequest) {
       // Deduped per user per day: a retrying processor can fire
       // payment.failed repeatedly and the client should not get
       // five identical emails in an afternoon.
+      // An exempt workspace has no billing relationship, so a
+      // payment event that somehow names one is noise rather than
+      // something to chase. Log it, skip the emails.
+      const { data: exemptRow } = await supabase
+        .from("subscription_status")
+        .select("billing_exempt")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const isExempt = Boolean(
+        (exemptRow as { billing_exempt: boolean } | null)?.billing_exempt
+      );
+
       const day = now.slice(0, 10);
-      if (customerEmail) {
+      if (customerEmail && !isExempt) {
         await sendNotification({
           to: customerEmail,
           toUserId: userId,
@@ -192,7 +204,7 @@ export async function POST(req: NextRequest) {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      for (const adminEmail of adminList) {
+      for (const adminEmail of isExempt ? [] : adminList) {
         await sendNotification({
           to: adminEmail,
           template: "payment_failed_admin",

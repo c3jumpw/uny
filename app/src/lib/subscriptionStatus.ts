@@ -21,6 +21,7 @@ export type DisplayStatus =
   | "grace"
   | "active"
   | "never_paid"
+  | "exempt"
   | "signup_incomplete"
   | "cancelled";
 
@@ -31,6 +32,8 @@ export type StatusRow = {
   subscription_state: string; // 'active' | 'lapsed' | 'cancelled' | 'never_paid'
   automations_active: boolean;
   cut_off_at: string | null;
+  billing_exempt?: boolean | null;
+  exempt_reason?: string | null;
   intended_plan?: string | null;
   plan_selected_at?: string | null;
   created_at?: string | null;
@@ -55,6 +58,11 @@ const NUDGE_DAYS: Array<{ day: number; step: 1 | 2 | 3 }> = [
 ];
 
 export function signupState(row: StatusRow): SignupState {
+  // Exempt accounts never chose a plan and never will. Nudging them
+  // about it would be noise aimed at ourselves.
+  if (row.billing_exempt) {
+    return { incomplete: false, daysSinceSignup: null, nudgeStep: null };
+  }
   const hasPlan = Boolean(row.intended_plan || row.plan_selected_at);
   const hasPaid = Boolean(row.last_payment_at) || row.subscription_state === "active";
   if (hasPlan || hasPaid) {
@@ -88,6 +96,9 @@ export type StatusMeta = {
 const DAYS_TO_MS = 24 * 60 * 60 * 1000;
 
 export function computeStatus(row: StatusRow): StatusMeta {
+  // An explicit cutoff still wins over exemption: if someone
+  // deliberately paused an internal workspace, that decision should
+  // be visible rather than masked by the exemption badge.
   if (!row.automations_active || row.cut_off_at) {
     return {
       status: "cut_off",
@@ -97,6 +108,22 @@ export function computeStatus(row: StatusRow): StatusMeta {
       daysLapsed: null,
       priority: 5,
       actionHint: "Restore when payment resumes",
+    };
+  }
+
+  // Exemption suppresses the entire billing ladder. Internal
+  // workspaces have no lapse clock, so there is nothing to escalate.
+  if (row.billing_exempt) {
+    return {
+      status: "exempt",
+      label: "Internal — no billing",
+      color: "#b79be8",
+      bg: "rgba(150,110,220,.15)",
+      daysLapsed: null,
+      priority: 2,
+      actionHint:
+        row.exempt_reason?.trim() ||
+        "Billing-exempt internal account. Payment tracking does not apply.",
     };
   }
 

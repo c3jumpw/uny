@@ -185,6 +185,7 @@ export async function GET(req: NextRequest) {
       .from("subscription_status")
       .select("*")
       .eq("subscription_state", "never_paid")
+      .eq("billing_exempt", false)
       .is("plan_selected_at", null)
       .lt("nudge_count", 3);
 
@@ -202,6 +203,7 @@ export async function GET(req: NextRequest) {
         subscription_state: row.subscription_state as string,
         automations_active: row.automations_active as boolean,
         cut_off_at: (row.cut_off_at as string | null) ?? null,
+        billing_exempt: (row.billing_exempt as boolean | null) ?? false,
         intended_plan: (row.intended_plan as string | null) ?? null,
         plan_selected_at: (row.plan_selected_at as string | null) ?? null,
         created_at: typeof createdAt === "string" ? createdAt : null,

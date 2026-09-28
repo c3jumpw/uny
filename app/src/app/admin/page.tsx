@@ -3,6 +3,7 @@ import { getUserRole } from "@/lib/admin";
 import { computeStatus, sortByPriority } from "@/lib/subscriptionStatus";
 import { CutoffButton } from "@/components/CutoffButton";
 import { ImportClients } from "@/components/ImportClients";
+import { ExemptButton } from "@/components/ExemptButton";
 
 // Admin dashboard — phase 2.
 //
@@ -28,6 +29,8 @@ type UserRow = {
 };
 type StatusRow = {
   user_id: string;
+  billing_exempt?: boolean | null;
+  exempt_reason?: string | null;
   intended_plan?: string | null;
   plan_selected_at?: string | null;
   created_at?: string | null;
@@ -234,11 +237,28 @@ export default async function AdminPage() {
                     )}
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    <CutoffButton
-                      targetUserId={row.user.user_id}
-                      targetEmail={row.user.email}
-                      currentlyActive={row.status.automations_active}
-                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 6,
+                        justifyContent: "flex-end",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {isSuperAdmin ? (
+                        <ExemptButton
+                          targetUserId={row.user.user_id}
+                          targetEmail={row.user.email}
+                          currentlyExempt={Boolean(row.status.billing_exempt)}
+                          currentReason={row.status.exempt_reason ?? null}
+                        />
+                      ) : null}
+                      <CutoffButton
+                        targetUserId={row.user.user_id}
+                        targetEmail={row.user.email}
+                        currentlyActive={row.status.automations_active}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))
@@ -309,6 +329,7 @@ function StatusLegend() {
   const items = [
     { label: "Active", color: "#7CC084", bg: "rgba(120,180,120,.15)" },
     { label: "No plan chosen", color: "#8fb8d8", bg: "rgba(90,169,230,.14)" },
+    { label: "Internal — no billing", color: "#b79be8", bg: "rgba(150,110,220,.15)" },
     { label: "Grace (0-3d)", color: "#ffd76a", bg: "rgba(200,170,50,.15)" },
     { label: "Warning (4-7d)", color: "#ffb066", bg: "rgba(200,120,40,.2)" },
     { label: "Escalated (8-14d)", color: "#ff8080", bg: "rgba(180,60,60,.25)" },
