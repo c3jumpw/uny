@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { VaultClient } from "@/components/VaultClient";
 import { VaultSharing, type VaultShare } from "@/components/VaultSharing";
 import type { Integration } from "@/lib/integrations";
+import type { IntegrationEvent } from "@/components/VaultClient";
 
 // Integration health & credentials hub.
 //
@@ -18,11 +19,16 @@ export default async function VaultPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data, error }, { data: shareData }, { data: ownerData }] =
+  const [{ data, error }, { data: shareData }, { data: ownerData }, { data: eventData }] =
     await Promise.all([
       supabase.from("integrations").select("*").order("created_at", { ascending: false }),
       supabase.rpc("list_my_vault_shares"),
       supabase.rpc("integration_owner_emails"),
+      supabase
+        .from("integration_events")
+        .select("integration_id, actor_email, event_type, detail, created_at")
+        .order("created_at", { ascending: false })
+        .limit(300),
     ]);
 
   const integrations = (data as Integration[] | null) ?? [];
@@ -31,6 +37,14 @@ export default async function VaultPage() {
   const ownerEmails = new Map<string, string>();
   for (const o of (ownerData as Array<{ owner_id: string; email: string }> | null) ?? []) {
     ownerEmails.set(o.owner_id, o.email);
+  }
+
+  // Group the audit trail per credential, newest first, capped so a
+  // noisy integration cannot flood the page.
+  const events: Record<string, IntegrationEvent[]> = {};
+  for (const e of (eventData as IntegrationEvent[] | null) ?? []) {
+    const list = (events[e.integration_id] ??= []);
+    if (list.length < 8) list.push(e);
   }
 
   const mine = integrations.filter((i) => i.workspace_owner_id === user?.id);
@@ -76,6 +90,7 @@ export default async function VaultPage() {
         integrations={integrations}
         currentUserId={user?.id ?? null}
         ownerEmails={Object.fromEntries(ownerEmails)}
+        events={events}
       />
     </>
   );

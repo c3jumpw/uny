@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { RevealCredential } from "@/components/RevealCredential";
 import { useRouter } from "next/navigation";
 import {
   PROVIDERS,
@@ -49,14 +50,24 @@ const EMPTY_FORM: FormState = {
   notes: "",
 };
 
+export type IntegrationEvent = {
+  integration_id: string;
+  actor_email: string | null;
+  event_type: string;
+  detail: string | null;
+  created_at: string;
+};
+
 export function VaultClient({
   integrations,
   currentUserId,
   ownerEmails,
+  events,
 }: {
   integrations: Integration[];
   currentUserId?: string | null;
   ownerEmails?: Record<string, string>;
+  events?: Record<string, IntegrationEvent[]>;
 }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState | null>(null);
@@ -432,11 +443,19 @@ export function VaultClient({
                         gap: 2,
                       }}
                     >
-                      <Field
-                        label="Credential"
-                        value={i.credential_hint}
-                        mono
-                      />
+                      <div>
+                        <span style={{ color: "var(--muted)" }}>Credential: </span>
+                        {i.credential_hint ? (
+                          <RevealCredential
+                            integrationId={i.id}
+                            hint={i.credential_hint}
+                          />
+                        ) : (
+                          <span style={{ color: "var(--muted)", fontStyle: "italic" }}>
+                            Not set
+                          </span>
+                        )}
+                      </div>
                       <Field label="System" value={i.associated_system} />
                       <Field label="Account" value={i.account_identifier} />
                       <Field label="Env var" value={i.env_var_name} mono />
@@ -456,6 +475,8 @@ export function VaultClient({
                       />
                       <Field label="Notes" value={i.notes} />
                     </div>
+
+                    <HistoryDisclosure entries={events?.[i.id] ?? []} />
 
                     {i.health_detail ? (
                       <div
@@ -878,6 +899,82 @@ function Field({
       ) : (
         <span style={{ color: "var(--muted)", fontStyle: "italic" }}>Not set</span>
       )}
+    </div>
+  );
+}
+
+
+// Access and change history for one credential.
+//
+// Collapsed by default: on a normal day the history is noise, and
+// on the day a key leaks it is the first thing you want. Reveals
+// are highlighted because "who saw this" is the question that
+// actually matters, while health checks are routine chatter.
+function HistoryDisclosure({ entries }: { entries: IntegrationEvent[] }) {
+  const [open, setOpen] = useState(false);
+  if (entries.length === 0) return null;
+
+  const reveals = entries.filter((e) => e.event_type === "credential_revealed").length;
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{
+          padding: 0,
+          border: "none",
+          background: "transparent",
+          color: "var(--sky)",
+          fontSize: "0.75rem",
+          cursor: "pointer",
+        }}
+      >
+        {open ? "Hide history" : "History"}
+        {reveals > 0 ? (
+          <span style={{ color: "var(--muted)" }}>
+            {" "}
+            · {reveals} reveal{reveals === 1 ? "" : "s"}
+          </span>
+        ) : null}
+      </button>
+
+      {open ? (
+        <div
+          style={{
+            marginTop: 6,
+            paddingLeft: 10,
+            borderLeft: "2px solid var(--line)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          {entries.map((e, idx) => {
+            const isReveal = e.event_type === "credential_revealed";
+            const isRotate = e.event_type === "credential_rotated";
+            return (
+              <div key={idx} style={{ fontSize: "0.72rem", color: "var(--muted)" }}>
+                <span
+                  style={{
+                    color: isReveal
+                      ? "var(--amber)"
+                      : isRotate
+                        ? "var(--sky)"
+                        : "var(--muted)",
+                  }}
+                >
+                  {e.event_type.replace(/_/g, " ")}
+                </span>
+                {e.actor_email ? (
+                  <span> · {e.actor_email}</span>
+                ) : null}
+                <span> · {new Date(e.created_at).toLocaleString()}</span>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
