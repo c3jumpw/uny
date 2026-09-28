@@ -45,7 +45,7 @@ export default async function DeveloperOnboardingPage() {
         <Step
           n={3}
           title="We'll reach out to connect your first service"
-          body="Backend setup depends on what you're building, so we do this part with you rather than handing you a generic checklist. Expect to hear from us within one business day. If you'd rather kick it off now, just reply to your welcome email and tell us what you're connecting."
+          body="Backend setup depends on what you're building, so we do this part with you rather than handing you a generic checklist. Expect to hear from us within one business day. If you'd rather kick it off now, email support@unywebs.com and tell us what you're connecting."
         />
       </div>
 

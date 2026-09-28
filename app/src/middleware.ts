@@ -2,9 +2,19 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Paths that don't require an auth session. Anything else redirects to /login.
-const PUBLIC_PATHS = ["/login", "/signup", "/start", "/auth/callback"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/start",
+  "/auth/callback",
+  "/forgot-password",
+  "/reset-password",
+];
 
 // Paths where a logged-in user should be sent to /dashboard instead.
+// /reset-password is deliberately absent: the recovery link signs
+// the user in before they set a new password, so redirecting authed
+// users away from it would break the entire flow.
 const REDIRECT_IF_AUTHED = ["/login", "/signup", "/start"];
 
 export async function middleware(request: NextRequest) {
@@ -40,7 +50,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith("/invite/") ||
-    pathname.startsWith("/api/webhooks/");
+    pathname.startsWith("/api/webhooks/") ||
+    pathname.startsWith("/api/cron/");
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

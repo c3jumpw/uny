@@ -44,7 +44,22 @@ export function LoginForm({ next }: { next?: string }) {
         />
       </div>
       <div className="field">
-        <label htmlFor="password">Password</label>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <label htmlFor="password">Password</label>
+          <Link
+            href="/forgot-password"
+            style={{ color: "var(--sky)", fontSize: "0.8rem" }}
+          >
+            Forgot password?
+          </Link>
+        </div>
         <input
           id="password"
           type="password"

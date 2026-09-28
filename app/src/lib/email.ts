@@ -69,8 +69,9 @@ function shell(opts: {
         <tr><td style="padding:28px 32px 28px;">
           <div style="border-top:1px solid #1e2b40;padding-top:16px;color:#6b7d94;font-size:13px;line-height:1.5;">
             ${footerNote ? `${footerNote}<br><br>` : ""}
-            Questions? Reply to this email or reach us at
-            <a href="mailto:${SUPPORT_EMAIL}" style="color:#5aa9e6;text-decoration:none;">${SUPPORT_EMAIL}</a>.
+            Questions? Reply to this email, or write to
+            <a href="mailto:${SUPPORT_EMAIL}" style="color:#5aa9e6;text-decoration:none;">${SUPPORT_EMAIL}</a>
+            &mdash; both reach the same place.
           </div>
         </td></tr>
       </table>
@@ -112,7 +113,7 @@ export function buildTemplate(
         html: shell({
           heading: "Your UnyBase account is ready",
           body: `<p style="margin:0 0 12px;">Thanks for signing up. Your workspace is live and you can sign in any time.</p>
-                 <p style="margin:0;">We'll be in touch shortly to help you connect your first app. If you'd rather get moving now, your dashboard has everything you need to start.</p>`,
+                 <p style="margin:0;">We'll be in touch shortly to help you connect your first app. If you'd rather get moving now, your dashboard has everything you need to start, and ${SUPPORT_EMAIL} reaches us any time.</p>`,
           ctaLabel: "Open your dashboard",
           ctaUrl: `${APP_URL}/dashboard`,
         }),
@@ -145,7 +146,7 @@ export function buildTemplate(
           ctaLabel: "Update payment details",
           ctaUrl: vars.billingUrl || `${APP_URL}/dashboard`,
           footerNote:
-            "If you think this is a mistake, reply to this email and a human will look into it.",
+            `If you think this is a mistake, email ${SUPPORT_EMAIL} and a human will look into it.`,
         }),
       };
 
@@ -183,8 +184,7 @@ export function buildTemplate(
                  <p style="margin:0;">Your data is safe and nothing has been deleted. Once payment is resolved we'll restore everything &mdash; your existing API key will start working again, so you won't need to change any code.</p>`,
           ctaLabel: "Resolve payment",
           ctaUrl: vars.billingUrl || `${APP_URL}/dashboard`,
-          footerNote:
-            "If you believe this was done in error, reply to this email and we'll restore your access right away.",
+          footerNote: `If you believe this was done in error, email ${SUPPORT_EMAIL} and we'll restore your access right away.`,
         }),
       };
 
@@ -358,6 +358,12 @@ export async function sendNotification(opts: {
       body: JSON.stringify({
         from: FROM,
         to: [to],
+        // Sends come from a noreply address on the verified domain,
+        // but several templates invite a reply ("reply and we'll
+        // restore your access"). Without this header those replies
+        // would land in an unmonitored mailbox, which is worse than
+        // not offering to help at all.
+        reply_to: SUPPORT_EMAIL,
         subject: built.subject,
         html: built.html,
       }),
