@@ -19,7 +19,7 @@ function unauthorized() {
   return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 }
 
-export async function POST(req: NextRequest) {
+async function handle(req: NextRequest, paths: string[]) {
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret) {
     return NextResponse.json(
@@ -33,11 +33,6 @@ export async function POST(req: NextRequest) {
     new URL(req.url).searchParams.get("secret");
 
   if (provided !== secret) return unauthorized();
-
-  const body = await req.json().catch(() => ({}));
-  const paths: string[] = Array.isArray(body?.paths)
-    ? body.paths.filter((p: unknown): p is string => typeof p === "string")
-    : [];
 
   // Default set covers the pages that list content. A guide or solution
   // change almost always affects more than the one page it lives on —
@@ -60,4 +55,26 @@ export async function POST(req: NextRequest) {
     revalidated,
     at: new Date().toISOString(),
   });
+}
+
+// What the admin calls on every publish.
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+  const paths: string[] = Array.isArray(body?.paths)
+    ? body.paths.filter((p: unknown): p is string => typeof p === "string")
+    : [];
+  return handle(req, paths);
+}
+
+// Manual escape hatch: the same refresh, reachable from a browser at
+// /api/revalidate?secret=…&path=/guides. Without it, a publish that
+// failed to revalidate (rotated secret, renamed deployment) would leave
+// the editor with no way to force the site to catch up short of a
+// redeploy. Safe to expose as a GET because it mutates nothing — it
+// only asks pages to re-render from the database — and it still
+// requires the secret.
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const paths = url.searchParams.getAll("path");
+  return handle(req, paths);
 }
