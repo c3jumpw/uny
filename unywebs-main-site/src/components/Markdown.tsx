@@ -9,6 +9,13 @@ import remarkGfm from "remark-gfm";
 // off-site opens in a new tab with rel="noopener", and internal links
 // behave normally. Tables get their own scroll container so a wide one
 // never widens the page.
+//
+// Every override below destructures `node` away before spreading the
+// rest onto the element. react-markdown hands each component its own
+// syntax-tree node under that name; spreading it through reaches the
+// DOM as node="[object Object]" on every link and image, which is
+// invalid markup and adds weight to exactly the pages that need to stay
+// clean for crawlers.
 
 export function Markdown({ children }: { children: string }) {
   return (
@@ -16,7 +23,7 @@ export function Markdown({ children }: { children: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a({ href, children, ...props }) {
+          a({ node: _node, href, children, ...props }) {
             const url = href ?? "";
             const external = /^https?:\/\//i.test(url);
             return (
@@ -31,14 +38,14 @@ export function Markdown({ children }: { children: string }) {
               </a>
             );
           },
-          img({ src, alt, ...props }) {
+          img({ node: _node, src, alt, ...props }) {
             if (!src || typeof src !== "string") return null;
             return (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={src} alt={alt ?? ""} loading="lazy" {...props} />
             );
           },
-          table({ children, ...props }) {
+          table({ node: _node, children, ...props }) {
             return (
               <div className="table-scroll">
                 <table {...props}>{children}</table>

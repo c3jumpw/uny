@@ -1,78 +1,66 @@
-# Media files to upload
+# Media
 
-Drop these files into the `/media/` folder. Filenames must match exactly for images to appear. All originals from unywebs.com live at `https://unywebs.com/wp-content/uploads/2025/05/` (or `.../2023/03/` for the two hero images).
+The WordPress media library was exported into `public/media/` and is
+served at `/media/<filename>`. Files kept their original WordPress
+names, and the content in Supabase points at those names — so nothing
+needs renaming.
 
-## Global / branding
+## How images get referenced now
 
-| Filename           | Used on            | Original source                                            |
-|--------------------|--------------------|-------------------------------------------------------------|
-| `site-logo.png`    | Header (all pages) | `/wp-content/uploads/2025/05/site-logo.png`                 |
+Image paths live in the database, not in the code:
 
-## Home page (`index.html`)
+- `site_guides.body_markdown` — inline images, as `![alt](/media/name.jpg)`
+- `site_guides.hero_image_url` — the banner at the top of an article
+- `site_guides.og_image_url` — social share image (falls back to the hero)
+- `site_solutions.logo_url` — optional logo on a tool card
 
-| Filename                  | Used on   | Original                                                                 |
-|---------------------------|-----------|--------------------------------------------------------------------------|
-| `hero-illustration.svg`   | Hero      | `/wp-content/uploads/2023/03/bebusiness7-home-pic1.svg`                  |
-| `about-pic.jpg` **or** `about-pic.webp` | About split | `/wp-content/uploads/2023/03/bebusiness7-about-pic2.webp` |
+To change one, edit it in the admin rather than here. Adding a **new**
+image should go through the guide editor (paste, drag, or Insert image),
+which uploads to the `site-media` Supabase Storage bucket and writes a
+full URL. `public/media/` exists so the original WordPress screenshots
+didn't have to be re-uploaded one at a time.
 
-## Guides index (`guides.html`)
+## Files currently referenced
 
-| Filename              | Used on           | Original                                                        |
-|-----------------------|-------------------|-----------------------------------------------------------------|
-| `official-email.jpg`  | 2 guide cards     | `/wp-content/uploads/2025/05/official-email-960x750.jpg`        |
-| `web-registering.jpg` | WordPress card    | `/wp-content/uploads/2025/05/web-registering-960x750.jpg`       |
+Verified present and serving:
 
-## Article: Your app needs five things
+| File | Used by |
+|------|---------|
+| `site-logo.png` | Header and favicon, every page |
+| `official-email.jpg` | Hero — "app needs five things" and "official company emails" |
+| `web-registering.jpg` | Hero — "WordPress site registration" |
+| `3ddfccc5-665a-4c31-af54-2b78bd7d21d1.jpg` | Email guide — "let our team handle it" |
+| `sign-up.jpg`, `diy.png` | Email guide — DIY intro |
+| `add-domain-name.png` | Email guide — step 2 |
+| `select-the-txt-method.jpg`, `mx.jpg` | Email guide — TXT verification |
+| `select-cname-record.jpg`, `cname.jpg` | Email guide — CNAME verification |
+| `add-users.jpg`, `add-user-details.jpg` | Email guide — step 4 |
+| `dns-values.jpg`, `mx-record-values.jpg` | Email guide — MX records |
+| `spf-record-value.jpg`, `dkim-record-value.jpg` | Email guide — SPF / DKIM |
+| `hosting-diagram.jpg`, `register-hosting.jpg` | WordPress guide — intro |
+| `image.png` … `image-5.png` | WordPress guide — steps 1 through 5 |
 
-| Filename              | Original                                                        |
-|-----------------------|-----------------------------------------------------------------|
-| `official-email.jpg`  | `/wp-content/uploads/2025/05/official-email.jpg` (already listed above) |
+## Not carried over
 
-## Article: Registering Your Official Company Emails
+Two assets came from the old WordPress **theme**, not the media library,
+so they weren't in the export:
 
-| Filename                     | Original                                                   |
-|------------------------------|------------------------------------------------------------|
-| `official-email.jpg`         | (already listed)                                            |
-| `team-handles-it.jpg`        | `/wp-content/uploads/2025/05/3ddfccc5-665a-4c31-af54-2b78bd7d21d1.jpg` |
-| `sign-up.jpg`                | `/wp-content/uploads/2025/05/sign-up.jpg`                  |
-| `diy.png`                    | `/wp-content/uploads/2025/05/diy.png`                      |
-| `add-domain-name.png`        | `/wp-content/uploads/2025/05/add-domain-name.png`          |
-| `select-the-txt-method.jpg`  | `/wp-content/uploads/2025/05/select-the-txt-method.jpg`    |
-| `mx.jpg`                     | `/wp-content/uploads/2025/05/mx.jpg`                       |
-| `select-cname-record.jpg`    | `/wp-content/uploads/2025/05/select-cname-record.jpg`      |
-| `cname.jpg`                  | `/wp-content/uploads/2025/05/cname.jpg`                    |
-| `add-users.jpg`              | `/wp-content/uploads/2025/05/add-users.jpg`                |
-| `add-user-details.jpg`       | `/wp-content/uploads/2025/05/add-user-details.jpg`         |
-| `dns-values.jpg`             | `/wp-content/uploads/2025/05/dns-values.jpg`               |
-| `mx-record-values.jpg`       | `/wp-content/uploads/2025/05/mx-record-values.jpg`         |
-| `spf-record-value.jpg`       | `/wp-content/uploads/2025/05/spf-record-value.jpg`         |
-| `dkim-record-value.jpg`      | `/wp-content/uploads/2025/05/dkim-record-value.jpg`        |
+- `bebusiness7-home-pic1.svg` — home page hero illustration
+- `bebusiness7-about-pic2.webp` — home page "about" image
 
-## Article: WordPress Site Registration
+Neither is missing on the live site: the home page draws its own inline
+SVG artwork instead. To use real images there, add them to
+`public/media/` and swap the `<HeroArt />` / `<AboutArt />` components in
+`src/app/page.tsx` for `<img>` tags.
 
-| Filename                | Original                                                     |
-|-------------------------|--------------------------------------------------------------|
-| `web-registering.jpg`   | (already listed)                                             |
-| `hosting-diagram.jpg`   | `/wp-content/uploads/2025/05/hosting-diagram.jpg`            |
-| `register-hosting.jpg`  | `/wp-content/uploads/2025/05/register-hosting.jpg`           |
-| `step-1.png`            | `/wp-content/uploads/2025/05/image.png`                      |
-| `step-2.png`            | `/wp-content/uploads/2025/05/image-1.png`                    |
-| `step-3a.png`           | `/wp-content/uploads/2025/05/image-2.png`                    |
-| `step-3b.png`           | `/wp-content/uploads/2025/05/image-3.png`                    |
-| `step-4.png`            | `/wp-content/uploads/2025/05/image-4.png`                    |
-| `step-5.png`            | `/wp-content/uploads/2025/05/image-5.png`                    |
+## About the unused files
 
-## Quick download tip
+The export included every size WordPress generates per upload
+(`-150x150`, `-768x768`, `-scaled`, and so on) — 559 files, about 28MB,
+of which 25 are actually referenced.
 
-If you want to grab every image from the live WordPress site at once, run this on your machine:
-
-```bash
-# creates media/ and pulls the media library folder
-mkdir -p media
-wget -r -np -nH --cut-dirs=3 -A jpg,jpeg,png,webp,svg,gif \
-  https://unywebs.com/wp-content/uploads/2025/05/ -P media/
-wget -r -np -nH --cut-dirs=3 -A jpg,jpeg,png,webp,svg,gif \
-  https://unywebs.com/wp-content/uploads/2023/03/ -P media/
-```
-
-Then rename the files to match the table above (or update the `<img src="...">` tags to whatever names you prefer).
+This is harmless: Vercel serves `public/` as static files, so the unused
+ones cost nothing at request time. They do make the folder hard to read
+and the repo larger than it needs to be. Pruning to just the referenced
+files would take it from ~28MB to ~5MB, but it is worth keeping the full
+set if you might reference other images from future guides.
