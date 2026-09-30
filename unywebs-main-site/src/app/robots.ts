@@ -6,10 +6,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Draft previews carry a token in the query string; keeping
-      // crawlers out of them stops an unpublished draft being indexed
-      // if a preview link is ever shared.
-      disallow: ["/api/"],
+      // Draft previews are served at /guides/<slug>?preview=<token>.
+      // This keeps well-behaved crawlers off them if a preview link is
+      // ever shared, but it is the belt, not the braces: the preview
+      // render also emits `noindex`, which is what actually keeps an
+      // unpublished draft out of the index.
+      disallow: ["/*?preview="],
     },
     sitemap: `${siteUrl()}/sitemap.xml`,
   };

@@ -27,10 +27,22 @@ type Props = {
   searchParams: Promise<{ preview?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { preview } = await searchParams;
   const guide = await getGuide(slug);
-  if (!guide) return { title: "Guide not found" };
+
+  // No published guide at this slug but a preview token is present:
+  // this render is a draft. Mark it noindex so an unpublished article
+  // cannot end up in search results if the preview link is shared.
+  if (!guide) {
+    return preview
+      ? { title: "Draft preview", robots: { index: false, follow: false } }
+      : { title: "Guide not found" };
+  }
 
   const title = guide.seo_title || guide.title;
   const description = guide.seo_description || guide.excerpt;
