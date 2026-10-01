@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { affiliateUrlWarning, type SolutionRow } from "@/lib/siteContentShared";
+import {
+  affiliateUrlWarning,
+  type SolutionRow,
+  type SolutionFeature,
+} from "@/lib/siteContentShared";
 
 // The solutions page is a short, ordered list of visual cards, so this
 // is not list-then-detail CRUD. It is one table you can reorder by
@@ -47,12 +51,31 @@ export function SolutionsAdmin({ initial }: Props) {
       cta_url: "",
       category: "",
       status: "draft",
+      features: [],
     });
     setMsg(null);
   }
 
   function field<K extends keyof SolutionRow>(key: K, value: SolutionRow[K]) {
     setDraft((d) => ({ ...(d ?? selected ?? {}), [key]: value }));
+  }
+
+  function setFeature(i: number, key: keyof SolutionFeature, value: string) {
+    const list: SolutionFeature[] = [...((current?.features as SolutionFeature[]) ?? [])];
+    list[i] = { ...(list[i] ?? { title: "", body: "" }), [key]: value };
+    field("features", list as SolutionRow["features"]);
+  }
+
+  function addFeature() {
+    const list: SolutionFeature[] = [...((current?.features as SolutionFeature[]) ?? [])];
+    list.push({ title: "", body: "" });
+    field("features", list as SolutionRow["features"]);
+  }
+
+  function removeFeature(i: number) {
+    const list: SolutionFeature[] = [...((current?.features as SolutionFeature[]) ?? [])];
+    list.splice(i, 1);
+    field("features", list as SolutionRow["features"]);
   }
 
   async function save() {
@@ -76,6 +99,13 @@ export function SolutionsAdmin({ initial }: Props) {
         logo_url: current.logo_url ?? null,
         category: current.category ?? null,
         status: current.status ?? "draft",
+        tagline: current.tagline ?? null,
+        overview: current.overview ?? null,
+        best_for: current.best_for ?? null,
+        pricing_note: current.pricing_note ?? null,
+        domain: current.domain ?? null,
+        brand_color: current.brand_color ?? null,
+        features: current.features ?? [],
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -391,6 +421,160 @@ export function SolutionsAdmin({ initial }: Props) {
                 placeholder="Leave blank to use the first letter"
               />
             </div>
+
+            <details className="detail-fields" style={{ marginTop: 4 }}>
+              <summary
+                style={{
+                  cursor: "pointer",
+                  color: "var(--paper-dim)",
+                  fontSize: "0.85rem",
+                  padding: "10px 0",
+                  borderTop: "1px solid var(--line)",
+                }}
+              >
+                Detail page content &mdash; shown at /solutions/{current.slug ?? "…"}
+              </summary>
+
+              <div style={{ paddingTop: 14 }}>
+                <div className="field">
+                  <label htmlFor="sol-tagline">Tagline</label>
+                  <input
+                    id="sol-tagline"
+                    value={current.tagline ?? ""}
+                    onChange={(e) => field("tagline", e.target.value)}
+                    placeholder="A real business number your whole team shares"
+                  />
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
+                    One short line. Replaces the description on cards.
+                  </span>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="sol-overview">Overview</label>
+                  <textarea
+                    id="sol-overview"
+                    rows={4}
+                    value={current.overview ?? ""}
+                    onChange={(e) => field("overview", e.target.value)}
+                    placeholder="Two or three short sentences, in plain language."
+                  />
+                </div>
+
+                <div className="field">
+                  <label>What you get</label>
+                  {((current.features as SolutionFeature[]) ?? []).map((f, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        border: "1px solid var(--line)",
+                        borderRadius: 8,
+                        padding: 12,
+                        marginBottom: 8,
+                        background: "var(--ink-2)",
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                        <input
+                          value={f.title}
+                          onChange={(e) => setFeature(i, "title", e.target.value)}
+                          placeholder="Shared Phone Numbers"
+                          style={{ flex: 1 }}
+                          aria-label={`Feature ${i + 1} title`}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-ghost"
+                          style={{ padding: "4px 10px", fontSize: "0.78rem" }}
+                          onClick={() => removeFeature(i)}
+                          aria-label={`Remove feature ${i + 1}`}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={f.body}
+                        onChange={(e) => setFeature(i, "body", e.target.value)}
+                        placeholder="One sentence on what it does for them."
+                        aria-label={`Feature ${i + 1} description`}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    style={{ padding: "6px 14px", fontSize: "0.8rem" }}
+                    onClick={addFeature}
+                  >
+                    Add a feature
+                  </button>
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem", marginTop: 6 }}>
+                    Four works best &mdash; they lay out two by two.
+                  </span>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="sol-bestfor">Best for</label>
+                  <textarea
+                    id="sol-bestfor"
+                    rows={2}
+                    value={current.best_for ?? ""}
+                    onChange={(e) => field("best_for", e.target.value)}
+                    placeholder="The kind of business this suits, in one sentence."
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="sol-pricing">Pricing note</label>
+                  <input
+                    id="sol-pricing"
+                    value={current.pricing_note ?? ""}
+                    onChange={(e) => field("pricing_note", e.target.value)}
+                    placeholder="Free plan available; paid from $X/month"
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="sol-domain">Website domain</label>
+                  <input
+                    id="sol-domain"
+                    value={current.domain ?? ""}
+                    onChange={(e) => field("domain", e.target.value)}
+                    placeholder="zapier.com"
+                  />
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
+                    No https://. Used to find a logo when none is uploaded.
+                  </span>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="sol-brand">Brand colour</label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <input
+                      id="sol-brand"
+                      value={current.brand_color ?? ""}
+                      onChange={(e) => field("brand_color", e.target.value)}
+                      placeholder="#FF4F00"
+                      style={{ flex: 1 }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 8,
+                        border: "1px solid var(--line)",
+                        background: current.brand_color || "transparent",
+                        flexShrink: 0,
+                      }}
+                    />
+                  </div>
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
+                    Tints the tool&apos;s page header and its fallback monogram.
+                  </span>
+                </div>
+              </div>
+            </details>
 
             <CardPreview draft={current} />
 

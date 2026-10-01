@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { getSolutions } from "@/lib/content";
 
 export const revalidate = 3600;
@@ -28,26 +30,37 @@ export default async function SolutionsPage() {
             <div className="grid">
               {solutions.map((s) => (
                 <article key={s.id} className="card">
-                  <div className="icon" aria-hidden="true">
-                    {s.logo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.logo_url} alt="" />
-                    ) : (
-                      s.name.charAt(0)
-                    )}
+                  <div className="card-head">
+                    <BrandMark
+                      name={s.name}
+                      logoUrl={s.logo_url}
+                      domain={s.domain}
+                      brandColor={s.brand_color}
+                    />
+                    <h3>{s.name}</h3>
                   </div>
-                  <h3>{s.name}</h3>
-                  <p>{s.blurb}</p>
-                  {s.cta_url && (
-                    <a
-                      className="btn"
-                      href={s.cta_url}
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                    >
-                      {s.cta_label} <span className="arrow">&rarr;</span>
-                    </a>
-                  )}
+
+                  <p>{s.tagline || s.blurb}</p>
+
+                  {/* Two distinct actions rather than one wrapping link:
+                      signing up is the conversion, reading more is the
+                      considered path, and a link inside a link is both
+                      invalid markup and ambiguous to click. */}
+                  <div className="card-actions">
+                    {s.cta_url && (
+                      <a
+                        className="btn"
+                        href={s.cta_url}
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
+                      >
+                        {s.cta_label}
+                      </a>
+                    )}
+                    <Link className="card-explore" href={`/solutions/${s.slug}`}>
+                      Explore &rarr;
+                    </Link>
+                  </div>
                 </article>
               ))}
             </div>

@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { supabase } from "./supabase";
 
+export type SolutionFeature = { title: string; body: string };
+
 export type Solution = {
   id: string;
   slug: string;
@@ -12,6 +14,15 @@ export type Solution = {
   category: string | null;
   sort_order: number;
   featured: boolean;
+  // Detail-page fields. All optional: a tool with none of them still
+  // renders a correct card and a thin but valid detail page.
+  tagline: string | null;
+  overview: string | null;
+  features: SolutionFeature[];
+  best_for: string | null;
+  pricing_note: string | null;
+  domain: string | null;
+  brand_color: string | null;
 };
 
 export type Guide = {
@@ -31,7 +42,7 @@ export type Guide = {
 };
 
 const SOLUTION_FIELDS =
-  "id, slug, name, blurb, cta_label, cta_url, logo_url, category, sort_order, featured";
+  "id, slug, name, blurb, cta_label, cta_url, logo_url, category, sort_order, featured, tagline, overview, features, best_for, pricing_note, domain, brand_color";
 
 const GUIDE_FIELDS =
   "id, slug, title, excerpt, eyebrow, hero_image_url, body_markdown, status, published_at, seo_title, seo_description, og_image_url, author";
@@ -56,6 +67,23 @@ export const getSolutions = cache(async (): Promise<Solution[]> => {
   }
   return (data ?? []) as Solution[];
 });
+
+export const getSolution = cache(
+  async (slug: string): Promise<Solution | null> => {
+    const { data, error } = await supabase
+      .from("site_solutions")
+      .select(SOLUTION_FIELDS)
+      .eq("slug", slug)
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (error) {
+      console.error(`getSolution(${slug}) failed:`, error.message);
+      return null;
+    }
+    return (data as Solution) ?? null;
+  }
+);
 
 export const getGuides = cache(async (): Promise<Guide[]> => {
   const { data, error } = await supabase

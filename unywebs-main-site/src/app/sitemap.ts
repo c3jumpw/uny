@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { getGuides, siteUrl } from "@/lib/content";
+import { getGuides, getSolutions, siteUrl } from "@/lib/content";
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const guides = await getGuides();
+  const [guides, solutions] = await Promise.all([getGuides(), getSolutions()]);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, changeFrequency: "weekly", priority: 1 },
@@ -21,5 +21,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...guidePages];
+  const toolPages: MetadataRoute.Sitemap = solutions.map((s) => ({
+    url: `${base}/solutions/${s.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...toolPages, ...guidePages];
 }

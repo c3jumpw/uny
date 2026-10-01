@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { getSolutions } from "@/lib/content";
 
 // Rebuilt on publish via /api/revalidate; the hourly figure is only a
@@ -70,17 +71,17 @@ export default async function HomePage() {
             <div className="grid">
               {featured.map((s) => (
                 <article key={s.id} className="card">
-                  <div className="icon" aria-hidden="true">
-                    {s.logo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.logo_url} alt="" />
-                    ) : (
-                      s.name.charAt(0)
-                    )}
+                  <div className="card-head">
+                    <BrandMark
+                      name={s.name}
+                      logoUrl={s.logo_url}
+                      domain={s.domain}
+                      brandColor={s.brand_color}
+                    />
+                    <h3>{s.name}</h3>
                   </div>
-                  <h3>{s.name}</h3>
-                  <p>{s.blurb}</p>
-                  <Link href="/solutions" className="btn">
+                  <p>{s.tagline || s.blurb}</p>
+                  <Link href={`/solutions/${s.slug}`} className="btn">
                     Explore
                   </Link>
                 </article>

@@ -13,6 +13,12 @@ import {
 
 const LIST_PATHS = ["/", "/solutions"];
 
+// A solution also owns its own detail page, so edits have to refresh
+// that too, not just the listings it appears on.
+function pathsFor(slug?: string | null) {
+  return slug ? [...LIST_PATHS, `/solutions/${slug}`] : LIST_PATHS;
+}
+
 type Payload = Record<string, unknown>;
 
 function str(v: unknown, max = 2000): string | null {
@@ -59,6 +65,13 @@ export async function POST(req: NextRequest) {
       cta_url: str(body.cta_url, 1000),
       logo_url: str(body.logo_url, 1000),
       category: str(body.category, 80),
+      tagline: str(body.tagline, 200),
+      overview: str(body.overview, 2000),
+      best_for: str(body.best_for, 500),
+      pricing_note: str(body.pricing_note, 300),
+      domain: str(body.domain, 200),
+      brand_color: str(body.brand_color, 20),
+      features: Array.isArray(body.features) ? body.features : [],
       status: body.status === "published" ? "published" : "draft",
       sort_order: nextOrder,
     })
@@ -81,7 +94,7 @@ export async function POST(req: NextRequest) {
     metadata: { slug, status: data.status },
   });
 
-  const rev = await revalidateSite(LIST_PATHS);
+  const rev = await revalidateSite(pathsFor(data.slug));
   return NextResponse.json({ ok: true, solution: data, revalidated: rev });
 }
 
@@ -123,6 +136,24 @@ export async function PATCH(req: NextRequest) {
   if ("logo_url" in body) patch.logo_url = str(body.logo_url, 1000);
   if ("category" in body) patch.category = str(body.category, 80);
   if ("featured" in body) patch.featured = body.featured === true;
+  if ("tagline" in body) patch.tagline = str(body.tagline, 200);
+  if ("overview" in body) patch.overview = str(body.overview, 2000);
+  if ("best_for" in body) patch.best_for = str(body.best_for, 500);
+  if ("pricing_note" in body) patch.pricing_note = str(body.pricing_note, 300);
+  if ("domain" in body) patch.domain = str(body.domain, 200);
+  if ("brand_color" in body) patch.brand_color = str(body.brand_color, 20);
+  if ("features" in body) {
+    // Drop blank rows so an editor who clears a feature removes it
+    // rather than leaving an empty block on the live page.
+    patch.features = Array.isArray(body.features)
+      ? (body.features as { title?: unknown; body?: unknown }[])
+          .map((f) => ({
+            title: typeof f?.title === "string" ? f.title.trim().slice(0, 80) : "",
+            body: typeof f?.body === "string" ? f.body.trim().slice(0, 400) : "",
+          }))
+          .filter((f) => f.title || f.body)
+      : [];
+  }
   if ("status" in body) {
     const s = body.status;
     if (s === "draft" || s === "published" || s === "archived") patch.status = s;
@@ -157,7 +188,7 @@ export async function PATCH(req: NextRequest) {
     });
   }
 
-  const rev = await revalidateSite(LIST_PATHS);
+  const rev = await revalidateSite(pathsFor(data.slug));
   return NextResponse.json({ ok: true, solution: data, revalidated: rev });
 }
 
@@ -196,6 +227,6 @@ export async function DELETE(req: NextRequest) {
     metadata: { slug: data.slug },
   });
 
-  const rev = await revalidateSite(LIST_PATHS);
+  const rev = await revalidateSite(pathsFor(data.slug));
   return NextResponse.json({ ok: true, revalidated: rev });
 }

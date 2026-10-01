@@ -701,3 +701,179 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   Tool detail page — /solutions/<slug>
+   The brief here was lean and spacious: few words,
+   large type, generous air between ideas.
+   ============================================ */
+
+.tool-hero {
+  padding-block: 56px 64px;
+  background: linear-gradient(180deg, var(--brand-tint, var(--bg-tint)), transparent);
+  border-bottom: 1px solid var(--brand-edge, var(--border));
+}
+
+.tool-crumb {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0 0 28px;
+  letter-spacing: 0.02em;
+}
+.tool-crumb a { color: var(--muted); }
+.tool-crumb a:hover { color: var(--brand); }
+
+.tool-lockup {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.tool-lockup h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-wrap: balance;
+}
+.tool-cat {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tool-tagline {
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  line-height: 1.35;
+  color: var(--text);
+  max-width: 26ch;
+  margin: 0 0 32px;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.tool-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.tool-site {
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+}
+.tool-site:hover { color: var(--brand); border-color: var(--brand); text-decoration: none; }
+
+.tool-narrow { max-width: 760px; }
+
+.tool-overview {
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  line-height: 1.65;
+  color: #26313f;
+  margin: 0;
+}
+
+/* Capability grid — two up, with real space between items. */
+.tool-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 52px 56px;
+  margin-top: 36px;
+}
+@media (max-width: 760px) {
+  .tool-features { grid-template-columns: 1fr; gap: 40px; }
+}
+.tool-feature { min-width: 0; }
+.tool-feature-rule {
+  display: block;
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 18px;
+}
+.tool-feature h2 {
+  font-size: 1.2rem;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+.tool-feature p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 42ch;
+}
+
+.tool-bestfor {
+  font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+  line-height: 1.45;
+  margin: 20px 0 0;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.tool-cta {
+  background: var(--brand-tint, var(--bg-tint));
+  border: 1px solid var(--brand-edge, var(--border));
+  border-radius: 18px;
+  padding: 56px 40px;
+  text-align: center;
+}
+.tool-cta h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.tool-pricing {
+  color: var(--muted);
+  font-size: 1.02rem;
+  margin: 0 0 28px;
+}
+.tool-pricing-fine {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 24px auto 0;
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+/* Compact cards in the "more tools" rail. */
+.tool-mini { text-decoration: none; }
+.tool-mini:hover { text-decoration: none; }
+.tool-mini h3 { margin: 16px 0 8px; font-size: 1.05rem; }
+.tool-mini p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+
+/* The index card becomes a link to the tool's page, so it needs the
+   same hover affordance without the underline a bare <a> would add. */
+.card-link { text-decoration: none; color: inherit; }
+.card-link:hover { text-decoration: none; color: inherit; }
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.card-head h3 { margin: 0; font-size: 1.12rem; }
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.card-explore {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand);
+}

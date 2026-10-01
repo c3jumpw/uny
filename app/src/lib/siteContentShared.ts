@@ -5,6 +5,8 @@
 // component drags server-only code into the browser bundle. Anything
 // both sides need lives here instead.
 
+export type SolutionFeature = { title: string; body: string };
+
 export type SolutionRow = {
   id: string;
   slug: string;
@@ -19,6 +21,14 @@ export type SolutionRow = {
   featured: boolean;
   created_at: string;
   updated_at: string;
+  // Detail-page fields, surfaced at /solutions/<slug> on the site.
+  tagline: string | null;
+  overview: string | null;
+  features: SolutionFeature[];
+  best_for: string | null;
+  pricing_note: string | null;
+  domain: string | null;
+  brand_color: string | null;
 };
 
 export type GuideRow = {
