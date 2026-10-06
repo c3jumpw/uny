@@ -24,11 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: s.name,
     description,
     alternates: { canonical: `${siteUrl()}/solutions/${s.slug}` },
+    // A page-level openGraph replaces the layout's whole openGraph object
+    // rather than merging into it, so the default share image has to be
+    // restated here or tool pages unfurl with no picture.
     openGraph: {
       title: `${s.name} | Unywebs`,
       description,
       type: "website",
       url: `${siteUrl()}/solutions/${s.slug}`,
+      images: [{ url: "/media/site-logo.png", width: 1227, height: 681, alt: "Unywebs" }],
     },
   };
 }
