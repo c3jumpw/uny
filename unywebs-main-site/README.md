@@ -1,7 +1,7 @@
 # unywebs.com — marketing site
 
 Next.js 16 (App Router). Content lives in Supabase and is edited from the
-admin at `/admin/solutions` and `/admin/guides` in the `app/` project.
+Unywebs admin at admin.unywebs.com (`unywebs-admin/` in this repo).
 
 ## How content reaches the page
 
@@ -15,7 +15,7 @@ calls `POST /api/revalidate` on this site, which runs `revalidatePath()`
 for the affected pages, so a change is live in roughly two seconds.
 
 ```
-admin (app/)  ──PATCH──>  Supabase  ──reads──>  this site
+admin.unywebs.com  ──writes──>  Supabase  ──reads──>  this site
      │                                              ▲
      └──POST /api/revalidate (shared secret) ───────┘
 ```
@@ -73,7 +73,7 @@ deployed from `main`. Pushing to `main` redeploys.
 
 1. Vercel → project → Settings → Domains → add `unywebs.com`.
 2. Point DNS at the records Vercel shows.
-3. Update `MARKETING_SITE_URL` on the **`unybase-app-v2`** project to
+3. Update `MARKETING_SITE_URL` on the **`unywebs-admin`** project to
    `https://unywebs.com`, so the admin's "View live" links and its
    revalidation calls target the real domain.
 

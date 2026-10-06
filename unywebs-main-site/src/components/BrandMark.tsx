@@ -73,13 +73,15 @@ export function BrandMark({
   if (tier === 0 && logoUrl) {
     return (
       <span style={{ ...box, background: "#fff", border: "1px solid var(--border)" }}>
+        {/* Inset so a mark drawn edge to edge, like most icon files, does
+            not touch the tile's border. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={logoUrl}
           alt={`${name} logo`}
           width={size}
           height={size}
-          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          style={{ width: "78%", height: "78%", objectFit: "contain" }}
           onError={() => setTier(domain ? 1 : 2)}
         />
       </span>

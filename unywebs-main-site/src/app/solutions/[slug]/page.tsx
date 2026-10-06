@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `${siteUrl()}/solutions/${s.slug}` },
     openGraph: {
-      title: `${s.name} — Unywebs`,
+      title: `${s.name} | Unywebs`,
       description,
       type: "website",
       url: `${siteUrl()}/solutions/${s.slug}`,
@@ -107,7 +107,7 @@ export default async function SolutionPage({ params }: Props) {
         </div>
       </section>
 
-      {/* Overview — one generous block, set large with room to breathe. */}
+      {/* Overview: one generous block, set large with room to breathe. */}
       {(solution.overview || solution.blurb) && (
         <section className="section">
           <div className="container tool-narrow">
@@ -138,7 +138,7 @@ export default async function SolutionPage({ params }: Props) {
         </section>
       )}
 
-      {/* Who it suits — deliberately one line, given the whole width. */}
+      {/* Who it suits: deliberately one line, given the whole width. */}
       {solution.best_for && (
         <section className="section">
           <div className="container tool-narrow">

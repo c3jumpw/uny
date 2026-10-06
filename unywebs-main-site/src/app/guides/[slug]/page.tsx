@@ -116,7 +116,7 @@ export default async function GuidePage({ params, searchParams }: Props) {
     <>
       {isPreview && (
         <div className="preview-banner">
-          Draft preview — this guide is not published and is not visible to
+          Draft preview. This guide is not published and is not visible to
           anyone else.
         </div>
       )}

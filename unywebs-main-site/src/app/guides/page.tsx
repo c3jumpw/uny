@@ -6,7 +6,7 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Guides & How-To's",
   description:
-    "Practical, plain-language walkthroughs to get your business online — domain and hosting registration, professional company email, and choosing a backend.",
+    "Practical, plain-language walkthroughs to get your business online, covering domain and hosting registration, professional company email and choosing a backend.",
 };
 
 export default async function GuidesPage() {

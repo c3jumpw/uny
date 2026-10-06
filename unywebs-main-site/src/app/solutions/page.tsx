@@ -7,7 +7,7 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Solutions",
   description:
-    "The best businesses use the best tools. Browse the Unywebs marketplace — hosting, business phone, automation, project management, AI video, and a managed backend.",
+    "The best businesses use the best tools. Browse the Unywebs marketplace for hosting, a business phone, automation, project management, AI video and a managed backend.",
 };
 
 export default async function SolutionsPage() {

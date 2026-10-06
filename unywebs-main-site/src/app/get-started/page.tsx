@@ -6,12 +6,26 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Get Started",
   description:
-    "A few practical next steps to get your business online with Unywebs — register your site, set up official email, and choose a backend.",
+    "A few practical next steps to get your business online with Unywebs: register your site, set up official email and choose a backend.",
 };
 
 export default async function GetStartedPage() {
   const guides = await getGuides();
-  const steps = guides.slice(0, 3);
+
+  // Get Started is a journey, not a list: a business needs a website
+  // before an email address on its domain, and both before a backend for
+  // an app. Known guides take that order; anything published later
+  // follows in its normal sort order.
+  const JOURNEY = [
+    "wordpress-site-registration-with-unywebs",
+    "registering-your-official-company-emails",
+    "your-businesss-app-needs-five-things",
+  ];
+  const rank = (slug: string) => {
+    const i = JOURNEY.indexOf(slug);
+    return i === -1 ? JOURNEY.length : i;
+  };
+  const steps = [...guides].sort((a, b) => rank(a.slug) - rank(b.slug)).slice(0, 3);
 
   return (
     <>

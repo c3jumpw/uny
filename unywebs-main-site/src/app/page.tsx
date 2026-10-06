@@ -25,7 +25,7 @@ export default async function HomePage() {
             <h1>Get the best tools for your business</h1>
             <p className="lead">
               A curated marketplace of software and services that help
-              entrepreneurs launch, run, and scale — without the guesswork.
+              entrepreneurs launch, run and scale without the guesswork.
             </p>
             <Link href="/solutions" className="btn">
               View Our Tools <span className="arrow">&rarr;</span>
