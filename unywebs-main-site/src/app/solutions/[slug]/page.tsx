@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { BrandMark } from "@/components/BrandMark";
-import { getSolution, getSolutions, siteUrl } from "@/lib/content";
+import { getRedirectTarget, getSolution, getSolutions, siteUrl } from "@/lib/content";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -40,7 +40,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SolutionPage({ params }: Props) {
   const { slug } = await params;
   const solution = await getSolution(slug);
-  if (!solution) notFound();
+  if (!solution) {
+    // A tool renamed after launch (OpenPhone to Quo, say) keeps its old
+    // address working: links and search results move on to the new page.
+    const target = await getRedirectTarget("solution", slug);
+    if (target) permanentRedirect(`/solutions/${target}`);
+    notFound();
+  }
 
   const all = await getSolutions();
   const others = all.filter((s) => s.slug !== solution.slug).slice(0, 3);

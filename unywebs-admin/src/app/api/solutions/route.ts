@@ -17,7 +17,7 @@ const LIST_PATHS = ["/", "/solutions"];
 // A solution also owns its own detail page, so edits have to refresh
 // that too, not just the listings it appears on.
 function pathsFor(slug?: string | null) {
-  return slug ? [...LIST_PATHS, `/solutions/${slug}`] : LIST_PATHS;
+  return slug ? [...LIST_PATHS, `/solutions/${slug}`] : [...LIST_PATHS];
 }
 
 type Payload = Record<string, unknown>;
@@ -164,6 +164,18 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
+  // Note the slug before the change, so a renamed tool's old address can
+  // keep working (OpenPhone becoming Quo, say).
+  let previousSlug: string | null = null;
+  if ("slug" in patch) {
+    const { data: before } = await admin
+      .from("site_solutions")
+      .select("slug")
+      .eq("id", id)
+      .single();
+    previousSlug = before?.slug ?? null;
+  }
+
   const { data, error } = await admin
     .from("site_solutions")
     .update(patch)
@@ -179,6 +191,34 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
+  const renamedFrom =
+    previousSlug && data.slug && previousSlug !== data.slug ? previousSlug : null;
+  if (renamedFrom) {
+    await admin.from("site_redirects").upsert(
+      { kind: "solution", from_slug: renamedFrom, to_slug: data.slug },
+      { onConflict: "kind,from_slug" }
+    );
+    // Keep chains of renames to one hop, and drop any redirect away from
+    // the slug now in use so the live page can't forward to itself.
+    await admin
+      .from("site_redirects")
+      .update({ to_slug: data.slug })
+      .eq("kind", "solution")
+      .eq("to_slug", renamedFrom);
+    await admin
+      .from("site_redirects")
+      .delete()
+      .eq("kind", "solution")
+      .eq("from_slug", data.slug);
+    await logEvent(auth, {
+      action: "solution_renamed",
+      target_kind: "solution",
+      target_slug: data.slug,
+      notes: data.name,
+      metadata: { from: renamedFrom, to: data.slug },
+    });
+  }
+
   if ("status" in patch) {
     await logEvent(auth, {
     action: `solution_${patch.status}`,
@@ -189,7 +229,9 @@ export async function PATCH(req: NextRequest) {
   });
   }
 
-  const rev = await revalidateSite(pathsFor(data.slug));
+  const paths = pathsFor(data.slug);
+  if (renamedFrom) paths.push(`/solutions/${renamedFrom}`);
+  const rev = await revalidateSite(paths);
   return NextResponse.json({ ok: true, solution: data, revalidated: rev });
 }
 
