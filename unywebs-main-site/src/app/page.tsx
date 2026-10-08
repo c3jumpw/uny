@@ -6,8 +6,11 @@ import { getSolutions } from "@/lib/content";
 // backstop in case a revalidation call is ever missed.
 export const revalidate = 3600;
 
+// The layout's "%s | Unywebs" template only applies to child routes, not
+// to the page that shares the layout's own segment, so a plain "Home"
+// here reached search results and link previews as just "Home".
 export const metadata = {
-  title: "Home",
+  title: { absolute: "Unywebs | Online Marketplace for the Best Business Tools" },
   description:
     "Get the best tools for your business. Unywebs is a curated marketplace of software and services that help entrepreneurs launch, run, and scale.",
 };
