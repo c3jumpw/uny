@@ -384,7 +384,7 @@ export function SolutionsAdmin({ initial, siteBase }: Props) {
                 id="sol-name"
                 value={current.name ?? ""}
                 onChange={(e) => field("name", e.target.value)}
-                placeholder="OpenPhone"
+                placeholder="Quo"
               />
             </div>
 
