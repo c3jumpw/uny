@@ -7,6 +7,8 @@ const PLANS = [
     name: "Basic",
     price: "$29.95",
     period: "/month",
+    yearly: "$299.50/yr",
+    saves: "Save $59.90",
     desc: "Single web apps and early-stage products. Standard processing and memory limits.",
   },
   {
@@ -14,6 +16,8 @@ const PLANS = [
     name: "Premium",
     price: "$49.95",
     period: "/month",
+    yearly: "$499.50/yr",
+    saves: "Save $99.90",
     desc: "Higher processing speeds and larger memory limits. Best for AI-powered and integrated workspaces that need headroom for embeddings, background jobs, and multi-service pipelines.",
   },
 ];
@@ -55,6 +59,11 @@ export default function StartPage() {
             <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
               <span style={{ fontWeight: 600 }}>{p.price}</span>
               <span style={{ color: "var(--paper-dim)", fontSize: "0.85rem" }}>{p.period}</span>
+              {/* Yearly is ten months' price, so the saving is two months. */}
+              <div style={{ color: "var(--paper-dim)", fontSize: "0.78rem", marginTop: 4 }}>
+                or {p.yearly}{" "}
+                <span style={{ color: "var(--sky)", fontWeight: 600 }}>{p.saves}</span>
+              </div>
             </div>
           </Link>
         ))}

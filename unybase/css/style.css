@@ -465,6 +465,21 @@ section { padding-top: clamp(56px, 8vw, 100px); padding-bottom: clamp(56px, 8vw,
 .plan-price .amount { font-size: 2.4rem; color: var(--paper); }
 .plan-price .cycle { color: var(--muted-2); font-size: 0.9rem; }
 
+.plan-price .plan-save {
+  align-self: center;
+  margin-left: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: var(--font-body, inherit);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--sky);
+  background: color-mix(in srgb, var(--sky) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sky) 35%, transparent);
+}
+.plan-price .plan-save[hidden] { display: none; }
+
 .plan-yearly-note {
   margin-top: 6px;
   font-size: 0.82rem;

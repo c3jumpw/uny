@@ -15,6 +15,11 @@
     return (yearly / 12).toFixed(2);
   }
 
+  /* What a year of monthly billing costs, minus the yearly price. */
+  function yearlySavings(plan) {
+    return Math.round((plan.monthly * 12 - plan.yearly) * 100) / 100;
+  }
+
   /* ---------------- Landing page pricing toggle ---------------- */
 
   function initPricingSection() {
@@ -44,14 +49,26 @@
         var noteEl = card.querySelector('[data-role="yearlynote"]');
         var chooseEl = card.querySelector('[data-role="choose"]');
 
+        var saveEl = card.querySelector('[data-role="save"]');
+        var savings = yearlySavings(plan);
+
         if (cycle === "yearly") {
           amountEl.textContent = money(monthlyEquivalent(plan.yearly));
           cycleEl.textContent = "/month";
           noteEl.textContent = money(plan.yearly) + " billed yearly";
+          if (saveEl) {
+            saveEl.textContent = savings > 0 ? "Save " + money(savings) + "/yr" : "";
+            saveEl.hidden = !(savings > 0);
+          }
         } else {
           amountEl.textContent = money(plan.monthly);
           cycleEl.textContent = "/month";
-          noteEl.textContent = "";
+          noteEl.textContent =
+            savings > 0 ? "Save " + money(savings) + " a year with yearly billing" : "";
+          if (saveEl) {
+            saveEl.textContent = "";
+            saveEl.hidden = true;
+          }
         }
 
         if (chooseEl && signupHrefs[planKey]) {
