@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import {
   CALLOUT_LABELS,
+  VIDEO_RE,
   remarkGuide,
+  videoSrc,
   type CalloutKind,
 } from "@/lib/guideMarkdown";
 import { guideIcon } from "@/lib/guideIcons";
@@ -76,6 +78,20 @@ export function Markdown({ children }: { children: string }) {
           },
           img({ node: _node, src, alt, ...props }) {
             if (!src || typeof src !== "string") return null;
+            if (VIDEO_RE.test(src)) {
+              // A guide video: native controls, nothing downloaded until
+              // the reader presses play, and inline on phones.
+              return (
+                <video
+                  className="guide-video"
+                  src={videoSrc(src)}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  aria-label={alt || undefined}
+                />
+              );
+            }
             return (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={src} alt={alt ?? ""} loading="lazy" decoding="async" {...props} />

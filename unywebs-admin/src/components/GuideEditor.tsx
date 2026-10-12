@@ -549,6 +549,13 @@ export function GuideEditor({ initial, siteBase }: Props) {
               }
             />
             <ToolButton
+              label="Video"
+              title="Plays a video file from the site's media folder, like /media/guides/quo/video.mp4"
+              onClick={() =>
+                insertAtCursor('\n![Watch: what this video shows](/media/guides/FOLDER/video.mp4 "Short caption")\n')
+              }
+            />
+            <ToolButton
               label="Button"
               title='A link shown as a button. Use "button-outline" for a lighter one'
               onClick={() => wrap("[", '](https:// "button")', "Button text")}
@@ -622,6 +629,10 @@ export function GuideEditor({ initial, siteBase }: Props) {
               <li>
                 <strong>Captions:</strong> put the caption in quotes after the image link:{" "}
                 <code>![Alt text](/media/x.webp &quot;Caption&quot;)</code>.
+              </li>
+              <li>
+                <strong>Videos:</strong> the image syntax pointing at an <code>.mp4</code> plays as a
+                video: <code>![Watch: setup](/media/guides/quo/video.mp4 &quot;Caption&quot;)</code>.
               </li>
               <li>
                 <strong>Buttons:</strong> <code>[Text](https://... &quot;button&quot;)</code>, or{" "}

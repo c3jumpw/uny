@@ -10,7 +10,7 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
-import { CALLOUT_LABELS, remarkGuide, type CalloutKind } from "@/lib/guideMarkdown";
+import { CALLOUT_LABELS, VIDEO_RE, remarkGuide, videoSrc, type CalloutKind } from "@/lib/guideMarkdown";
 import { guideIcon } from "@/lib/guideIcons";
 import { resolveAssetUrl } from "@/lib/shared";
 
@@ -61,6 +61,18 @@ export function GuidePreviewMarkdown({ body, siteBase }: { body: string; siteBas
           img({ node: _node, src, alt, ...props }) {
             const url = resolveAssetUrl(typeof src === "string" ? src : null, siteBase);
             if (!url) return null;
+            if (VIDEO_RE.test(url)) {
+              return (
+                <video
+                  className="guide-video"
+                  src={videoSrc(url)}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  aria-label={alt || undefined}
+                />
+              );
+            }
             // eslint-disable-next-line @next/next/no-img-element
             return <img src={url} alt={alt ?? ""} {...props} />;
           },

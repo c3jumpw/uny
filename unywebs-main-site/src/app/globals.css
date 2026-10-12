@@ -693,6 +693,14 @@ a:hover {
   margin: 0;
   border-radius: 14px;
 }
+.prose .guide-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  background: #0f172a;
+  box-shadow: var(--shadow-sm);
+}
 .prose figcaption {
   margin-top: 10px;
   font-size: 0.88rem;

@@ -17,6 +17,10 @@
 //   [Start free](https://... "button")     A link titled "button" (or
 //                                          "button-outline") is a button.
 //
+//   ![Watch: setup](/media/x/video.mp4 "Caption")   The same image syntax
+//                                          pointing at an .mp4, .webm or
+//                                          .mov file plays as a video.
+//
 // Numbered lists at the top level are styled as step cards in CSS.
 //
 // The same file lives in unywebs-admin/src/lib/guideMarkdown.ts so the
@@ -32,6 +36,14 @@ import type {
   Root,
 } from "mdast";
 import { visit } from "unist-util-visit";
+
+/** Image syntax pointing at one of these plays as a video instead. */
+export const VIDEO_RE = /\.(mp4|webm|mov)([?#].*)?$/i;
+
+/** Start at 0.1s so iPhones show the first frame instead of a blank box. */
+export function videoSrc(src: string): string {
+  return src.includes("#") ? src : `${src}#t=0.1`;
+}
 
 export const CALLOUT_KINDS = ["tip", "info", "note", "warning", "success"] as const;
 export type CalloutKind = (typeof CALLOUT_KINDS)[number];

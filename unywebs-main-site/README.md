@@ -69,6 +69,7 @@ can be broken up for skimming without any HTML:
 | `1. **Step.** Text` | Numbered step cards. |
 | `![Alt](/media/x.webp "Caption")` on its own line | A full-width figure with a caption. |
 | `[Start](https://... "button")` | A button (`"button-outline"` for a lighter one). |
+| `![Watch](/media/guides/quo/video.mp4 "Caption")` | A video player (`.mp4`, `.webm` or `.mov`). |
 
 A guide that links to `/solutions/<slug>` is shown on that tool's page
 as its beginner guide. The admin editor has toolbar buttons for each of
@@ -77,7 +78,8 @@ files must be kept in step with this app's).
 
 The tool guides' illustrations live in `public/media/guides/<tool>/`:
 `hero.webp` (page and cards), `share.jpg` (link previews), `one.webp`
-and `two.webp` (in the article).
+and `two.webp` (in the article), and `video.mp4` once a guide has an
+explainer video (keep each under 25 MB, GitHub's browser upload limit).
 
 ## Local development
 
