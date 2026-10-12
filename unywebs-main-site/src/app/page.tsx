@@ -90,6 +90,11 @@ export default async function HomePage() {
                 </article>
               ))}
             </div>
+            <div className="section-cta">
+              <Link href="/solutions" className="btn outline">
+                View all solutions <span className="arrow">&rarr;</span>
+              </Link>
+            </div>
           </div>
         </section>
       )}

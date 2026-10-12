@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Markdown } from "@/components/Markdown";
+import { readingMinutes } from "@/lib/guideMarkdown";
 import {
   getGuide,
   getGuides,
@@ -142,6 +143,7 @@ export default async function GuidePage({ params, searchParams }: Props) {
         <p className="meta">
           {guide.author || "Unywebs"}
           {published ? ` · ${published}` : ""}
+          {` · ${readingMinutes(guide.body_markdown)} min read`}
         </p>
 
         <Markdown>{guide.body_markdown}</Markdown>

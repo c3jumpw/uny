@@ -2,7 +2,14 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { BrandMark } from "@/components/BrandMark";
-import { getRedirectTarget, getSolution, getSolutions, siteUrl } from "@/lib/content";
+import {
+  getGuideForSolution,
+  getRedirectTarget,
+  getSolution,
+  getSolutions,
+  siteUrl,
+} from "@/lib/content";
+import { readingMinutes } from "@/lib/guideMarkdown";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -49,6 +56,7 @@ export default async function SolutionPage({ params }: Props) {
   }
 
   const all = await getSolutions();
+  const guide = await getGuideForSolution(solution.slug);
   const others = all.filter((s) => s.slug !== solution.slug).slice(0, 3);
   const brand = solution.brand_color || "#1e73be";
 
@@ -154,6 +162,28 @@ export default async function SolutionPage({ params }: Props) {
           <div className="container tool-narrow">
             <p className="eyebrow">Best for</p>
             <p className="tool-bestfor">{solution.best_for}</p>
+          </div>
+        </section>
+      )}
+
+      {/* The beginner guide for this tool, when one exists. */}
+      {guide && (
+        <section className="section section-soft">
+          <div className="container tool-narrow">
+            <p className="eyebrow">New to {solution.name}?</p>
+            <Link href={`/guides/${guide.slug}`} className="tool-guide">
+              {guide.hero_image_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={guide.hero_image_url} alt="" />
+              )}
+              <div>
+                <h3>{guide.title}</h3>
+                {guide.excerpt && <p>{guide.excerpt}</p>}
+                <p className="read">
+                  Read the guide &middot; {readingMinutes(guide.body_markdown)} min
+                </p>
+              </div>
+            </Link>
           </div>
         </section>
       )}

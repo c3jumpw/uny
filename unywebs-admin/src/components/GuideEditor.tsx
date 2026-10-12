@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { resolveAssetUrl, type GuideRow } from "@/lib/shared";
+import { GUIDE_ICONS } from "@/lib/guideIcons";
+import { GuidePreviewMarkdown } from "./GuidePreviewMarkdown";
 
 // The guide editor.
 //
@@ -529,8 +529,30 @@ export function GuideEditor({ initial, siteBase }: Props) {
             <ToolButton label="Link" title="Link" onClick={() => wrap("[", "](https://)", "link text")} />
             <ToolButton label="• List" title="Bullet list" onClick={() => linePrefix("- ")} />
             <ToolButton label="1. List" title="Numbered list" onClick={() => linePrefix("1. ")} />
-            <ToolButton label="Quote" title="Callout" onClick={() => linePrefix("> ")} />
+            <ToolButton label="Quote" title="Quote" onClick={() => linePrefix("> ")} />
             <ToolButton label="Code" title="Inline code" onClick={() => wrap("`")} />
+            <ToolButton
+              label="Tip box"
+              title="A coloured box with an icon. Other kinds: INFO, NOTE, WARNING, SUCCESS"
+              onClick={() => insertAtCursor("\n> [!TIP] Short title (optional)\n> Your tip in a sentence or two.\n")}
+            />
+            <ToolButton
+              label="Warning box"
+              title="A red box for mistakes to avoid"
+              onClick={() => insertAtCursor("\n> [!WARNING] Short title (optional)\n> What to avoid, and why.\n")}
+            />
+            <ToolButton
+              label="Icon list"
+              title="Every item that starts with :icon-name: becomes an icon card"
+              onClick={() =>
+                insertAtCursor("\n- :check: **First point.** One short sentence.\n- :clock: **Second point.** One short sentence.\n")
+              }
+            />
+            <ToolButton
+              label="Button"
+              title='A link shown as a button. Use "button-outline" for a lighter one'
+              onClick={() => wrap("[", '](https:// "button")', "Button text")}
+            />
             <div style={{ flex: 1 }} />
             <ToolButton
               label={uploading ? "Uploading…" : "Insert image"}
@@ -582,6 +604,44 @@ export function GuideEditor({ initial, siteBase }: Props) {
             <code>**bold**</code>, <code>## heading</code>,{" "}
             <code>[text](url)</code>.
           </p>
+          <details className="format-help">
+            <summary>Formatting help: boxes, icons, steps, captions and buttons</summary>
+            <ul>
+              <li>
+                <strong>Boxes:</strong> start a quote with <code>[!TIP]</code>,{" "}
+                <code>[!INFO]</code>, <code>[!NOTE]</code>, <code>[!WARNING]</code> or{" "}
+                <code>[!SUCCESS]</code>. Words after it on the same line become the title.
+              </li>
+              <li>
+                <strong>Icon cards:</strong> start each list item with an icon name, like{" "}
+                <code>- :phone: **Calls.** Text</code>.
+              </li>
+              <li>
+                <strong>Steps:</strong> a numbered list (<code>1.</code>) shows as numbered steps.
+              </li>
+              <li>
+                <strong>Captions:</strong> put the caption in quotes after the image link:{" "}
+                <code>![Alt text](/media/x.webp &quot;Caption&quot;)</code>.
+              </li>
+              <li>
+                <strong>Buttons:</strong> <code>[Text](https://... &quot;button&quot;)</code>, or{" "}
+                <code>&quot;button-outline&quot;</code> for a lighter one.
+              </li>
+              <li>
+                <strong>Tool link:</strong> link to a tool page, like <code>/solutions/quo</code>, and
+                that tool&apos;s page will link back to this guide.
+              </li>
+            </ul>
+            <p>
+              <strong>Icon names:</strong>{" "}
+              {Object.keys(GUIDE_ICONS).map((n, i) => (
+                <span key={n}>
+                  {i > 0 && ", "}
+                  <code>{n}</code>
+                </span>
+              ))}
+            </p>
+          </details>
         </>
       )}
 
@@ -626,21 +686,10 @@ export function GuideEditor({ initial, siteBase }: Props) {
                 {guide.excerpt}
               </p>
             )}
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                // Guide images are stored as paths on the public site, so
-                // the preview loads them from there.
-                img({ node: _node, src, alt, ...props }) {
-                  const url = resolveAssetUrl(typeof src === "string" ? src : null, siteBase);
-                  if (!url) return null;
-                  // eslint-disable-next-line @next/next/no-img-element
-                  return <img src={url} alt={alt ?? ""} {...props} />;
-                },
-              }}
-            >
-              {guide.body_markdown || "_Nothing written yet._"}
-            </ReactMarkdown>
+            <GuidePreviewMarkdown
+              body={guide.body_markdown || "_Nothing written yet._"}
+              siteBase={siteBase}
+            />
           </div>
         </div>
       )}

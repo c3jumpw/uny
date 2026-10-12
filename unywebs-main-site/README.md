@@ -57,6 +57,28 @@ Two sources, both plain URLs, both work in markdown:
 New images should go through the admin. `public/media/` exists so the
 original WordPress screenshots can be dropped in without re-uploading.
 
+## Writing guides
+
+Guides are markdown with a few extras (lib/guideMarkdown.ts), so a page
+can be broken up for skimming without any HTML:
+
+| Write this | Get this |
+|---|---|
+| `> [!TIP] Title` then `> text` | A coloured box with an icon. Kinds: TIP, INFO, NOTE, WARNING, SUCCESS. |
+| `- :phone: **Calls.** Text` on every item | A grid of icon cards. Icon names are in lib/guideIcons.tsx. |
+| `1. **Step.** Text` | Numbered step cards. |
+| `![Alt](/media/x.webp "Caption")` on its own line | A full-width figure with a caption. |
+| `[Start](https://... "button")` | A button (`"button-outline"` for a lighter one). |
+
+A guide that links to `/solutions/<slug>` is shown on that tool's page
+as its beginner guide. The admin editor has toolbar buttons for each of
+these and a preview that uses the same rules (its copy of the two lib
+files must be kept in step with this app's).
+
+The tool guides' illustrations live in `public/media/guides/<tool>/`:
+`hero.webp` (page and cards), `share.jpg` (link previews), `one.webp`
+and `two.webp` (in the article).
+
 ## Local development
 
 ```bash
@@ -69,15 +91,8 @@ npm run dev     # http://localhost:3000
 Vercel project `uny-unywebs-main-site`, root directory `unywebs-main-site`,
 deployed from `main`. Pushing to `main` redeploys.
 
-### Attaching unywebs.com
-
-1. Vercel → project → Settings → Domains → add `unywebs.com`.
-2. Point DNS at the records Vercel shows.
-3. Update `MARKETING_SITE_URL` on the **`unywebs-admin`** project to
-   `https://unywebs.com`, so the admin's "View live" links and its
-   revalidation calls target the real domain.
-
-`NEXT_PUBLIC_SITE_URL` is already set to `https://unywebs.com`.
+Live at unywebs.com (DNS at GoDaddy: `@` A record to Vercel, `www`
+CNAME to Vercel and redirected to the bare domain).
 
 ## License
 

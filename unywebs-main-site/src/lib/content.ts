@@ -115,6 +115,18 @@ export const getGuide = cache(async (slug: string): Promise<Guide | null> => {
   return (data as Guide) ?? null;
 });
 
+// The beginner guide for a tool is whichever published guide links to
+// that tool's page. No extra field to keep in sync: write a guide that
+// links to /solutions/quo and the Quo page links back to it.
+export const getGuideForSolution = cache(
+  async (slug: string): Promise<Guide | null> => {
+    const escaped = slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const linksHere = new RegExp(`\\]\\(/solutions/${escaped}(?=[\\s)"])`);
+    const guides = await getGuides();
+    return guides.find((g) => linksHere.test(g.body_markdown)) ?? null;
+  }
+);
+
 // Draft preview.
 //
 // Goes through a security-definer function rather than a service-role

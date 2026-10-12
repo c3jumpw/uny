@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getGuides } from "@/lib/content";
+import { readingMinutes } from "@/lib/guideMarkdown";
 
 export const revalidate = 3600;
 
 export const metadata = {
   title: "Guides & How-To's",
   description:
-    "Practical, plain-language walkthroughs to get your business online, covering domain and hosting registration, professional company email and choosing a backend.",
+    "Plain-language walkthroughs to get your business online and set up the tools that run it: websites, company email, business phone, funnels, projects, automation, chat and video.",
 };
 
 export default async function GuidesPage() {
@@ -16,7 +17,7 @@ export default async function GuidesPage() {
     <>
       <div className="page-header">
         <h1>Guides &amp; How-To&apos;s</h1>
-        <p>Practical, plain-language walkthroughs to get your business online.</p>
+        <p>Plain-language walkthroughs for getting online and setting up the tools that run your business.</p>
       </div>
 
       <section className="section">
@@ -38,10 +39,14 @@ export default async function GuidesPage() {
                     )}
                   </Link>
                   <div className="guide-body">
+                    {g.eyebrow && <p className="guide-label">{g.eyebrow}</p>}
                     <h3>
                       <Link href={`/guides/${g.slug}`}>{g.title}</Link>
                     </h3>
                     {g.excerpt && <p>{g.excerpt}</p>}
+                    <p className="guide-time">
+                      {readingMinutes(g.body_markdown)} min read
+                    </p>
                   </div>
                 </article>
               ))}

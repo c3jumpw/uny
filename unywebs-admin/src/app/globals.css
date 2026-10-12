@@ -322,3 +322,533 @@ img { max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* ---------- Guide preview ----------
+   The live site's article styles (unywebs-main-site/src/app/globals.css,
+   .prose and the guide building blocks), scoped to the editor's preview
+   so a guide looks the same here as on unywebs.com. */
+.guide-preview {
+  --brand: #1e73be;
+  --brand-dark: #155a94;
+  --accent: #f7a600;
+  --text: #0f172a;
+  --muted: #5b6b7f;
+  --bg-soft: #f4f7fb;
+  --bg-tint: #eaf2fb;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  line-height: 1.65;
+}
+.guide-preview .gp-prose a { color: var(--brand); }
+.guide-preview .gp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 12px 6px 0;
+  padding: 12px 22px;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.guide-preview .gp-btn-outline {
+  background: #fff;
+  color: var(--brand);
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.format-help {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+}
+.format-help summary { cursor: pointer; color: var(--sky); font-weight: 600; }
+.format-help ul { margin: 10px 0; padding-left: 18px; }
+.format-help li { margin-bottom: 6px; }
+.format-help code { font-size: 0.76rem; }
+
+.guide-preview .gp-prose {
+  font-size: 1.04rem;
+}
+.guide-preview .gp-prose h2 {
+  font-size: 1.6rem;
+  margin: 44px 0 14px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.guide-preview .gp-prose h3 {
+  font-size: 1.25rem;
+  margin: 34px 0 12px;
+}
+.guide-preview .gp-prose h4 {
+  font-size: 1.08rem;
+  margin: 26px 0 10px;
+}
+.guide-preview .gp-prose p {
+  margin: 0 0 18px;
+  color: #26313f;
+}
+.guide-preview .gp-prose ul,
+.guide-preview .gp-prose ol {
+  padding-left: 24px;
+  margin: 0 0 18px;
+  color: #26313f;
+}
+.guide-preview .gp-prose li {
+  margin-bottom: 8px;
+}
+.guide-preview .gp-prose li > ul,
+.guide-preview .gp-prose li > ol {
+  margin-top: 8px;
+}
+.guide-preview .gp-prose img {
+  border-radius: 10px;
+  margin: 24px 0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.guide-preview .gp-prose blockquote {
+  background: var(--bg-soft);
+  border-left: 4px solid var(--brand);
+  padding: 16px 22px;
+  border-radius: 6px;
+  margin: 24px 0;
+  color: #26313f;
+}
+.guide-preview .gp-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+.guide-preview .gp-prose code {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: break-word;
+}
+.guide-preview .gp-prose pre {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 0 0 18px;
+}
+.guide-preview .gp-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.guide-preview .gp-prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+.guide-preview .gp-prose a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.guide-preview .gp-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 18px;
+}
+.guide-preview .gp-prose th,
+.guide-preview .gp-prose td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.guide-preview .gp-prose th {
+  background: var(--bg-soft);
+}
+.guide-preview .table-scroll {
+  overflow-x: auto;
+  margin: 0 0 18px;
+}
+
+/* ---------- Guide building blocks ----------
+   Drawn from the conventions in lib/guideMarkdown.ts. The aim is a page
+   a busy owner can skim on a phone: short blocks, clear landmarks, and
+   something visual every screen or so. */
+
+.guide-preview .gp-prose h2 {
+  position: relative;
+  padding-top: 18px;
+}
+.guide-preview .gp-prose h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+/* Figures: full width, rounded, with an optional caption. */
+.guide-preview .gp-prose figure {
+  margin: 32px 0;
+}
+.guide-preview .gp-prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 14px;
+}
+.guide-preview .gp-prose figcaption {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-style: normal;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Callouts. */
+.guide-preview .callout {
+  --c-bg: var(--bg-soft);
+  --c-line: var(--border);
+  --c-ink: var(--brand-dark);
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  padding: 18px 20px 4px;
+  margin: 28px 0;
+}
+.guide-preview .callout-tip { --c-bg: #fff8ea; --c-line: #f6dca2; --c-ink: #8a5a00; }
+.guide-preview .callout-info { --c-bg: var(--bg-tint); --c-line: #cfe0f3; --c-ink: var(--brand-dark); }
+.guide-preview .callout-note { --c-bg: var(--bg-soft); --c-line: var(--border); --c-ink: #334155; }
+.guide-preview .callout-warning { --c-bg: #fdf0ef; --c-line: #f2c9c5; --c-ink: #a1261d; }
+.guide-preview .callout-success { --c-bg: #ecf8f1; --c-line: #bfe6cf; --c-ink: #166240; }
+.guide-preview .gp-prose .callout-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-ink);
+}
+.guide-preview .callout-title svg { flex-shrink: 0; }
+.guide-preview .callout-body > :last-child { margin-bottom: 14px; }
+.guide-preview .gp-prose .callout-body p,
+.guide-preview .gp-prose .callout-body li { color: #26313f; }
+.guide-preview .gp-prose .callout-body ul { margin-bottom: 14px; }
+
+/* Icon lists: a grid of small cards, two up when there is room. */
+.guide-preview .gp-prose ul.icon-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.guide-preview .gp-prose ul.icon-list > li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.guide-preview .gp-prose .callout ul.icon-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 6px 0 16px;
+}
+.guide-preview .gp-prose .icon-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  min-width: 0;
+}
+.guide-preview .gp-prose .callout .icon-item {
+  padding: 0;
+  background: none;
+  border: none;
+}
+.guide-preview .icon-bubble {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-tint);
+  color: var(--brand);
+}
+.guide-preview .callout .icon-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--c-ink);
+}
+.guide-preview .callout .icon-bubble svg { width: 17px; height: 17px; }
+.guide-preview .icon-item-body { min-width: 0; padding-top: 2px; }
+.guide-preview .icon-item-body > :last-child { margin-bottom: 0; }
+.guide-preview .gp-prose .icon-item-body p { margin: 0 0 6px; }
+.guide-preview .gp-prose .icon-item-body strong { color: var(--text); }
+
+/* Numbered lists at the top level are steps: a numbered badge with a
+   thin rail joining one step to the next. */
+.guide-preview .gp-prose > ol {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 24px 0 28px;
+}
+.guide-preview .gp-prose > ol > li {
+  counter-increment: step;
+  position: relative;
+  padding: 2px 0 20px 54px;
+  margin: 0;
+  min-height: 36px;
+}
+.guide-preview .gp-prose > ol > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.guide-preview .gp-prose > ol > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 40px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--border);
+}
+.guide-preview .gp-prose > ol > li > p { margin-bottom: 8px; }
+
+
+/* Guide meta and the guide card label. */
+.guide-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin: 0 0 8px;
+}
+.guide-time {
+  margin-top: auto;
+  padding-top: 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Tool page: link through to the matching beginner guide. */
+.tool-guide {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tool-guide:hover { transform: translateY(-2px); box-shadow: var(--shadow); text-decoration: none; }
+.tool-guide img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+.tool-guide h3 { margin: 4px 0 6px; font-size: 1.15rem; color: var(--text); }
+.tool-guide p { margin: 0; color: var(--muted); font-size: 0.94rem; }
+.tool-guide .read { margin-top: 10px; color: var(--brand); font-weight: 600; font-size: 0.92rem; }
+@media (max-width: 620px) {
+  .tool-guide { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* ---------- Guide building blocks ----------
+   Drawn from the conventions in lib/guideMarkdown.ts. The aim is a page
+   a busy owner can skim on a phone: short blocks, clear landmarks, and
+   something visual every screen or so. */
+
+.guide-preview .gp-prose h2 {
+  position: relative;
+  padding-top: 18px;
+}
+.guide-preview .gp-prose h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+/* Figures: full width, rounded, with an optional caption. */
+.guide-preview .gp-prose figure {
+  margin: 32px 0;
+}
+.guide-preview .gp-prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 14px;
+}
+.guide-preview .gp-prose figcaption {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-style: normal;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Callouts. */
+.guide-preview .callout {
+  --c-bg: var(--bg-soft);
+  --c-line: var(--border);
+  --c-ink: var(--brand-dark);
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  padding: 18px 20px 4px;
+  margin: 28px 0;
+}
+.guide-preview .callout-tip { --c-bg: #fff8ea; --c-line: #f6dca2; --c-ink: #8a5a00; }
+.guide-preview .callout-info { --c-bg: var(--bg-tint); --c-line: #cfe0f3; --c-ink: var(--brand-dark); }
+.guide-preview .callout-note { --c-bg: var(--bg-soft); --c-line: var(--border); --c-ink: #334155; }
+.guide-preview .callout-warning { --c-bg: #fdf0ef; --c-line: #f2c9c5; --c-ink: #a1261d; }
+.guide-preview .callout-success { --c-bg: #ecf8f1; --c-line: #bfe6cf; --c-ink: #166240; }
+.guide-preview .gp-prose .callout-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-ink);
+}
+.guide-preview .callout-title svg { flex-shrink: 0; }
+.guide-preview .callout-body > :last-child { margin-bottom: 14px; }
+.guide-preview .gp-prose .callout-body p,
+.guide-preview .gp-prose .callout-body li { color: #26313f; }
+.guide-preview .gp-prose .callout-body ul { margin-bottom: 14px; }
+
+/* Icon lists: a grid of small cards, two up when there is room. */
+.guide-preview .gp-prose ul.icon-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.guide-preview .gp-prose ul.icon-list > li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.guide-preview .gp-prose .callout ul.icon-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 6px 0 16px;
+}
+.guide-preview .gp-prose .icon-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  min-width: 0;
+}
+.guide-preview .gp-prose .callout .icon-item {
+  padding: 0;
+  background: none;
+  border: none;
+}
+.guide-preview .icon-bubble {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-tint);
+  color: var(--brand);
+}
+.guide-preview .callout .icon-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--c-ink);
+}
+.guide-preview .callout .icon-bubble svg { width: 17px; height: 17px; }
+.guide-preview .icon-item-body { min-width: 0; padding-top: 2px; }
+.guide-preview .icon-item-body > :last-child { margin-bottom: 0; }
+.guide-preview .gp-prose .icon-item-body p { margin: 0 0 6px; }
+.guide-preview .gp-prose .icon-item-body strong { color: var(--text); }
+
+/* Numbered lists at the top level are steps: a numbered badge with a
+   thin rail joining one step to the next. */
+.guide-preview .gp-prose > ol {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 24px 0 28px;
+}
+.guide-preview .gp-prose > ol > li {
+  counter-increment: step;
+  position: relative;
+  padding: 2px 0 20px 54px;
+  margin: 0;
+  min-height: 36px;
+}
+.guide-preview .gp-prose > ol > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.guide-preview .gp-prose > ol > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 40px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--border);
+}
+.guide-preview .gp-prose > ol > li > p { margin-bottom: 8px; }
+
+
