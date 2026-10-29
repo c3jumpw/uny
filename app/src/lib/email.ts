@@ -100,7 +100,13 @@ export type TemplateName =
   | "grant_granted"
   | "grant_revoked"
   | "vault_shared"
-  | "domain_expiring";
+  | "domain_expiring"
+  | "finish_checkout"
+  | "payment_confirmed"
+  | "trial_granted"
+  | "trial_ending_soon"
+  | "trial_ending_client"
+  | "trial_ended_client";
 
 type Built = { subject: string; html: string };
 
@@ -130,8 +136,8 @@ export function buildTemplate(
             vars.daysAgo ? ` ${vars.daysAgo} days ago` : ""
           } but haven't chosen a plan yet, so your workspace isn't active.</p>
                  <p style="margin:0;">Picking a plan takes about a minute and activates everything straight away.</p>`,
-          ctaLabel: "Choose your plan",
-          ctaUrl: `${APP_URL}/start`,
+          ctaLabel: "Log in and choose a plan",
+          ctaUrl: `${APP_URL}/login?next=/plans`,
           footerNote:
             "Not ready yet? No problem — your account stays put and nothing expires.",
         }),
@@ -324,6 +330,122 @@ export function buildTemplate(
                  <p style="margin:0;">Sign in to view them. If you don't have a UnyBase account yet, create one with this email address and the shared credentials will be waiting.</p>`,
           ctaLabel: "Open the vault",
           ctaUrl: `${APP_URL}/dashboard/vault`,
+        }),
+      };
+
+    case "finish_checkout": {
+      const plan = vars.planName ? `the <strong style="color:#e8eef7;">${vars.planName}</strong> plan` : "a plan";
+      const final = vars.step === "3";
+      return {
+        subject: final
+          ? "Your UnyBase workspace is still waiting for you"
+          : "Finish activating your UnyBase workspace",
+        html: shell({
+          heading: final ? "Still want your workspace?" : "One step left: checkout",
+          body: `<p style="margin:0 0 12px;">You created your UnyBase account${
+            vars.daysAgo ? ` ${vars.daysAgo} day${vars.daysAgo === "1" ? "" : "s"} ago` : ""
+          } and picked ${plan}${vars.cycleLabel ? ` (${vars.cycleLabel})` : ""}, but checkout wasn't completed, so the workspace isn't active yet.</p>
+                 <ol style="margin:0 0 12px;padding-left:20px;">
+                   <li style="margin-bottom:6px;">Log in with the email and password you signed up with.</li>
+                   <li style="margin-bottom:6px;">Confirm your plan and choose monthly or yearly billing.</li>
+                   <li>Complete checkout using <strong style="color:#e8eef7;">this same email address</strong> &mdash; that's how we match the payment to your account.</li>
+                 </ol>
+                 <p style="margin:0;">Your dashboard opens as soon as the payment is confirmed.</p>`,
+          ctaLabel: "Log in and finish checkout",
+          ctaUrl: `${APP_URL}/login?next=/plans`,
+          footerNote: final
+            ? "This is the last reminder we'll send. Your account stays put if you come back later."
+            : "Already paid? Log in and press \"I've already paid\" &mdash; we'll check again straight away.",
+        }),
+      };
+    }
+
+    case "payment_confirmed":
+      return {
+        subject: "Payment confirmed — your UnyBase workspace is live",
+        html: shell({
+          heading: "You're in. Here's where to start.",
+          body: `<p style="margin:0 0 12px;">Thanks &mdash; your payment${
+            vars.planName ? ` for the <strong style="color:#e8eef7;">${vars.planName}</strong> plan` : ""
+          } is confirmed and your workspace is active.</p>
+                 <p style="margin:0 0 8px;">Three things worth doing in your first ten minutes:</p>
+                 <ol style="margin:0 0 12px;padding-left:20px;">
+                   <li style="margin-bottom:6px;"><strong style="color:#e8eef7;">Add your first credential</strong> to the vault &mdash; we start health-checking it immediately.</li>
+                   <li style="margin-bottom:6px;"><strong style="color:#e8eef7;">Add your domains</strong> so renewals and SSL expiry are tracked.</li>
+                   <li><strong style="color:#e8eef7;">Invite your developer</strong> or share specific credentials with them.</li>
+                 </ol>
+                 <p style="margin:0;">We'll email you before anything expires or stops responding.</p>`,
+          ctaLabel: "Open your dashboard",
+          ctaUrl: `${APP_URL}/dashboard`,
+        }),
+      };
+
+    case "trial_granted":
+      return {
+        subject: "You've got full access to UnyBase",
+        html: shell({
+          heading: "Your UnyBase trial is active",
+          body: `<p style="margin:0 0 12px;">We've switched on full access to your UnyBase workspace until <strong style="color:#e8eef7;">${
+            vars.endsOn ?? "the end of your trial"
+          }</strong>. There's nothing to pay and no card needed.</p>
+                 ${
+                   vars.note
+                     ? `<p style="margin:0 0 12px;padding:12px 14px;background:#131f33;border-left:3px solid #5aa9e6;border-radius:4px;color:#c8d6e8;">${vars.note}</p>`
+                     : ""
+                 }
+                 <p style="margin:0;">Log in with the email and password you signed up with. Before the trial ends we'll remind you, and you can choose a plan any time from your dashboard.</p>`,
+          ctaLabel: "Log in to your workspace",
+          ctaUrl: `${APP_URL}/login?next=/dashboard`,
+          footerNote: "Forgot your password? Use 'Forgot password?' on the login page.",
+        }),
+      };
+
+    case "trial_ending_client":
+      return {
+        subject: `Your UnyBase trial ends ${vars.whenPhrase ?? "soon"}`,
+        html: shell({
+          heading: `Your trial ends ${vars.whenPhrase ?? "soon"}`,
+          body: `<p style="margin:0 0 12px;">Your UnyBase trial runs until <strong style="color:#e8eef7;">${
+            vars.endsOn ?? "soon"
+          }</strong>.</p>
+                 <p style="margin:0 0 12px;">To keep using your dashboard after that, choose a plan and complete checkout with this email address. Everything you've added stays exactly where it is.</p>
+                 <p style="margin:0;">Need more time? Just reply to this email.</p>`,
+          ctaLabel: "Choose a plan",
+          ctaUrl: `${APP_URL}/login?next=/plans`,
+        }),
+      };
+
+    case "trial_ended_client":
+      return {
+        subject: "Your UnyBase trial has ended",
+        html: shell({
+          heading: "Your trial has ended",
+          body: `<p style="margin:0 0 12px;">Your UnyBase trial finished on <strong style="color:#e8eef7;">${
+            vars.endsOn ?? "today"
+          }</strong>. Nothing has been deleted &mdash; your credentials, domains and notes are all still there.</p>
+                 <p style="margin:0;">Choose a plan to pick up where you left off. Checkout takes about a minute.</p>`,
+          ctaLabel: "Choose a plan",
+          ctaUrl: `${APP_URL}/login?next=/plans`,
+          footerNote: "Want to talk it through first? Reply to this email.",
+        }),
+      };
+
+    case "trial_ending_soon":
+      return {
+        subject: `Trial ending: ${vars.clientEmail ?? "a prospect"} (${vars.whenPhrase ?? "soon"})`,
+        html: shell({
+          heading: "A trial is about to end",
+          body: `<p style="margin:0 0 12px;"><strong style="color:#e8eef7;">${
+            vars.clientEmail ?? "A prospect"
+          }</strong>'s trial ends ${vars.whenPhrase ?? "soon"} (${vars.endsOn ?? ""}).</p>
+                 ${
+                   vars.note
+                     ? `<p style="margin:0 0 12px;">Note: ${vars.note}</p>`
+                     : ""
+                 }
+                 <p style="margin:0;">When it ends they'll be asked to choose a plan at login. Extend it, mark it converted, or follow up from the admin dashboard.</p>`,
+          ctaLabel: "Open admin dashboard",
+          ctaUrl: `${APP_URL}/admin`,
         }),
       };
 

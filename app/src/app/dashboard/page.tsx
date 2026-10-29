@@ -1,8 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { computeStatus, signupState } from "@/lib/subscriptionStatus";
+import { computeStatus, trialState } from "@/lib/subscriptionStatus";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,9 +26,7 @@ export default async function DashboardPage() {
   const withCreated = statusRow
     ? { ...statusRow, created_at: user!.created_at }
     : null;
-  const signup = withCreated
-    ? signupState(withCreated)
-    : { incomplete: false, daysSinceSignup: null, nudgeStep: null };
+  const trial = withCreated ? trialState(withCreated) : null;
   const status = withCreated
     ? computeStatus(withCreated)
     : {
@@ -36,40 +39,9 @@ export default async function DashboardPage() {
 
   return (
     <>
-      {signup.incomplete ? (
-        <div
-          style={{
-            marginBottom: 24,
-            padding: "16px 18px",
-            borderRadius: 10,
-            background: "rgba(90,169,230,.1)",
-            border: "1px solid rgba(90,169,230,.3)",
-          }}
-        >
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-            You haven&apos;t chosen a plan yet
-          </div>
-          <p
-            style={{
-              margin: "0 0 12px",
-              color: "var(--paper-dim)",
-              fontSize: "0.9rem",
-              lineHeight: 1.6,
-            }}
-          >
-            Your account is set up
-            {signup.daysSinceSignup !== null && signup.daysSinceSignup > 0
-              ? ` (${signup.daysSinceSignup} day${
-                  signup.daysSinceSignup === 1 ? "" : "s"
-                } ago)`
-              : ""}
-            , but your workspace won&apos;t be active until you pick a plan. It takes about
-            a minute.
-          </p>
-          <Link href="/start" className="btn btn-amber" style={{ padding: "9px 18px" }}>
-            Choose your plan
-          </Link>
-        </div>
+      {welcome ? <WelcomeBanner /> : null}
+      {trial?.onTrial && trial.endsAt ? (
+        <TrialBanner endsAt={trial.endsAt} daysLeft={trial.daysLeft ?? 0} />
       ) : null}
 
       <div style={{ marginBottom: 32 }}>
@@ -183,5 +155,71 @@ export default async function DashboardPage() {
         </div>
       </div>
     </>
+  );
+}
+
+function WelcomeBanner() {
+  return (
+    <div
+      role="status"
+      style={{
+        marginBottom: 24,
+        padding: "16px 18px",
+        borderRadius: 10,
+        background: "rgba(120,180,120,.1)",
+        border: "1px solid rgba(120,180,120,.35)",
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>Payment confirmed — your workspace is live 🎉</div>
+      <p style={{ margin: "0 0 10px", color: "var(--paper-dim)", fontSize: "0.9rem", lineHeight: 1.6 }}>
+        A confirmation is on its way to your inbox. Three good first steps:
+      </p>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <Link href="/dashboard/vault" className="btn btn-amber" style={{ padding: "8px 14px" }}>
+          1. Add a credential
+        </Link>
+        <Link href="/dashboard/domains" className="btn btn-ghost" style={{ padding: "8px 14px" }}>
+          2. Add your domains
+        </Link>
+        <Link href="/dashboard/team" className="btn btn-ghost" style={{ padding: "8px 14px" }}>
+          3. Invite your developer
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function TrialBanner({ endsAt, daysLeft }: { endsAt: string; daysLeft: number }) {
+  const soon = daysLeft <= 3;
+  return (
+    <div
+      style={{
+        marginBottom: 24,
+        padding: "16px 18px",
+        borderRadius: 10,
+        background: soon ? "rgba(242,169,59,.1)" : "rgba(90,190,215,.08)",
+        border: `1px solid ${soon ? "rgba(242,169,59,.35)" : "rgba(90,190,215,.3)"}`,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 16,
+        flexWrap: "wrap",
+      }}
+    >
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+          You&apos;re on a trial until{" "}
+          {new Date(endsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+          {` (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)`}
+        </div>
+        <p style={{ margin: 0, color: "var(--paper-dim)", fontSize: "0.88rem", lineHeight: 1.6 }}>
+          Full access, nothing to pay. When it ends you&apos;ll be asked to choose a plan at login &mdash; nothing
+          you&apos;ve added is deleted.
+        </p>
+      </div>
+      <Link href="/plans" className={soon ? "btn btn-amber" : "btn btn-ghost"} style={{ padding: "9px 18px" }}>
+        Choose a plan
+      </Link>
+    </div>
   );
 }

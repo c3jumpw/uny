@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
     PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith("/invite/") ||
     pathname.startsWith("/api/webhooks/") ||
+    pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/api/cron/");
 
   if (!user && !isPublic) {

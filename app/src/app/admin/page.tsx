@@ -4,6 +4,9 @@ import { computeStatus, sortByPriority } from "@/lib/subscriptionStatus";
 import { CutoffButton } from "@/components/CutoffButton";
 import { ImportClients } from "@/components/ImportClients";
 import { ExemptButton } from "@/components/ExemptButton";
+import { TrialButton } from "@/components/TrialButton";
+import { SystemeSyncButton } from "@/components/SystemeSyncButton";
+import { systemeConfigured, SIGNUP_TAG, CUSTOMER_TAG, PAID_TAGS } from "@/lib/systeme";
 
 // Admin dashboard — phase 2.
 //
@@ -39,6 +42,24 @@ type StatusRow = {
   subscription_state: string;
   automations_active: boolean;
   cut_off_at: string | null;
+  trial_started_at?: string | null;
+  trial_ends_at?: string | null;
+  trial_note?: string | null;
+  trial_converted_at?: string | null;
+  intended_cycle?: string | null;
+  active_plan?: string | null;
+  active_cycle?: string | null;
+  systeme_signup_tagged_at?: string | null;
+  systeme_customer_tagged_at?: string | null;
+};
+type SyncRow = {
+  id: string;
+  email: string | null;
+  action: string;
+  ok: boolean;
+  status_code: number | null;
+  detail: string | null;
+  created_at: string;
 };
 type KeyRow = { user_id: string; revoked_at: string | null };
 type EventRow = {
@@ -63,7 +84,14 @@ export default async function AdminPage() {
   const role = getUserRole(user?.email);
   const isSuperAdmin = role === "super_admin";
 
-  const [{ data: usersData }, { data: statusData }, { data: keysData }, { data: eventsData }, { data: actionsData }] =
+  const [
+    { data: usersData },
+    { data: statusData },
+    { data: keysData },
+    { data: eventsData },
+    { data: actionsData },
+    { data: syncData },
+  ] =
     await Promise.all([
       supabase.rpc("list_visible_users_for_admin"),
       supabase.from("subscription_status").select("*"),
@@ -78,7 +106,15 @@ export default async function AdminPage() {
         .select("id, admin_email, target_email, action_type, notes, created_at")
         .order("created_at", { ascending: false })
         .limit(20),
+      isSuperAdmin
+        ? supabase
+            .from("systeme_sync_log")
+            .select("id, email, action, ok, status_code, detail, created_at")
+            .order("created_at", { ascending: false })
+            .limit(12)
+        : Promise.resolve({ data: [] as SyncRow[] }),
     ]);
+  const syncLog = (syncData as SyncRow[] | null) ?? [];
 
   const users = (usersData as UserRow[] | null) ?? [];
   const statusMap = new Map<string, StatusRow>();
@@ -207,6 +243,10 @@ export default async function AdminPage() {
                         (super admin account)
                       </div>
                     ) : null}
+                    <PlanLine status={row.status} />
+                    {isSuperAdmin && !row.status.billing_exempt ? (
+                      <TagLine status={row.status} />
+                    ) : null}
                   </td>
                   <td style={{ fontSize: "0.85rem", color: "var(--paper-dim)" }}>
                     {row.status.last_payment_at
@@ -245,6 +285,15 @@ export default async function AdminPage() {
                         flexWrap: "wrap",
                       }}
                     >
+                      {isSuperAdmin && !row.status.billing_exempt ? (
+                        <TrialButton
+                          targetUserId={row.user.user_id}
+                          targetEmail={row.user.email}
+                          trialEndsAt={row.status.trial_ends_at ?? null}
+                          trialConverted={Boolean(row.status.trial_converted_at)}
+                          trialNote={row.status.trial_note ?? null}
+                        />
+                      ) : null}
                       {isSuperAdmin ? (
                         <ExemptButton
                           targetUserId={row.user.user_id}
@@ -266,6 +315,8 @@ export default async function AdminPage() {
           </tbody>
         </table>
       </div>
+
+      {isSuperAdmin ? <SystemePanel log={syncLog} /> : null}
 
       <h2 style={{ margin: "0 0 12px", fontSize: "1.1rem", fontWeight: 600 }}>
         Recent admin actions
@@ -329,6 +380,8 @@ function StatusLegend() {
   const items = [
     { label: "Active", color: "#7CC084", bg: "rgba(120,180,120,.15)" },
     { label: "No plan chosen", color: "#8fb8d8", bg: "rgba(90,169,230,.14)" },
+    { label: "On trial", color: "#6ec8d8", bg: "rgba(90,190,215,.15)" },
+    { label: "Trial ended", color: "#ffb066", bg: "rgba(200,120,40,.22)" },
     { label: "Internal — no billing", color: "#b79be8", bg: "rgba(150,110,220,.15)" },
     { label: "Grace (0-3d)", color: "#ffd76a", bg: "rgba(200,170,50,.15)" },
     { label: "Warning (4-7d)", color: "#ffb066", bg: "rgba(200,120,40,.2)" },
@@ -361,6 +414,93 @@ function StatusLegend() {
           {i.label}
         </span>
       ))}
+    </div>
+  );
+}
+
+function PlanLine({ status }: { status: StatusRow }) {
+  const plan = status.active_plan || status.intended_plan;
+  const cycle = status.active_cycle || status.intended_cycle;
+  if (!plan && !status.trial_ends_at) return null;
+  const bits: string[] = [];
+  if (plan) bits.push(`${plan[0].toUpperCase()}${plan.slice(1)}${cycle ? ` · ${cycle}` : ""}${status.active_plan ? "" : " (chosen)"}`);
+  if (status.trial_ends_at && !status.trial_converted_at) {
+    bits.push(`trial to ${new Date(status.trial_ends_at).toLocaleDateString()}`);
+  }
+  if (status.trial_converted_at) bits.push("trial converted");
+  return (
+    <div style={{ fontSize: "0.72rem", color: "var(--paper-dim)", marginTop: 2 }}>{bits.join(" — ")}</div>
+  );
+}
+
+function TagLine({ status }: { status: StatusRow }) {
+  const tag = (on: boolean, label: string) => (
+    <span style={{ color: on ? "#7CC084" : "var(--muted)" }}>
+      {on ? "✓" : "○"} {label}
+    </span>
+  );
+  return (
+    <div style={{ fontSize: "0.7rem", marginTop: 2, display: "flex", gap: 8 }} title="systeme.io segment tags">
+      {tag(Boolean(status.systeme_signup_tagged_at), "signup tag")}
+      {tag(Boolean(status.systeme_customer_tagged_at), "customer tag")}
+    </div>
+  );
+}
+
+function SystemePanel({ log }: { log: SyncRow[] }) {
+  const configured = systemeConfigured();
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
+        <div>
+          <div style={{ fontWeight: 600 }}>systeme.io segments</div>
+          <div style={{ fontSize: "0.82rem", color: "var(--paper-dim)" }}>
+            {configured ? (
+              <>
+                Signups get <code>{SIGNUP_TAG}</code>; paying customers get <code>{CUSTOMER_TAG}</code> (and
+                lose the signup tag). Payment is confirmed by the webhook, or by finding{" "}
+                <code>{PAID_TAGS.join(", ")}</code> on the contact.
+              </>
+            ) : (
+              <>
+                Not connected: add <code>SYSTEME_API_KEY</code> in Vercel to start tagging. Until then, every
+                tagging attempt is logged here as skipped.
+              </>
+            )}
+          </div>
+        </div>
+        {configured ? <SystemeSyncButton /> : null}
+      </div>
+      {log.length === 0 ? (
+        <div style={{ fontSize: "0.82rem", color: "var(--muted)" }}>No sync activity yet.</div>
+      ) : (
+        <table className="tbl" style={{ fontSize: "0.78rem" }}>
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Email</th>
+              <th>Action</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {log.map((l) => (
+              <tr key={l.id}>
+                <td style={{ color: "var(--paper-dim)", whiteSpace: "nowrap" }}>{new Date(l.created_at).toLocaleString()}</td>
+                <td>{l.email ?? "—"}</td>
+                <td>
+                  <code>{l.action}</code>
+                </td>
+                <td style={{ color: l.ok ? "#7CC084" : "#ffb066" }}>
+                  {l.ok ? "ok" : "failed"}
+                  {l.status_code ? ` (${l.status_code})` : ""}
+                  {l.detail ? <span style={{ color: "var(--paper-dim)" }}> — {l.detail.slice(0, 120)}</span> : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

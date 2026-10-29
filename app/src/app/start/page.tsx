@@ -1,32 +1,12 @@
-import { AuthShell } from "@/components/AuthShell";
 import Link from "next/link";
-
-const PLANS = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: "$29.95",
-    period: "/month",
-    yearly: "$299.50/yr",
-    saves: "Save $59.90",
-    desc: "Single web apps and early-stage products. Standard processing and memory limits.",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: "$49.95",
-    period: "/month",
-    yearly: "$499.50/yr",
-    saves: "Save $99.90",
-    desc: "Higher processing speeds and larger memory limits. Best for AI-powered and integrated workspaces that need headroom for embeddings, background jobs, and multi-service pipelines.",
-  },
-];
+import { AuthShell } from "@/components/AuthShell";
+import { PLANS, formatPrice, yearlySaving } from "@/lib/plans";
 
 export default function StartPage() {
   return (
     <AuthShell
       title="Choose your plan"
-      subtitle="Pick a plan to create your account."
+      subtitle="Pick a plan and billing cycle, then create your account. You'll confirm your email and check out after."
       footer={
         <>
           Already have an account?{" "}
@@ -38,34 +18,34 @@ export default function StartPage() {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {PLANS.map((p) => (
-          <Link
+          <div
             key={p.id}
-            href={`/signup?plan=${p.id}`}
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 16,
               padding: 16,
               border: "1px solid var(--line)",
               borderRadius: 10,
               background: "var(--ink-2)",
             }}
           >
-            <div>
-              <div style={{ fontWeight: 600, fontSize: "1rem", marginBottom: 4 }}>{p.name}</div>
-              <div style={{ color: "var(--paper-dim)", fontSize: "0.85rem" }}>{p.desc}</div>
+            <div style={{ fontWeight: 600, fontSize: "1rem", marginBottom: 4 }}>{p.name}</div>
+            <div style={{ color: "var(--paper-dim)", fontSize: "0.85rem", marginBottom: 12 }}>{p.tagline}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <Link
+                href={`/signup?plan=${p.id}&cycle=monthly`}
+                className="btn btn-ghost"
+                style={{ textAlign: "center", padding: "8px 10px", fontSize: "0.85rem" }}
+              >
+                {formatPrice(p.monthly)}/mo
+              </Link>
+              <Link
+                href={`/signup?plan=${p.id}&cycle=yearly`}
+                className="btn btn-amber"
+                style={{ textAlign: "center", padding: "8px 10px", fontSize: "0.85rem" }}
+              >
+                {formatPrice(p.yearly)}/yr · save {formatPrice(yearlySaving(p))}
+              </Link>
             </div>
-            <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-              <span style={{ fontWeight: 600 }}>{p.price}</span>
-              <span style={{ color: "var(--paper-dim)", fontSize: "0.85rem" }}>{p.period}</span>
-              {/* Yearly is ten months' price, so the saving is two months. */}
-              <div style={{ color: "var(--paper-dim)", fontSize: "0.78rem", marginTop: 4 }}>
-                or {p.yearly}{" "}
-                <span style={{ color: "var(--sky)", fontWeight: 600 }}>{p.saves}</span>
-              </div>
-            </div>
-          </Link>
+          </div>
         ))}
       </div>
     </AuthShell>

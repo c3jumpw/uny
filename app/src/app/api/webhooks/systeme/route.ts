@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendNotification } from "@/lib/email";
+import { markPaid } from "@/lib/billing";
+import { PAID_TAGS } from "@/lib/systeme";
+import { inferPlanFromText } from "@/lib/plans";
 
 // systeme.io webhook endpoint.
 //
@@ -36,22 +39,50 @@ import { sendNotification } from "@/lib/email";
 // added an insert policy for it below, but user matching won't
 // find auth.users. Prefer SRK.
 
+// Event names are normalised (lower-case, any separator -> ".") so
+// "NEW_SALE", "new-sale" and "new.sale" all match. systeme.io sends
+// different shapes depending on where the webhook is configured:
+//   - automation rule "send webhook" after a sale: type
+//     "customer.sale.completed", email at data.customer.email
+//   - Settings > Webhooks: "New sale", "Sale canceled",
+//     "Contact tag added", … (header X-Webhook-Event on some accounts)
 const PAID_EVENTS = new Set([
   "payment.succeeded",
   "invoice.paid",
   "subscription.renewed",
   "subscription.payment.succeeded",
+  "customer.sale.completed",
+  "sale.completed",
+  "new.sale",
+  "sale.new",
+  "order.completed",
+  "order.paid",
 ]);
 const FAILED_EVENTS = new Set([
   "payment.failed",
   "invoice.failed",
   "subscription.payment.failed",
+  "sale.payment.failed",
+  "customer.sale.failed",
 ]);
 const CANCELLED_EVENTS = new Set([
   "subscription.cancelled",
   "subscription.canceled",
   "customer.subscription.deleted",
+  "sale.canceled",
+  "sale.cancelled",
+  "customer.sale.canceled",
+  "customer.sale.cancelled",
 ]);
+const TAG_ADDED_EVENTS = new Set(["contact.tag.added", "tag.added", "customer.tag.added"]);
+
+function normaliseEvent(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ".")
+    .replace(/^\.|\.$/g, "");
+}
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -95,16 +126,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const eventType =
+  const rawEvent =
     pickString(payload, ["type"], ["event"], ["event_type"], ["name"]) ??
+    req.headers.get("x-webhook-event") ??
+    req.headers.get("x-systeme-event") ??
     "unknown";
+  const eventType = normaliseEvent(rawEvent);
   const customerEmail = pickString(
     payload,
     ["data", "customer", "email"],
     ["customer", "email"],
+    ["data", "contact", "email"],
+    ["contact", "email"],
     ["data", "email"],
     ["email"]
   );
+  const tagName = pickString(payload, ["data", "tag", "name"], ["tag", "name"], ["data", "tag_name"]);
+  const pricePlanName = pickString(
+    payload,
+    ["data", "offer_price_plan", "name"],
+    ["data", "price_plan", "name"],
+    ["offer_price_plan", "name"],
+    ["pricePlan", "name"],
+    ["data", "funnel_step", "name"]
+  );
+  // "Contact tag added" with a paid tag counts as a payment: that is
+  // what a systeme.io rule "New sale -> add tag unybase-customer" sends.
+  const isPaidTag =
+    TAG_ADDED_EVENTS.has(eventType) &&
+    Boolean(tagName && PAID_TAGS.map((t) => t.toLowerCase()).includes(tagName.toLowerCase()));
   const customerId = pickString(
     payload,
     ["data", "customer", "id"],
@@ -149,16 +199,15 @@ export async function POST(req: NextRequest) {
 
   if (userId) {
     const now = new Date().toISOString();
-    if (PAID_EVENTS.has(eventType)) {
-      await supabase
-        .from("subscription_status")
-        .update({
-          subscription_state: "active",
-          last_payment_at: now,
-          last_payment_failed_at: null,
-          updated_at: now,
-        })
-        .eq("user_id", userId);
+    if (PAID_EVENTS.has(eventType) || isPaidTag) {
+      const inferred = inferPlanFromText(pricePlanName);
+      await markPaid(supabase, {
+        userId,
+        email: customerEmail,
+        plan: inferred.plan,
+        cycle: inferred.cycle,
+        source: "webhook",
+      });
     } else if (FAILED_EVENTS.has(eventType)) {
       await supabase
         .from("subscription_status")
@@ -224,6 +273,7 @@ export async function POST(req: NextRequest) {
     }
     if (
       PAID_EVENTS.has(eventType) ||
+      isPaidTag ||
       FAILED_EVENTS.has(eventType) ||
       CANCELLED_EVENTS.has(eventType)
     ) {

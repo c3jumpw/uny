@@ -12,6 +12,7 @@
 //   admin flipped toggle       -> Cut off           (grey)
 //   never paid                 -> Never paid        (muted)
 //   cancelled by client        -> Cancelled         (grey)
+//   manual trial (admin-set)   -> On trial / Trial ends in Nd / Trial ended
 
 export type DisplayStatus =
   | "cut_off"
@@ -23,6 +24,9 @@ export type DisplayStatus =
   | "never_paid"
   | "exempt"
   | "signup_incomplete"
+  | "trial"
+  | "trial_ending"
+  | "trial_expired"
   | "cancelled";
 
 export type StatusRow = {
@@ -37,7 +41,35 @@ export type StatusRow = {
   intended_plan?: string | null;
   plan_selected_at?: string | null;
   created_at?: string | null;
+  trial_started_at?: string | null;
+  trial_ends_at?: string | null;
+  trial_note?: string | null;
+  trial_converted_at?: string | null;
+  intended_cycle?: string | null;
 };
+
+// A trial counts while it has an end date, has not been converted
+// into a paid subscription, and the account is not already paying.
+export type TrialState = {
+  onTrial: boolean;
+  expired: boolean;
+  daysLeft: number | null;
+  endsAt: string | null;
+};
+
+export function trialState(row: StatusRow): TrialState {
+  if (!row.trial_ends_at || row.trial_converted_at || row.subscription_state === "active") {
+    return { onTrial: false, expired: false, daysLeft: null, endsAt: null };
+  }
+  const ms = new Date(row.trial_ends_at).getTime() - Date.now();
+  const daysLeft = Math.ceil(ms / (24 * 60 * 60 * 1000));
+  return {
+    onTrial: ms > 0,
+    expired: ms <= 0,
+    daysLeft: ms > 0 ? daysLeft : Math.floor(ms / (24 * 60 * 60 * 1000)),
+    endsAt: row.trial_ends_at,
+  };
+}
 
 // Someone who signed up and never picked a plan is a different
 // problem from someone who picked one and never paid. The first is
@@ -60,7 +92,7 @@ const NUDGE_DAYS: Array<{ day: number; step: 1 | 2 | 3 }> = [
 export function signupState(row: StatusRow): SignupState {
   // Exempt accounts never chose a plan and never will. Nudging them
   // about it would be noise aimed at ourselves.
-  if (row.billing_exempt) {
+  if (row.billing_exempt || trialState(row).onTrial) {
     return { incomplete: false, daysSinceSignup: null, nudgeStep: null };
   }
   const hasPlan = Boolean(row.intended_plan || row.plan_selected_at);
@@ -124,6 +156,47 @@ export function computeStatus(row: StatusRow): StatusMeta {
       actionHint:
         row.exempt_reason?.trim() ||
         "Billing-exempt internal account. Payment tracking does not apply.",
+    };
+  }
+
+  // Manual trials sit above the never-paid / cancelled branches: a
+  // prospect on a trial is neither, and the admin needs to see the
+  // trial clock rather than "awaiting first payment".
+  const trial = trialState(row);
+  if (trial.onTrial || trial.expired) {
+    const d = trial.daysLeft ?? 0;
+    if (trial.expired) {
+      const ago = Math.abs(d);
+      return {
+        status: "trial_expired",
+        label: ago === 0 ? "Trial ended today" : `Trial ended ${ago}d ago`,
+        color: "#ffb066",
+        bg: "rgba(200,120,40,.22)",
+        daysLapsed: ago,
+        priority: 70,
+        actionHint:
+          "Trial is over and no payment has arrived. They now see the plan picker when they log in. Extend, convert or follow up.",
+      };
+    }
+    if (d <= 3) {
+      return {
+        status: "trial_ending",
+        label: d <= 1 ? "Trial ends tomorrow" : `Trial ends in ${d}d`,
+        color: "#ffd76a",
+        bg: "rgba(200,170,50,.15)",
+        daysLapsed: null,
+        priority: 50,
+        actionHint: row.trial_note?.trim() || "Trial ending soon. Good moment to check in.",
+      };
+    }
+    return {
+      status: "trial",
+      label: `On trial — ${d}d left`,
+      color: "#6ec8d8",
+      bg: "rgba(90,190,215,.15)",
+      daysLapsed: null,
+      priority: 8,
+      actionHint: row.trial_note?.trim() || "Manual trial granted by an admin.",
     };
   }
 
@@ -232,4 +305,47 @@ export function sortByPriority<T extends { statusMeta: StatusMeta }>(rows: T[]):
       return b.statusMeta.priority - a.statusMeta.priority;
     return (b.statusMeta.daysLapsed ?? 0) - (a.statusMeta.daysLapsed ?? 0);
   });
+}
+
+// ---------------------------------------------------------------
+// Paywall
+// ---------------------------------------------------------------
+//
+// Who has to choose and pay for a plan before using the dashboard.
+// Only accounts that have never paid (or cancelled) are gated.
+// Lapsed and cut-off accounts keep the dashboard: they are on the
+// billing ladder, where a human makes the call, and locking them out
+// would contradict "nothing auto-cuts".
+
+export type AccessReason =
+  | "admin"
+  | "exempt"
+  | "paying"
+  | "billing_issue"
+  | "trial"
+  | "collaborator"
+  | "needs_plan"
+  | "trial_ended"
+  | "cancelled";
+
+export function accessFor(
+  row: StatusRow | null,
+  opts: { isAdmin: boolean; isCollaborator?: boolean }
+): { allowed: boolean; reason: AccessReason } {
+  if (opts.isAdmin) return { allowed: true, reason: "admin" };
+  if (row?.billing_exempt) return { allowed: true, reason: "exempt" };
+  if (row && (row.subscription_state === "active" || row.trial_converted_at)) {
+    return { allowed: true, reason: "paying" };
+  }
+  if (row && (row.subscription_state === "lapsed" || row.cut_off_at || !row.automations_active)) {
+    return { allowed: true, reason: "billing_issue" };
+  }
+  const trial = row ? trialState(row) : null;
+  if (trial?.onTrial) return { allowed: true, reason: "trial" };
+  // Someone a client shared credentials with needs to read them
+  // without buying a plan of their own.
+  if (opts.isCollaborator) return { allowed: true, reason: "collaborator" };
+  if (trial?.expired) return { allowed: false, reason: "trial_ended" };
+  if (row?.subscription_state === "cancelled") return { allowed: false, reason: "cancelled" };
+  return { allowed: false, reason: "needs_plan" };
 }

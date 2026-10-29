@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/dashboard/domains", label: "Domains" },
   { href: "/dashboard/team", label: "Team" },
   { href: "/dashboard/vault", label: "Vault" },
+  { href: "/dashboard/changes", label: "Changes" },
   { href: "/dashboard/settings", label: "Settings" },
 ];
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a1220;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a1220;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0e1829;border:1px solid #1e2b40;border-radius:12px;">
+        <tr><td style="padding:28px 32px 0;">
+          <div style="font-size:20px;font-weight:700;"><span style="color:#e8eef7;">uny</span><span style="color:#5aa9e6;">base</span></div>
+        </td></tr>
+        <tr><td style="padding:20px 32px 0;">
+          <h1 style="margin:0 0 12px;color:#e8eef7;font-size:20px;font-weight:600;line-height:1.3;">Confirm your email to finish signing up</h1>
+          <div style="color:#9fb0c7;font-size:15px;line-height:1.6;"><p style="margin:0 0 12px;">Thanks for creating a UnyBase account for <strong style="color:#e8eef7;">{{ .Email }}</strong>. Three quick steps and your workspace is live:</p>
+          <ol style="margin:0 0 12px;padding-left:20px;">
+            <li style="margin-bottom:6px;"><strong style="color:#e8eef7;">Confirm your email</strong> with the button below.</li>
+            <li style="margin-bottom:6px;"><strong style="color:#e8eef7;">Log in</strong> on the page that opens, with the password you just chose.</li>
+            <li><strong style="color:#e8eef7;">Choose monthly or yearly billing</strong> and complete checkout using this same email address.</li>
+          </ol>
+          <p style="margin:0;">The link works once and expires in 24 hours.</p></div>
+        </td></tr>
+        <tr><td style="padding:24px 32px 0;">
+          <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#f2a93b;color:#1a1204;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:8px;">Confirm my email</a>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;color:#6b7d94;font-size:12px;line-height:1.5;">
+          Button not working? Paste this link into your browser:<br>
+          <a href="{{ .ConfirmationURL }}" style="color:#5aa9e6;word-break:break-all;">{{ .ConfirmationURL }}</a>
+        </td></tr>
+        <tr><td style="padding:24px 32px 28px;">
+          <div style="border-top:1px solid #1e2b40;padding-top:16px;color:#6b7d94;font-size:13px;line-height:1.5;">
+            Didn't sign up for UnyBase? You can ignore this email &mdash; no account is created until the address is confirmed.<br><br>
+            Questions? Write to <a href="mailto:support@unywebs.com" style="color:#5aa9e6;text-decoration:none;">support@unywebs.com</a>.
+          </div>
+        </td></tr>
+      </table>
+      <div style="max-width:560px;margin:16px auto 0;color:#4a5a70;font-size:12px;text-align:center;">UnyBase &mdash; managed backend for web and mobile apps</div>
+    </td></tr>
+  </table>
+</body></html>
