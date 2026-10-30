@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import type { AccessReason } from "@/lib/subscriptionStatus";
-import { formatPrice, yearlySaving, type Cycle, type Plan, type PlanId } from "@/lib/plans";
+import { formatPrice, yearlySaving, yearlySavingPercent, type Cycle, type Plan, type PlanId } from "@/lib/plans";
 
 const SUPPORT = "support@unywebs.com";
 
@@ -205,7 +205,7 @@ export function PlansClient({
               >
                 {c === "monthly" ? "Monthly" : "Yearly"}
                 {c === "yearly" ? (
-                  <span style={{ marginLeft: 6, fontSize: "0.72rem", opacity: 0.85 }}>2 months free</span>
+                  <span style={{ marginLeft: 6, fontSize: "0.72rem", opacity: 0.85 }}>Save {yearlySavingPercent()}%</span>
                 ) : null}
               </button>
             ))}

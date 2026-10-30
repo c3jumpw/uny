@@ -1,5 +1,10 @@
 // Single source of truth for plans, prices and checkout links.
 //
+// Prices must match what the systeme.io order forms charge
+// (go-unybase.unywebs.com): Basic $29.95/mo or $299.95/yr,
+// Premium $49.95/mo or $499.95/yr. The marketing site keeps its own
+// copy in unybase/js/config.js — change both together.
+//
 // Checkout links are fixed constants (or env-configured), never taken
 // from client input, so sending a user to checkout can never become an
 // open redirect: the client only chooses which known link to use.
@@ -29,7 +34,7 @@ export const PLANS: Plan[] = [
     id: "basic",
     name: "Basic",
     monthly: 29.95,
-    yearly: 299.5,
+    yearly: 299.95,
     tagline: "Single web apps and early-stage products.",
     features: [
       "Credential vault with live health checks",
@@ -43,7 +48,7 @@ export const PLANS: Plan[] = [
     id: "premium",
     name: "Premium",
     monthly: 49.95,
-    yearly: 499.5,
+    yearly: 499.95,
     tagline: "AI-powered and integrated workspaces.",
     features: [
       "Everything in Basic",
@@ -93,6 +98,16 @@ export function checkoutUrl(plan: PlanId, cycle: Cycle, email?: string | null): 
 
 export function formatPrice(n: number): string {
   return `$${n.toFixed(2)}`;
+}
+
+/**
+ * Whole-number percentage saved by paying yearly, rounded down and
+ * taken from the plan that saves least, so the claim holds for both.
+ */
+export function yearlySavingPercent(): number {
+  return Math.floor(
+    Math.min(...PLANS.map((p) => ((p.monthly * 12 - p.yearly) / (p.monthly * 12)) * 100))
+  );
 }
 
 export function yearlySaving(p: Plan): number {

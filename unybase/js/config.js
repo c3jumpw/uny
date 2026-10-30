@@ -15,13 +15,15 @@ window.UNYBASE_CONFIG = {
   },
 
   /* Plan pricing shown on the pricing section.
-   * Yearly assumes 2 months free vs monthly. */
+   * Must match what the systeme.io checkout charges
+   * (go-unybase.unywebs.com). The app keeps its own copy in
+   * app/src/lib/plans.ts — change both together. */
   plans: {
     basic: {
       name: "Basic",
       for: "Best for: Single web apps and early-stage products.",
       monthly: 29.95,
-      yearly: 299.50, // ~$24.96/mo equivalent
+      yearly: 299.95, // ~$25.00/mo equivalent
       features: [
         "Managed database & authentication",
         "File storage",
@@ -34,7 +36,7 @@ window.UNYBASE_CONFIG = {
       name: "Premium",
       for: "Best for: Growing products and teams running multiple apps.",
       monthly: 49.95,
-      yearly: 499.50, // ~$41.63/mo equivalent
+      yearly: 499.95, // ~$41.66/mo equivalent
       features: [
         "Everything in Basic",
         "Expanded resource limits",

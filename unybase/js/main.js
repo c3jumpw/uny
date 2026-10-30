@@ -29,6 +29,18 @@
     var toggle = section.querySelector(".billing-toggle");
     var buttons = toggle ? toggle.querySelectorAll("button") : [];
     var cards = section.querySelectorAll(".plan-card[data-plan]");
+    // Label the yearly toggle from the configured prices, so it can't
+    // drift from what checkout charges. Rounded down, from the plan
+    // that saves least, so the claim holds for every plan.
+    var pcts = Object.keys(CONFIG.plans).map(function (k) {
+      var p = CONFIG.plans[k];
+      return ((p.monthly * 12 - p.yearly) / (p.monthly * 12)) * 100;
+    });
+    var savePct = Math.floor(Math.min.apply(null, pcts));
+    buttons.forEach(function (b) {
+      if (b.dataset.cycle === "yearly" && savePct > 0) b.textContent = "Yearly (save " + savePct + "%)";
+    });
+
     var signupHrefs = {
       basic: CONFIG.appUrls.signupBasic,
       premium: CONFIG.appUrls.signupPremium,
