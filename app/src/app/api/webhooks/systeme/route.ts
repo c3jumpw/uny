@@ -317,6 +317,19 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, matched: userId !== null });
 }
 
-export async function GET() {
-  return NextResponse.json({ ok: true, endpoint: "systeme webhook" });
+// Health check. With ?token=… it also says whether that token is the
+// one this deployment expects, so a webhook URL can be verified by
+// opening it in a browser instead of waiting for a real sale. The
+// token itself is never echoed back.
+export async function GET(req: NextRequest) {
+  const provided = req.nextUrl.searchParams.get("token");
+  const expected = process.env.SYSTEME_WEBHOOK_TOKEN;
+  if (provided === null) {
+    return NextResponse.json({ ok: true, endpoint: "systeme webhook" });
+  }
+  return NextResponse.json({
+    ok: true,
+    endpoint: "systeme webhook",
+    token: !expected ? "not_configured" : provided === expected ? "valid" : "invalid",
+  });
 }
