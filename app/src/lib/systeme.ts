@@ -30,6 +30,13 @@ const BASE = (process.env.SYSTEME_API_BASE || "https://api.systeme.io/api").repl
 
 export const SIGNUP_TAG = process.env.SYSTEME_SIGNUP_TAG || "unybase-signup";
 export const CUSTOMER_TAG = process.env.SYSTEME_CUSTOMER_TAG || "unybase-customer";
+export const CANCELLED_TAG = process.env.SYSTEME_CANCELLED_TAG || "unybase-cancelled";
+// Plan and billing-cycle segments, added from the payment details the
+// webhook carries (systeme.io has no automation-rule condition for the
+// price option chosen on a shared order form, so the app does it).
+const TAG_PREFIX = process.env.SYSTEME_TAG_PREFIX || "unybase-";
+export const PLAN_TAGS = { basic: `${TAG_PREFIX}basic`, premium: `${TAG_PREFIX}premium` } as const;
+export const CYCLE_TAGS = { monthly: `${TAG_PREFIX}monthly`, yearly: `${TAG_PREFIX}yearly` } as const;
 export const PAID_TAGS = (process.env.SYSTEME_PAID_TAGS || CUSTOMER_TAG)
   .split(",")
   .map((s) => s.trim())
@@ -203,7 +210,7 @@ export async function removeTag(
 export async function contactPaidTag(
   email: string,
   userId?: string | null
-): Promise<{ checked: boolean; paid: boolean; tag?: string; detail?: string }> {
+): Promise<{ checked: boolean; paid: boolean; tag?: string; tags?: string[]; detail?: string }> {
   if (!systemeConfigured()) return { checked: false, paid: false, detail: "not configured" };
   try {
     const contact = await findContact(email);
@@ -222,10 +229,43 @@ export async function contactPaidTag(
         ? `paid tag: ${hit.name}`
         : `tags: ${(contact.tags ?? []).map((t) => t.name).join(", ") || "none"}`,
     });
-    return { checked: true, paid: Boolean(hit), tag: hit?.name };
+    return {
+      checked: true,
+      paid: Boolean(hit),
+      tag: hit?.name,
+      tags: (contact.tags ?? []).map((t) => t.name).filter(Boolean),
+    };
   } catch (e) {
     const detail = e instanceof Error ? e.message : "unknown";
     await log({ userId, email, action: "pull_check", ok: false, detail });
     return { checked: false, paid: false, detail };
   }
+}
+
+/**
+ * Puts exactly one tag from a group on the contact: adds `keep`,
+ * removes the others (e.g. upgrading basic -> premium, or switching
+ * monthly -> yearly). Each call is logged like any other.
+ */
+export async function setExclusiveTag(
+  email: string,
+  keep: string,
+  group: readonly string[],
+  userId?: string | null
+): Promise<TagOutcome> {
+  const r = await addTag(email, keep, userId);
+  if (r.ok) {
+    for (const other of group) {
+      if (other.toLowerCase() !== keep.toLowerCase()) await removeTag(email, other, userId);
+    }
+  }
+  return r;
+}
+
+/** Plan named by a contact's tags, if a plan tag is present. */
+export function planFromTags(tags: string[] | undefined): "basic" | "premium" | null {
+  const t = (tags ?? []).map((x) => x.toLowerCase());
+  if (t.includes(PLAN_TAGS.premium.toLowerCase())) return "premium";
+  if (t.includes(PLAN_TAGS.basic.toLowerCase())) return "basic";
+  return null;
 }

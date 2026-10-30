@@ -1,6 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendNotification } from "@/lib/email";
-import { addTag, removeTag, SIGNUP_TAG, CUSTOMER_TAG } from "@/lib/systeme";
+import {
+  addTag,
+  removeTag,
+  setExclusiveTag,
+  SIGNUP_TAG,
+  CUSTOMER_TAG,
+  CANCELLED_TAG,
+  PLAN_TAGS,
+  CYCLE_TAGS,
+} from "@/lib/systeme";
 import { planById, type Cycle, type PlanId } from "@/lib/plans";
 
 // One place that turns "we know this person paid" into account state,
@@ -59,6 +68,16 @@ export async function markPaid(
         .update({ systeme_customer_tagged_at: now })
         .eq("user_id", opts.userId);
       await removeTag(opts.email, SIGNUP_TAG, opts.userId);
+      await removeTag(opts.email, CANCELLED_TAG, opts.userId);
+    }
+    // Plan / cycle segments only from confirmed payment details (the
+    // webhook's price option, or a plan tag already on the contact),
+    // never from what someone merely clicked on /plans.
+    if (opts.plan) {
+      await setExclusiveTag(opts.email, PLAN_TAGS[opts.plan], Object.values(PLAN_TAGS), opts.userId);
+    }
+    if (opts.cycle) {
+      await setExclusiveTag(opts.email, CYCLE_TAGS[opts.cycle], Object.values(CYCLE_TAGS), opts.userId);
     }
 
     // Only on the first payment: a renewal, or an imported client who
@@ -74,4 +93,22 @@ export async function markPaid(
   }
 
   return { firstPayment };
+}
+
+// A cancelled subscription: state -> cancelled, and the contact moves
+// from the customer segment to the cancelled one. Nothing is cut off
+// here; the admin dashboard shows it and a human decides.
+export async function markCancelled(
+  service: SupabaseClient,
+  opts: { userId: string; email: string | null }
+): Promise<void> {
+  const now = new Date().toISOString();
+  await service
+    .from("subscription_status")
+    .update({ subscription_state: "cancelled", updated_at: now })
+    .eq("user_id", opts.userId);
+  if (opts.email) {
+    const r = await addTag(opts.email, CANCELLED_TAG, opts.userId);
+    if (r.ok) await removeTag(opts.email, CUSTOMER_TAG, opts.userId);
+  }
 }

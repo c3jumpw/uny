@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serviceClient, hasServiceRole } from "@/lib/supabase/service";
 import { addTag, SIGNUP_TAG } from "@/lib/systeme";
+import { getUserRole } from "@/lib/admin";
 
 // Tags a brand-new signup in systeme.io ("free signup" segment).
 //
@@ -15,6 +16,7 @@ export async function POST(req: NextRequest) {
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!email || !email.includes("@")) return NextResponse.json({ ok: false }, { status: 400 });
   if (!hasServiceRole()) return NextResponse.json({ ok: false, skipped: true });
+  if (getUserRole(email) !== "client") return NextResponse.json({ ok: false, skipped: true });
 
   const service = serviceClient();
   const { data: userId } = await service.rpc("find_user_id_by_email", { p_email: email });

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getUserRole } from "@/lib/admin";
 import { serviceClient, hasServiceRole } from "@/lib/supabase/service";
-import { addTag, contactPaidTag, systemeConfigured, SIGNUP_TAG, CUSTOMER_TAG } from "@/lib/systeme";
+import { addTag, contactPaidTag, planFromTags, systemeConfigured, SIGNUP_TAG, CUSTOMER_TAG } from "@/lib/systeme";
 import { markPaid } from "@/lib/billing";
 
 export const maxDuration = 300;
@@ -35,6 +35,9 @@ export async function POST() {
     const userId = r.user_id as string;
     const { data: email } = await service.rpc("email_for_user", { p_user: userId });
     if (typeof email !== "string") continue;
+    // Staff accounts are not prospects or customers; keep them out of
+    // the marketing segments.
+    if (getUserRole(email) !== "client") continue;
     const paying = r.subscription_state === "active" || Boolean(r.last_payment_at);
 
     if (paying) {
@@ -50,7 +53,7 @@ export async function POST() {
 
     const pull = await contactPaidTag(email, userId);
     if (pull.paid) {
-      await markPaid(service, { userId, email, source: "pull_check" });
+      await markPaid(service, { userId, email, plan: planFromTags(pull.tags), source: "pull_check" });
       out.activated += 1;
       continue;
     }

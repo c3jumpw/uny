@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendNotification } from "@/lib/email";
-import { markPaid } from "@/lib/billing";
+import { markPaid, markCancelled } from "@/lib/billing";
 import { PAID_TAGS } from "@/lib/systeme";
 import { inferPlanFromText } from "@/lib/plans";
 
@@ -76,6 +76,42 @@ const CANCELLED_EVENTS = new Set([
 ]);
 const TAG_ADDED_EVENTS = new Set(["contact.tag.added", "tag.added", "customer.tag.added"]);
 
+// Finds the price option name anywhere in the payload: any object
+// under a key that looks like a price plan / offer with a "name".
+// "UnyBase Premium - Yearly" is how plan and cycle reach us when both
+// options live on the same order form.
+function findPricePlanName(obj: unknown, depth = 0): string | null {
+  if (!obj || typeof obj !== "object" || depth > 6) return null;
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (/price.?plan|offer/i.test(k) && v && typeof v === "object") {
+      const name = (v as Record<string, unknown>).name;
+      if (typeof name === "string" && name.trim()) return name;
+    }
+  }
+  for (const v of Object.values(obj as Record<string, unknown>)) {
+    const hit = findPricePlanName(v, depth + 1);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// Event name from any request header that carries one.
+function eventFromHeaders(req: NextRequest): string | null {
+  for (const [k, v] of req.headers.entries()) {
+    if (/event/i.test(k) && v && !/^(text|application)\//.test(v)) return v;
+  }
+  return null;
+}
+
+function hasOrderData(obj: unknown): boolean {
+  if (!obj || typeof obj !== "object") return false;
+  const o = obj as Record<string, unknown>;
+  const d = (o.data && typeof o.data === "object" ? o.data : {}) as Record<string, unknown>;
+  return ["order", "order_item", "orderItem", "offer_price_plan", "pricePlan", "offerPricePlan"].some(
+    (k) => k in o || k in d
+  );
+}
+
 function normaliseEvent(raw: string): string {
   return raw
     .trim()
@@ -127,11 +163,14 @@ export async function POST(req: NextRequest) {
   }
 
   const rawEvent =
-    pickString(payload, ["type"], ["event"], ["event_type"], ["name"]) ??
-    req.headers.get("x-webhook-event") ??
-    req.headers.get("x-systeme-event") ??
+    pickString(payload, ["type"], ["event"], ["event_type"], ["eventType"]) ??
+    eventFromHeaders(req) ??
+    pickString(payload, ["name"]) ??
     "unknown";
-  const eventType = normaliseEvent(rawEvent);
+  let eventType = normaliseEvent(rawEvent);
+  // Unlabelled payload that carries an order: a sale. Logged as such so
+  // the raw payload in subscription_events shows how we read it.
+  if (eventType === "unknown" && hasOrderData(payload)) eventType = "sale.completed";
   const customerEmail = pickString(
     payload,
     ["data", "customer", "email"],
@@ -142,14 +181,8 @@ export async function POST(req: NextRequest) {
     ["email"]
   );
   const tagName = pickString(payload, ["data", "tag", "name"], ["tag", "name"], ["data", "tag_name"]);
-  const pricePlanName = pickString(
-    payload,
-    ["data", "offer_price_plan", "name"],
-    ["data", "price_plan", "name"],
-    ["offer_price_plan", "name"],
-    ["pricePlan", "name"],
-    ["data", "funnel_step", "name"]
-  );
+  const pricePlanName =
+    findPricePlanName(payload) ?? pickString(payload, ["data", "funnel_step", "name"], ["funnel_step", "name"]);
   // "Contact tag added" with a paid tag counts as a payment: that is
   // what a systeme.io rule "New sale -> add tag unybase-customer" sends.
   const isPaidTag =
@@ -263,13 +296,7 @@ export async function POST(req: NextRequest) {
         });
       }
     } else if (CANCELLED_EVENTS.has(eventType)) {
-      await supabase
-        .from("subscription_status")
-        .update({
-          subscription_state: "cancelled",
-          updated_at: now,
-        })
-        .eq("user_id", userId);
+      await markCancelled(supabase, { userId, email: customerEmail });
     }
     if (
       PAID_EVENTS.has(eventType) ||

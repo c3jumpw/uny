@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { serviceClient, hasServiceRole } from "@/lib/supabase/service";
-import { contactPaidTag, systemeConfigured } from "@/lib/systeme";
+import { contactPaidTag, planFromTags, systemeConfigured } from "@/lib/systeme";
 import { markPaid } from "@/lib/billing";
 import { getAccess } from "@/lib/access";
 
@@ -35,7 +35,12 @@ export async function POST() {
 
   const r = await contactPaidTag(user.email, user.id);
   if (r.paid) {
-    await markPaid(serviceClient(), { userId: user.id, email: user.email, source: "pull_check" });
+    await markPaid(serviceClient(), {
+        userId: user.id,
+        email: user.email,
+        plan: planFromTags(r.tags),
+        source: "pull_check",
+      });
     return NextResponse.json({ paid: true, checked: true });
   }
 

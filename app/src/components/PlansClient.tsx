@@ -273,9 +273,15 @@ export function PlansClient({
                 >
                   Continue to checkout — {p.name} {cycle === "yearly" ? "yearly" : "monthly"}
                 </a>
-                {cycle === "yearly" && !dedicatedYearly[p.id] ? (
+                {!(cycle === "yearly" && dedicatedYearly[p.id]) ? (
+                  // Monthly and yearly share one order form, so name the
+                  // exact option to tick there.
                   <small style={{ display: "block", marginTop: 8, color: "var(--muted)", fontSize: "0.75rem", textAlign: "center" }}>
-                    Choose the annual option on the checkout page.
+                    On the checkout page, select{" "}
+                    <strong style={{ color: "var(--paper-dim)" }}>
+                      UnyBase {p.name} - {cycle === "yearly" ? "Yearly" : "Monthly"}
+                    </strong>
+                    .
                   </small>
                 ) : null}
               </div>
