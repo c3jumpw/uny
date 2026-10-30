@@ -167,6 +167,24 @@ textarea {
   margin-top: 4px;
 }
 
+/* Inputs inside a toolbar or list (outside a .field wrapper). */
+.ui-inputs input:not([type="checkbox"]):not([type="radio"]),
+.ui-inputs select,
+.ui-inputs textarea {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--ink-2);
+  color: var(--paper);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.ui-inputs input:focus,
+.ui-inputs select:focus,
+.ui-inputs textarea:focus {
+  border-color: var(--sky);
+}
+
 /* ---------- Cards ---------- */
 .card {
   background: var(--surface);

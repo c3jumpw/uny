@@ -367,7 +367,7 @@ export function ChangesClient({
   const bulkTarget = selectedItems.length ? selectedItems : [];
 
   return (
-    <div>
+    <div className="ui-inputs">
       <Terminology />
 
       {/* Add */}

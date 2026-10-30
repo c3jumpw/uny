@@ -297,6 +297,25 @@ export async function GET(req: NextRequest) {
       }
       if (!email || !createdAt || !confirmed) continue;
 
+      // Someone who signed up only to see credentials a client shared
+      // with them (or to look after a workspace) isn't a prospect, so
+      // "finish checkout" emails would be wrong for them.
+      const [{ data: share }, { data: grant }] = await Promise.all([
+        supabase
+          .from("vault_shares")
+          .select("id")
+          .eq("grantee_email", email.toLowerCase())
+          .is("revoked_at", null)
+          .limit(1),
+        supabase
+          .from("technical_admin_grants")
+          .select("id")
+          .eq("technical_admin_id", userId)
+          .is("revoked_at", null)
+          .limit(1),
+      ]);
+      if ((share?.length ?? 0) > 0 || (grant?.length ?? 0) > 0) continue;
+
       const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000);
       // Accounts older than two weeks predate this sequence or have
       // gone cold; a first-ever "last reminder" would just be noise.

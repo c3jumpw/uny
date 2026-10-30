@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/auth/callback",
   "/forgot-password",
   "/reset-password",
+  "/guide",
 ];
 
 // Paths where a logged-in user should be sent to /dashboard instead.

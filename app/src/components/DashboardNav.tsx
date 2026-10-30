@@ -14,6 +14,7 @@ const LINKS = [
   { href: "/dashboard/vault", label: "Vault" },
   { href: "/dashboard/changes", label: "Changes" },
   { href: "/dashboard/settings", label: "Settings" },
+  { href: "/guide", label: "Guide" },
 ];
 
 export function DashboardNav({

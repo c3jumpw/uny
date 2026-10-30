@@ -374,7 +374,8 @@ export function buildTemplate(
                    <li style="margin-bottom:6px;"><strong style="color:#e8eef7;">Add your domains</strong> so renewals and SSL expiry are tracked.</li>
                    <li><strong style="color:#e8eef7;">Invite your developer</strong> or share specific credentials with them.</li>
                  </ol>
-                 <p style="margin:0;">We'll email you before anything expires or stops responding.</p>`,
+                 <p style="margin:0 0 12px;">We'll email you before anything expires or stops responding.</p>
+                 <p style="margin:0;">New to UnyBase? <a href="${APP_URL}/guide" style="color:#5aa9e6;text-decoration:none;">The visual guide</a> walks through every page with screenshots.</p>`,
           ctaLabel: "Open your dashboard",
           ctaUrl: `${APP_URL}/dashboard`,
         }),
