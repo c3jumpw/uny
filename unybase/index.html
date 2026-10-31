@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=20261010" />
+<link rel="stylesheet" href="css/style.css?v=20261031" />
 </head>
 <body>
 
@@ -21,6 +21,7 @@
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a class="nav-item" href="#features">Features</a>
+      <a class="nav-item" href="#tour">Dashboard</a>
       <a class="nav-item" href="#pricing">Pricing</a>
       <a class="nav-item" href="https://unybase.unywebs.com/login">Log in</a>
     </nav>
@@ -30,6 +31,7 @@
     </div>
     <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
       <a class="nav-item" href="#features">Features</a>
+      <a class="nav-item" href="#tour">Dashboard</a>
       <a class="nav-item" href="#pricing">Pricing</a>
       <a class="nav-item" href="https://unybase.unywebs.com/login">Log in</a>
       <a class="btn btn-amber" href="https://unybase.unywebs.com/signup?plan=basic">Get Started</a>
@@ -47,6 +49,7 @@
         <p class="hero-sub">UnyBase is the backend behind your web and mobile apps — database, authentication, file storage, realtime updates, and server-side functions, unified into a single subscription. You focus on the product. We handle what runs underneath it.</p>
         <div class="hero-actions">
           <a class="btn btn-amber" href="https://unybase.unywebs.com/signup?plan=basic">Get Started</a>
+          <a class="btn btn-outline" href="#tour">See the dashboard</a>
         </div>
         <p class="hero-secondary-line">No engineering team required. No juggling five different dashboards.</p>
       </div>
@@ -97,6 +100,172 @@
           <div class="feature-mark">⟳</div>
           <h3>Real support, not just tools</h3>
           <p>When something needs attention, you're not stuck reading documentation at midnight. We help diagnose and resolve issues on your app's backend directly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard tour -->
+  <section id="tour" class="section-alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow-label">Your dashboard</p>
+        <h2>See what you get.</h2>
+        <p>Every subscription comes with a dashboard that keeps the credentials, domains and change requests behind your app in one place &mdash; checked every night, with a warning before anything expires.</p>
+      </div>
+
+      <div class="tour reveal">
+        <div class="tour-tabs" role="tablist" aria-label="Dashboard pages">
+          <button type="button" role="tab" id="tour-tab-overview" aria-controls="tour-panel-overview" aria-selected="true" tabindex="0" class="tour-tab is-active">Overview</button>
+          <button type="button" role="tab" id="tour-tab-vault" aria-controls="tour-panel-vault" aria-selected="false" tabindex="-1" class="tour-tab">Vault</button>
+          <button type="button" role="tab" id="tour-tab-credential" aria-controls="tour-panel-credential" aria-selected="false" tabindex="-1" class="tour-tab">Credentials</button>
+          <button type="button" role="tab" id="tour-tab-domains" aria-controls="tour-panel-domains" aria-selected="false" tabindex="-1" class="tour-tab">Domains</button>
+          <button type="button" role="tab" id="tour-tab-changes" aria-controls="tour-panel-changes" aria-selected="false" tabindex="-1" class="tour-tab">Change requests</button>
+        </div>
+        <div class="tour-panel is-active" id="tour-panel-overview" role="tabpanel" aria-labelledby="tour-tab-overview">
+          <div class="tour-copy">
+            <h3>Everything at a glance</h3>
+            <p>Log in and see straight away what needs attention: credentials that failed their last check, the next domain due for renewal, and the change requests still waiting on your developer.</p>
+            <ul class="tour-points">
+              <li>Problems are called out in orange, before they become outages</li>
+              <li>Your subscription status, always visible</li>
+              <li>Light and dark mode</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><div class="shot-url">unybase.unywebs.com/dashboard</div></div>
+            <div class="shot-body">
+              <a class="shot-link" href="assets/screens/overview-v1.webp" target="_blank" rel="noopener"><img src="assets/screens/overview-v1.webp" width="1650" height="828" alt="The UnyBase overview: subscription, vault, domains and change requests at a glance." loading="eager" decoding="async" /></a>
+              <span class="hotspot hotspot-right" style="left:36%;top:59.5%;"><span class="hotspot-dot"></span><span class="hotspot-label">2 credentials need attention</span></span><span class="hotspot hotspot-left" style="left:82%;top:40%;"><span class="hotspot-dot"></span><span class="hotspot-label">Next renewal, counted down</span></span><span class="hotspot hotspot-right" style="left:17%;top:76%;"><span class="hotspot-dot"></span><span class="hotspot-label">Edits waiting on your developer</span></span>
+            </div>
+          </figure>
+        </div>
+        <div class="tour-panel" id="tour-panel-vault" role="tabpanel" aria-labelledby="tour-tab-vault">
+          <div class="tour-copy">
+            <h3>Every key your app runs on, checked every night</h3>
+            <p>Store the API keys, tokens and logins behind your website and apps. UnyBase tests each one against the real service and tells you the moment one stops working.</p>
+            <ul class="tour-points">
+              <li>Encrypted before it's saved, hidden until you ask</li>
+              <li>Grouped by app or site, so nothing gets mixed up</li>
+              <li>Works with GitHub, Supabase, Vercel, ClickUp, systeme.io and any custom API</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><div class="shot-url">unybase.unywebs.com/dashboard/vault</div></div>
+            <div class="shot-body">
+              <a class="shot-link" href="assets/screens/vault-v1.webp" target="_blank" rel="noopener"><img src="assets/screens/vault-v1.webp" width="1440" height="1091" alt="The vault: a sharing panel, a toolbar, and a credential flagged as Failed." loading="lazy" decoding="async" /></a>
+              <span class="hotspot hotspot-right" style="left:39.6%;top:56.9%;"><span class="hotspot-dot"></span><span class="hotspot-label">Failed checks rise to the top</span></span><span class="hotspot hotspot-left" style="left:79%;top:46.4%;"><span class="hotspot-dot"></span><span class="hotspot-label">Tested nightly, or on demand</span></span><span class="hotspot hotspot-right" style="left:26%;top:24%;"><span class="hotspot-dot"></span><span class="hotspot-label">Shared only with who you choose</span></span>
+            </div>
+          </figure>
+        </div>
+        <div class="tour-panel" id="tour-panel-credential" role="tabpanel" aria-labelledby="tour-tab-credential">
+          <div class="tour-copy">
+            <h3>Safe to use, easy to hand over</h3>
+            <p>Each credential carries what the next person needs: which account it belongs to, where it's used, when it expires, and a note on how to renew it.</p>
+            <ul class="tour-points">
+              <li>Reveal auto-hides after 45 seconds, or copy without showing it</li>
+              <li>Expiry warnings 14, 7 and 1 days ahead</li>
+              <li>A history of every check, edit and reveal</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><div class="shot-url">unybase.unywebs.com/dashboard/vault</div></div>
+            <div class="shot-body">
+              <a class="shot-link" href="assets/screens/vault-card-v1.webp" target="_blank" rel="noopener"><img src="assets/screens/vault-card-v1.webp" width="1404" height="672" alt="A credential card with the key revealed, an expiry countdown and access history." loading="lazy" decoding="async" /></a>
+              <span class="hotspot hotspot-right" style="left:56%;top:23.9%;"><span class="hotspot-dot"></span><span class="hotspot-label">Auto-hides in 45 seconds</span></span><span class="hotspot hotspot-right" style="left:17.2%;top:53.4%;"><span class="hotspot-dot"></span><span class="hotspot-label">Warned before it expires</span></span><span class="hotspot hotspot-right" style="left:17.2%;top:69.4%;"><span class="hotspot-dot"></span><span class="hotspot-label">Every reveal is logged</span></span>
+            </div>
+          </figure>
+        </div>
+        <div class="tour-panel" id="tour-panel-domains" role="tabpanel" aria-labelledby="tour-tab-domains">
+          <div class="tour-copy">
+            <h3>Never lose a domain to a missed renewal</h3>
+            <p>Keep every web address in one list: where it's registered, who manages its DNS, and when the domain and its SSL certificate renew. The ones due soonest sit at the top.</p>
+            <ul class="tour-points">
+              <li>Warnings 30, 14, 7 and 1 days before renewal</li>
+              <li>Auto-renew status at a glance</li>
+              <li>Registrar and DNS logins noted for whoever needs them</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><div class="shot-url">unybase.unywebs.com/dashboard/domains</div></div>
+            <div class="shot-body">
+              <a class="shot-link" href="assets/screens/domains-v1.webp" target="_blank" rel="noopener"><img src="assets/screens/domains-v1.webp" width="1440" height="1044" alt="The domains list with renewal dates, SSL expiry and auto-renew status." loading="lazy" decoding="async" /></a>
+              <span class="hotspot hotspot-right" style="left:49.6%;top:29.6%;"><span class="hotspot-dot"></span><span class="hotspot-label">Auto-renew off? You'll know.</span></span><span class="hotspot hotspot-right" style="left:22%;top:48.8%;"><span class="hotspot-dot"></span><span class="hotspot-label">Domain &amp; SSL renewals, counted down</span></span>
+            </div>
+          </figure>
+        </div>
+        <div class="tour-panel" id="tour-panel-changes" role="tabpanel" aria-labelledby="tour-tab-changes">
+          <div class="tour-copy">
+            <h3>Turn scattered notes into a clear to-do list</h3>
+            <p>Jot down every edit you want on your site as you notice it. When you're ready, send them to your developer, a technician or an AI tool as one tidy, numbered list — and keep a dated record of what's been done.</p>
+            <ul class="tour-points">
+              <li>Paste a list: one request per line</li>
+              <li>Pending, Sent, Done — always know what's waiting on whom</li>
+              <li>A dated changelog you can copy as release notes</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span><div class="shot-url">unybase.unywebs.com/dashboard/changes</div></div>
+            <div class="shot-body">
+              <a class="shot-link" href="assets/screens/changes-v1.webp" target="_blank" rel="noopener"><img src="assets/screens/changes-v1.webp" width="1440" height="1334" alt="Change requests: a logging box, status tabs, bulk copy and a list grouped by date." loading="lazy" decoding="async" /></a>
+              <span class="hotspot hotspot-right" style="left:32%;top:31.5%;"><span class="hotspot-dot"></span><span class="hotspot-label">One request per line</span></span><span class="hotspot hotspot-bottom" style="left:45.7%;top:69.6%;"><span class="hotspot-dot"></span><span class="hotspot-label">One click: a brief for your developer</span></span><span class="hotspot hotspot-right" style="left:63.5%;top:54.4%;"><span class="hotspot-dot"></span><span class="hotspot-label">Backlog and changelog</span></span>
+            </div>
+          </figure>
+        </div>
+      </div>
+
+      <p class="tour-more">These are real screens, shown with a demo workspace. <a href="https://unybase.unywebs.com/guide">Read the full visual guide &rarr;</a></p>
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <section id="alerts">
+    <div class="wrap alerts-grid">
+      <div class="alerts-copy reveal">
+        <p class="eyebrow-label">Early warnings</p>
+        <h2>Warned before anything breaks.</h2>
+        <p class="alerts-sub">Expired keys and lapsed domains are the quiet way sites go down. UnyBase emails you while there's still time to fix them.</p>
+
+        <div class="timeline" role="img" aria-label="Credential warnings 14, 7 and 1 days before expiry; domain and SSL warnings 30, 14, 7 and 1 days before.">
+          <div class="timeline-row">
+            <span class="timeline-name">Credentials</span>
+            <div class="timeline-track">
+              <span class="timeline-pt" style="left:53%"><b>14d</b></span>
+              <span class="timeline-pt" style="left:77%"><b>7d</b></span>
+              <span class="timeline-pt is-hot" style="left:97%"><b>1d</b></span>
+            </div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-name">Domains &amp; SSL</span>
+            <div class="timeline-track">
+              <span class="timeline-pt" style="left:0%"><b>30d</b></span>
+              <span class="timeline-pt" style="left:53%"><b>14d</b></span>
+              <span class="timeline-pt" style="left:77%"><b>7d</b></span>
+              <span class="timeline-pt is-hot" style="left:97%"><b>1d</b></span>
+            </div>
+          </div>
+          <div class="timeline-axis"><span>30 days out</span><span>Expiry</span></div>
+        </div>
+
+        <ul class="tour-points alerts-points">
+          <li>An email the moment a working key fails its nightly check</li>
+          <li>Each warning names the account and where it&rsquo;s used</li>
+          <li>Reply to any alert and a person answers</li>
+        </ul>
+      </div>
+
+      <div class="mail-mock reveal" aria-label="Example warning email">
+        <div class="mail-meta">
+          <div><span>From</span> UnyBase</div>
+          <div><span>Subject</span> Credential expiring: Storefront deploy token</div>
+        </div>
+        <div class="mail-card">
+          <div class="mail-brand"><span>uny</span><span>base</span></div>
+          <div class="mail-h">A credential is about to expire</div>
+          <p><strong>Storefront deploy token</strong> expires in 7 days.</p>
+          <p>Account: <strong>acme-studio</strong> (client account)</p>
+          <p>Rotating it before the deadline avoids the silent breakage that happens when a token dies mid-deploy.</p>
+          <span class="mail-cta">Open the vault</span>
         </div>
       </div>
     </div>
@@ -174,7 +343,7 @@
   </div>
 </footer>
 
-<script src="js/config.js?v=20261010"></script>
-<script src="js/main.js?v=20261010"></script>
+<script src="js/config.js?v=20261031"></script>
+<script src="js/main.js?v=20261031"></script>
 </body>
 </html>

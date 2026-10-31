@@ -11,6 +11,8 @@ straight upload; every change is a single-file diff.
 index.html          Homepage: hero, problem, features, pricing
 assets/logo.png     Brand mark (used in header and footer)
 assets/favicon.png  Browser tab icon
+assets/screens/     Dashboard screenshots for the tour (copied from the
+                    app's guide: app/public/guide/dark/*.webp)
 css/style.css       All styles (design tokens, layout, components)
 js/config.js        Pricing + app URLs (single source of truth — edit here)
 js/main.js          Pricing toggle, mobile nav, scroll-reveal
@@ -23,6 +25,11 @@ vercel.json         Static hosting config (clean URLs, asset caching)
 - **App links** (login, signup) → `js/config.js` (`window.UNYBASE_CONFIG.appUrls`)
 - **Copy in sections** (hero, features, pricing headings) → `index.html`
 - **Visual design** → `css/style.css`
+- **Dashboard tour** (`#tour`) → screenshots in `assets/screens/`. They come
+  from the app's visual guide (`app/scripts/capture-guide.cjs` regenerates
+  them). When refreshing, save with a new suffix (`-v2.webp`) and update
+  `index.html` — `/assets/` is cached for a year. Hotspot positions are
+  percentages of the image, set inline in `index.html`.
 
 ## How pricing flows into the app
 

@@ -120,6 +120,38 @@
     });
   }
 
+  /* ---------------- Dashboard tour tabs ---------------- */
+
+  function initTour() {
+    var list = document.querySelector(".tour-tabs");
+    if (!list) return;
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute("aria-controls"));
+        if (panel) panel.classList.toggle("is-active", on);
+      });
+      if (focus) tab.focus();
+    }
+
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(t, false); });
+      t.addEventListener("keydown", function (e) {
+        var next = null;
+        if (e.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
+        if (e.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
+        if (e.key === "Home") next = tabs[0];
+        if (e.key === "End") next = tabs[tabs.length - 1];
+        if (next) { e.preventDefault(); select(next, true); }
+      });
+    });
+  }
+
   /* ---------------- Scroll-reveal (progressive enhancement) ---------------- */
 
   function initReveal() {
@@ -143,6 +175,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     initPricingSection();
     initMobileNav();
+    initTour();
     initReveal();
   });
 })();
