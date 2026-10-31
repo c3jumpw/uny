@@ -3,7 +3,8 @@
 // Prices must match what the systeme.io order forms charge
 // (go-unybase.unywebs.com): Basic $29.95/mo or $299.95/yr,
 // Premium $49.95/mo or $499.95/yr. The marketing site keeps its own
-// copy in unybase/js/config.js — change both together.
+// copy of prices, taglines and feature lists in unybase/js/config.js and
+// the static pricing cards in unybase/index.html — change all together.
 //
 // Checkout links are fixed constants (or env-configured), never taken
 // from client input, so sending a user to checkout can never become an
@@ -37,11 +38,13 @@ export const PLANS: Plan[] = [
     yearly: 299.95,
     tagline: "Single web apps and early-stage products.",
     features: [
-      "Credential vault with live health checks",
-      "Expiry warnings at 14, 7 and 1 days",
-      "Domain and SSL renewal tracking",
-      "Change requests log",
+      "Managed backend: database, auth, storage, realtime & server functions",
+      "Credential vault with nightly health checks",
+      "Expiry warnings for keys, domains & SSL",
+      "Change requests log for your developer",
       "Standard processing and memory limits",
+      "Monthly usage monitoring",
+      "Community and email support",
     ],
   },
   {
@@ -49,13 +52,14 @@ export const PLANS: Plan[] = [
     name: "Premium",
     monthly: 49.95,
     yearly: 499.95,
-    tagline: "AI-powered and integrated workspaces.",
+    tagline: "AI-powered and multi-app workspaces.",
     features: [
       "Everything in Basic",
       "Higher processing speeds",
-      "Larger memory limits",
-      "Headroom for embeddings, background jobs and multi-service pipelines",
-      "Best suited for AI-integrated workspaces",
+      "Larger memory limits for AI, embeddings & background jobs",
+      "Proactive diagnostics on app performance",
+      "Priority infrastructure support & faster response times",
+      "Priority access to new UnyBase features",
     ],
   },
 ];
