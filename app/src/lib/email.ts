@@ -106,7 +106,9 @@ export type TemplateName =
   | "trial_granted"
   | "trial_ending_soon"
   | "trial_ending_client"
-  | "trial_ended_client";
+  | "trial_ended_client"
+  | "site_paused"
+  | "site_restored";
 
 type Built = { subject: string; html: string };
 
@@ -193,6 +195,38 @@ export function buildTemplate(
           ctaLabel: "Resolve payment",
           ctaUrl: vars.billingUrl || `${APP_URL}/dashboard`,
           footerNote: `If you believe this was done in error, email ${SUPPORT_EMAIL} and we'll restore your access right away.`,
+        }),
+      };
+
+    case "site_paused": {
+      const where = vars.domain ? ` (${vars.domain})` : "";
+      return {
+        subject: `${vars.siteName || "Your app"} has been paused`,
+        html: shell({
+          heading: `${vars.siteName || "Your app"} is paused`,
+          body: `<p style="margin:0 0 12px;">We've paused <strong style="color:#e8eef7;">${vars.siteName || "your app"}</strong>${where}. Visitors now see a &ldquo;temporarily unavailable&rdquo; page instead of the app.</p>
+                 ${
+                   vars.reason
+                     ? `<p style="margin:0 0 12px;padding:12px 14px;background:#131f33;border-left:3px solid #f2a93b;border-radius:4px;color:#c8d6e8;"><strong style="color:#e8eef7;">Note:</strong> ${vars.reason}</p>`
+                     : ""
+                 }
+                 <p style="margin:0 0 12px;">Nothing has been deleted. Your data, accounts and records are exactly as they were, and webhooks and scheduled jobs keep running in the background.</p>
+                 <p style="margin:0;">Once the account is settled we switch it back on, and the app returns within about a minute. No changes are needed on your side.</p>`,
+          ctaLabel: "Contact us",
+          ctaUrl: `mailto:${SUPPORT_EMAIL}`,
+          footerNote: `If you believe this was done in error, reply to this email and we'll look at it right away.`,
+        }),
+      };
+    }
+
+    case "site_restored":
+      return {
+        subject: `${vars.siteName || "Your app"} is back online`,
+        html: shell({
+          heading: `${vars.siteName || "Your app"} is back online`,
+          body: `<p style="margin:0 0 12px;">We've switched <strong style="color:#e8eef7;">${vars.siteName || "your app"}</strong>${vars.domain ? ` (${vars.domain})` : ""} back on. Visitors will see it again within about a minute.</p>
+                 <p style="margin:0;">Everything is as you left it. No changes are needed on your side.</p>`,
+          footerNote: "Thanks for sorting that out.",
         }),
       };
 

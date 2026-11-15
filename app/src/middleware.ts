@@ -73,7 +73,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except static assets and image optimizer
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
+    // Everything except static assets, the image optimizer, and the
+    // licence check client apps call (public, high-volume, no session).
+    "/((?!_next/static|_next/image|favicon.ico|api/license/|license\\.js$|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };

@@ -249,6 +249,38 @@ nightly sweep at `/api/cron/sweep` (health re-checks, expiry warnings at
 3. `vercel.json` schedules the sweep at 07:00 UTC daily. Vercel Hobby
    allows one cron per project; confirm the plan supports it.
 
+## Phase 11 — Client app licensing (the kill switch) ✅
+
+Every client app Unywebs builds checks in with UnyBase about once a
+minute, so a non-paying client's app can be paused from the admin
+console instead of by logging into their tool.
+
+- `licensed_sites` table: one row per client app, SHA-256 of its key
+  (`unyl_` + 48 hex, shown once), optional link to the owner's UnyBase
+  account, switch mode (`auto` / `paused` / `active` = Always on), last
+  check-in time and origin. RLS: super admins only.
+- `licensed_site_state()` decides the state in one place: retired >
+  site Paused > Always on > no owner > owner cut off > owner exempt >
+  failed payment (grace) > active. Used by the endpoint and the admin
+  view `licensed_sites_admin`, so they cannot disagree.
+- `GET /api/license/status` (public, CORS open, `Authorization: Bearer
+  unyl_…`) → `{status: active|grace|paused, message, owner_message,
+  recheck_after}`. Unknown/retired key → 401; client apps fail open on
+  anything but a 200 "paused".
+- `/license.js`: drop-in script tag for static and browser-only sites
+  (neutral overlay when paused, caches the last answer, fails open).
+- `/admin/sites` (super admin): register a site, copy key and builder
+  prompt, switch Auto / Paused / Always on (type PAUSE to confirm),
+  new key, retire. Every action goes to `admin_actions`; the owner is
+  emailed (`site_paused` / `site_restored`) when the site actually
+  changes between paused and running. The account cutoff dialog says
+  how many linked sites it will pause.
+- Builder prompt (`src/lib/builderPrompt.ts`): the spec pasted into
+  Claude when building or rebuilding a client app, with a Next.js
+  reference implementation that was tested against every state.
+- Nothing auto-pauses: a failed payment only yields `grace`, which
+  client apps show to the client's own staff, never to the public.
+
 ## Phase 5+ (backlog)
 
 - Rebuild `/dashboard/domains` with real domain-management UX.

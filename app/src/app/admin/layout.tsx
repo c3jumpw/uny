@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserRole, canAccessAdmin } from "@/lib/admin";
 import { DashboardNav } from "@/components/DashboardNav";
+import { AdminTabs } from "@/components/AdminTabs";
 
 export default async function AdminLayout({
   children,
@@ -22,6 +23,8 @@ export default async function AdminLayout({
     <>
       <DashboardNav role={role} email={user.email ?? null} />
       <main className="wrap" style={{ paddingTop: 32, paddingBottom: 64 }}>
+        {/* Client sites (the kill switch) are super-admin only. */}
+        {role === "super_admin" ? <AdminTabs /> : null}
         {children}
       </main>
     </>

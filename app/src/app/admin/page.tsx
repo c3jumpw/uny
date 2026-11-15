@@ -91,6 +91,7 @@ export default async function AdminPage() {
     { data: eventsData },
     { data: actionsData },
     { data: syncData },
+    { data: sitesData },
   ] =
     await Promise.all([
       supabase.rpc("list_visible_users_for_admin"),
@@ -113,7 +114,17 @@ export default async function AdminPage() {
             .order("created_at", { ascending: false })
             .limit(12)
         : Promise.resolve({ data: [] as SyncRow[] }),
+      // Client sites on Auto follow the account, so a cutoff pauses them.
+      // RLS returns rows to super admins only; errors (table missing)
+      // just mean no count.
+      isSuperAdmin
+        ? supabase.from("licensed_sites").select("owner_id").eq("status_override", "auto").is("revoked_at", null)
+        : Promise.resolve({ data: [] as { owner_id: string | null }[] }),
     ]);
+  const sitesByOwner = new Map<string, number>();
+  for (const s of (sitesData as { owner_id: string | null }[] | null) ?? []) {
+    if (s.owner_id) sitesByOwner.set(s.owner_id, (sitesByOwner.get(s.owner_id) ?? 0) + 1);
+  }
   const syncLog = (syncData as SyncRow[] | null) ?? [];
 
   const users = (usersData as UserRow[] | null) ?? [];
@@ -306,6 +317,7 @@ export default async function AdminPage() {
                         targetUserId={row.user.user_id}
                         targetEmail={row.user.email}
                         currentlyActive={row.status.automations_active}
+                        siteCount={sitesByOwner.get(row.user.user_id) ?? 0}
                       />
                     </div>
                   </td>
@@ -349,12 +361,12 @@ export default async function AdminPage() {
                   <td>
                     <span
                       className={
-                        a.action_type === "cutoff"
+                        a.action_type === "cutoff" || a.action_type === "site_paused"
                           ? "pill"
                           : "pill pill-good"
                       }
                       style={
-                        a.action_type === "cutoff"
+                        a.action_type === "cutoff" || a.action_type === "site_paused"
                           ? { color: "#ffb3b3", borderColor: "rgba(240,80,80,.3)" }
                           : undefined
                       }

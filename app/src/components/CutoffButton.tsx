@@ -7,10 +7,13 @@ export function CutoffButton({
   targetUserId,
   targetEmail,
   currentlyActive,
+  siteCount = 0,
 }: {
   targetUserId: string;
   targetEmail: string;
   currentlyActive: boolean;
+  /** Client sites linked to this account on Auto: a cutoff pauses them too. */
+  siteCount?: number;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -98,12 +101,25 @@ export function CutoffButton({
                   This will pause automations for <strong>{targetEmail}</strong> and revoke
                   their API key. They will lose access to the UnyBase backend until you
                   restore. They will be notified by email (once SMTP is configured).
+                  {siteCount > 0 ? (
+                    <>
+                      {" "}
+                      <strong style={{ color: "var(--paper)" }}>
+                        {siteCount} client site{siteCount === 1 ? "" : "s"} linked to this account will
+                        show the &ldquo;temporarily unavailable&rdquo; page
+                      </strong>{" "}
+                      within about a minute (sites set to Always on keep running).
+                    </>
+                  ) : null}
                 </>
               ) : (
                 <>
                   This will resume automations for <strong>{targetEmail}</strong> and
                   un-revoke their API key. Existing integrations will start working again
                   without needing a new key.
+                  {siteCount > 0
+                    ? ` Its ${siteCount} linked client site${siteCount === 1 ? "" : "s"} come back within about a minute.`
+                    : ""}
                 </>
               )}
             </p>
