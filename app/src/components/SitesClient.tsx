@@ -552,7 +552,7 @@ function KeyReveal({
         <input readOnly value={licenseKey} onFocus={(e) => e.currentTarget.select()} className="mono" style={{ flex: 1, fontSize: "0.82rem" }} />
         <CopyButton text={licenseKey} label="Copy key" />
       </div>
-      <ol style={{ margin: "0 0 16px", paddingLeft: 20, fontSize: "0.88rem", lineHeight: 1.6 }}>
+      <ol style={{ margin: "0 0 16px", paddingLeft: 20, fontSize: "0.88rem", lineHeight: 1.6, listStyle: "decimal" }}>
         {rotated ? (
           <li>
             The old key stopped working just now. The app keeps running but stops checking in until you swap the key.

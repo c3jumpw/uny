@@ -281,6 +281,30 @@ console instead of by logging into their tool.
 - Nothing auto-pauses: a failed payment only yields `grace`, which
   client apps show to the client's own staff, never to the public.
 
+## Phase 12 — Getting-started tour for every role ✅
+
+- `/dashboard/tour` (menu: Help): a step-by-step tour with real
+  screenshots and numbered callouts, in four tracks: Getting started
+  (everyone), Shared access (collaborators), Technical admin and Super
+  admin. Admin tracks show only to those roles. Arrow keys, shareable
+  `?track=&step=` links, and "New" badges for steps added since the
+  viewer's last visit. The Overview card and welcome banner point to it.
+- One source for screenshot text: `src/lib/shotNotes.json` feeds both
+  the tour and `/guide`; `src/lib/tour.json` holds the steps.
+- Demo workspace (`/guide/demo`, GUIDE_CAPTURE=1 only) now also renders
+  Subscriptions (super and technical admin), Client sites and a shared
+  vault, from the real components (`AdminSubscriptionsView` was split
+  out of `/admin` for this).
+- Kept current automatically: `npm run build` runs
+  `scripts/check-guide.mjs` and fails if a page lacks a tour step or a
+  screenshot and its notes disagree; `.github/workflows/
+  guide-screenshots.yml` re-takes every screenshot on each push with a
+  frozen clock (`scripts/fake-now.cjs`), so it only commits real visual
+  changes. Instructions for future changes are in `/CLAUDE.md`.
+- Fixes found while capturing: the dashboard header was unreadable in
+  light mode and overflowed on phones; the account cutoff dialog
+  inherited right-aligned text.
+
 ## Phase 5+ (backlog)
 
 - Rebuild `/dashboard/domains` with real domain-management UX.

@@ -15,7 +15,7 @@ export function OnboardingShell({
       <header
         style={{
           borderBottom: "1px solid var(--line)",
-          background: "rgba(10,18,32,.9)",
+          background: "color-mix(in srgb, var(--ink) 92%, transparent)",
           backdropFilter: "saturate(140%) blur(10px)",
           position: "sticky",
           top: 0,

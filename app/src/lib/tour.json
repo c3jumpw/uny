@@ -1,0 +1,334 @@
+{
+ "_comment": "The in-app getting-started tour (/dashboard/tour). Every page route in src/app must be covered by a step's routes or listed in exempt with a reason; every step's shot must exist with callout notes. scripts/check-guide.mjs enforces this on every build. When you ship a new screen or change one, add or update its step here and bump 'updated'.",
+ "updated": "2026-11-18",
+ "tracks": [
+  {
+   "id": "client",
+   "label": "Getting started",
+   "audience": "For everyone with a workspace: from signing up to every page in the dashboard.",
+   "roles": [
+    "client",
+    "technical_admin",
+    "super_admin"
+   ],
+   "steps": [
+    {
+     "id": "c-signup",
+     "shot": "signup",
+     "title": "Create your account",
+     "summary": "Sign up with the email you'll pay with. You'll get a confirmation email straight away.",
+     "routes": [
+      "/start",
+      "/signup"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/guide#account",
+      "label": "Account help"
+     }
+    },
+    {
+     "id": "c-login",
+     "shot": "login",
+     "title": "Confirm your email and log in",
+     "summary": "The link in the confirmation email brings you here. Forgot your password? Reset it from the same page.",
+     "routes": [
+      "/login",
+      "/forgot-password",
+      "/reset-password"
+     ],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-plans",
+     "shot": "plans",
+     "title": "Choose your plan",
+     "summary": "Pick Basic or Premium, monthly or yearly, and pay at the secure checkout. Your dashboard opens as soon as the payment arrives.",
+     "routes": [
+      "/plans"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/plans",
+      "label": "See plans"
+     }
+    },
+    {
+     "id": "c-overview",
+     "shot": "overview",
+     "title": "Your overview",
+     "summary": "Your subscription, credentials that need attention, the next domain renewal and open change requests, all on one screen.",
+     "routes": [
+      "/dashboard",
+      "/onboarding/developer",
+      "/onboarding/manual"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/dashboard",
+      "label": "Open Overview"
+     }
+    },
+    {
+     "id": "c-vault",
+     "shot": "vault",
+     "title": "The vault",
+     "summary": "Every key, token and login your apps depend on, encrypted, checked every night and sorted so problems come first.",
+     "routes": [
+      "/dashboard/vault"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/dashboard/vault",
+      "label": "Open Vault"
+     }
+    },
+    {
+     "id": "c-vault-add",
+     "shot": "vault-add",
+     "title": "Add a credential",
+     "summary": "Paste the key once. UnyBase encrypts it, tracks its expiry and tests it every night.",
+     "routes": [],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-vault-card",
+     "shot": "vault-card",
+     "title": "Reveal, copy and check a credential",
+     "summary": "Each credential shows its health, owner and expiry. Reveal or copy it when you need it; every reveal is logged.",
+     "routes": [],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-vault-share",
+     "shot": "vault-share",
+     "title": "Share credentials with your developer",
+     "summary": "Give someone access to all your credentials or just one system, for as long as you choose. Revoke it in one click.",
+     "routes": [],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-domains",
+     "shot": "domains",
+     "title": "Domains and renewals",
+     "summary": "Where each domain is registered, who owns the account, and when it and its SSL certificate renew.",
+     "routes": [
+      "/dashboard/domains"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/dashboard/domains",
+      "label": "Open Domains"
+     }
+    },
+    {
+     "id": "c-domains-add",
+     "shot": "domains-add",
+     "title": "Add a domain",
+     "summary": "Record the registrar, the DNS login and the renewal dates. You're emailed 30, 14, 7 and 1 days before each one.",
+     "routes": [],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-changes",
+     "shot": "changes",
+     "title": "Log change requests",
+     "summary": "Write down every edit you want made to your apps, one per line, and keep a dated record.",
+     "routes": [
+      "/dashboard/changes"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/dashboard/changes",
+      "label": "Open Changes"
+     }
+    },
+    {
+     "id": "c-changes-done",
+     "shot": "changes-done",
+     "title": "Send changes and mark them done",
+     "summary": "Copy a batch for your developer in one click, then tick requests off as they're finished.",
+     "routes": [],
+     "added": "2026-10-31"
+    },
+    {
+     "id": "c-settings",
+     "shot": "settings",
+     "title": "Give a technical admin access",
+     "summary": "Let your developer or agency work in your workspace, with an end date if you want one. Revoke it any time.",
+     "routes": [
+      "/dashboard/settings"
+     ],
+     "added": "2026-10-31",
+     "link": {
+      "href": "/dashboard/settings",
+      "label": "Open Settings"
+     }
+    }
+   ]
+  },
+  {
+   "id": "shared",
+   "label": "Shared access",
+   "audience": "For developers and contractors a client has shared credentials with.",
+   "roles": [
+    "client",
+    "technical_admin",
+    "super_admin"
+   ],
+   "steps": [
+    {
+     "id": "s-login",
+     "shot": "login",
+     "title": "Log in with the email you were invited with",
+     "summary": "Sign up or log in with the address the client shared with. You don't need a plan of your own to see what they shared.",
+     "routes": [],
+     "added": "2026-11-18"
+    },
+    {
+     "id": "s-vault",
+     "shot": "vault-shared",
+     "title": "Your shared vault",
+     "summary": "Only what the client shared appears, labelled with their email. Access ends on the date they set, or when they revoke it.",
+     "routes": [],
+     "added": "2026-11-18",
+     "link": {
+      "href": "/dashboard/vault",
+      "label": "Open Vault"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tech",
+   "label": "Technical admin",
+   "audience": "For agencies and developers a client has granted technical-admin access.",
+   "roles": [
+    "technical_admin",
+    "super_admin"
+   ],
+   "steps": [
+    {
+     "id": "t-vault",
+     "shot": "vault-shared",
+     "title": "Your clients' workspaces",
+     "summary": "Once a client grants you access in their Settings, their credentials, domains and change requests appear in your own pages, labelled with their email.",
+     "routes": [],
+     "added": "2026-11-18",
+     "link": {
+      "href": "/dashboard/vault",
+      "label": "Open Vault"
+     }
+    },
+    {
+     "id": "t-admin",
+     "shot": "admin-tech",
+     "title": "Your clients' subscriptions",
+     "summary": "Admin shows the payment status of each workspace you're granted, worst first, so you can see who needs a nudge.",
+     "routes": [
+      "/admin"
+     ],
+     "added": "2026-11-18",
+     "link": {
+      "href": "/admin",
+      "label": "Open Admin"
+     }
+    },
+    {
+     "id": "t-cutoff",
+     "shot": "admin-cutoff",
+     "title": "Cut off and restore",
+     "summary": "Nothing cuts off on its own. When a client hasn't paid, you decide, and Restore brings everything back.",
+     "routes": [],
+     "added": "2026-11-18"
+    }
+   ]
+  },
+  {
+   "id": "super",
+   "label": "Super admin",
+   "audience": "For Unywebs staff who run billing, trials and the client-site kill switch.",
+   "roles": [
+    "super_admin"
+   ],
+   "steps": [
+    {
+     "id": "a-admin",
+     "shot": "admin",
+     "title": "Subscriptions",
+     "summary": "Every workspace on the platform, worst payment status first, with the actions for each.",
+     "routes": [
+      "/admin"
+     ],
+     "added": "2026-11-18",
+     "link": {
+      "href": "/admin",
+      "label": "Open Subscriptions"
+     }
+    },
+    {
+     "id": "a-trial",
+     "shot": "admin-trial",
+     "title": "Give a manual trial",
+     "summary": "Free access until a date you choose, with automatic reminders before it ends.",
+     "routes": [],
+     "added": "2026-11-18"
+    },
+    {
+     "id": "a-cutoff",
+     "shot": "admin-cutoff",
+     "title": "Cut off an account",
+     "summary": "Pauses the account's automations and every client site linked to it. Always a deliberate, logged decision.",
+     "routes": [],
+     "added": "2026-11-18"
+    },
+    {
+     "id": "a-audit",
+     "shot": "admin-audit",
+     "title": "systeme.io tags and the audit trail",
+     "summary": "Check that customers are tagged in systeme.io, re-sync if needed, and see every admin action with its reason.",
+     "routes": [],
+     "added": "2026-11-18"
+    },
+    {
+     "id": "a-sites",
+     "shot": "sites",
+     "title": "Client sites: the kill switch",
+     "summary": "Every client app Unywebs builds checks in here. Pause one and its visitors see a neutral page within a minute.",
+     "routes": [
+      "/admin/sites"
+     ],
+     "added": "2026-11-18",
+     "link": {
+      "href": "/admin/sites",
+      "label": "Open Client sites"
+     }
+    },
+    {
+     "id": "a-sites-key",
+     "shot": "sites-key",
+     "title": "Register a site and copy its key",
+     "summary": "Each app gets its own key, shown once. Put it in the app's hosting and paste the builder prompt into Claude.",
+     "routes": [],
+     "added": "2026-11-18"
+    },
+    {
+     "id": "a-sites-pause",
+     "shot": "sites-pause",
+     "title": "Pause and restore a site",
+     "summary": "Type PAUSE to confirm. The owner is emailed, and switching back brings the app back within a minute.",
+     "routes": [],
+     "added": "2026-11-18"
+    }
+   ]
+  }
+ ],
+ "exempt": {
+  "/": "Redirects to the dashboard or the login page.",
+  "/guide": "The full written guide; the tour links to it.",
+  "/guide/demo": "Sample screens the screenshots are taken from. Switched off in production.",
+  "/dashboard/tour": "This tour.",
+  "/dashboard/team": "Coming-soon placeholder. Give it a tour step when it ships.",
+  "/invite/[token]": "Placeholder until the team system ships."
+ }
+}

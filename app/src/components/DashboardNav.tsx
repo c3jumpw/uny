@@ -14,7 +14,7 @@ const LINKS = [
   { href: "/dashboard/vault", label: "Vault" },
   { href: "/dashboard/changes", label: "Changes" },
   { href: "/dashboard/settings", label: "Settings" },
-  { href: "/guide", label: "Guide" },
+  { href: "/dashboard/tour", label: "Help" },
 ];
 
 export function DashboardNav({
@@ -42,13 +42,14 @@ export function DashboardNav({
         position: "sticky",
         top: 0,
         zIndex: 40,
-        background: "rgba(10,18,32,.9)",
+        // Follows the theme: a fixed dark bar left the menu unreadable in light mode.
+        background: "color-mix(in srgb, var(--ink) 92%, transparent)",
         backdropFilter: "saturate(140%) blur(10px)",
         borderBottom: "1px solid var(--line)",
       }}
     >
       <div
-        className="wrap"
+        className="wrap dash-head"
         style={{
           display: "flex",
           alignItems: "center",
@@ -63,7 +64,7 @@ export function DashboardNav({
           <Image src="/logo.png" alt="UnyBase" width={120} height={24} priority />
         </Link>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <nav className="dash-links" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {LINKS.map((l) => {
             const active =
               l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href);
@@ -104,7 +105,7 @@ export function DashboardNav({
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <ThemeToggle compact />
           {email ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.2 }}>
+            <div className="dash-user" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.2 }}>
               <span style={{ color: "var(--paper)", fontSize: "0.85rem" }}>{email}</span>
               <span style={{ color: "var(--muted)", fontSize: "0.75rem" }}>{roleLabel(role)}</span>
             </div>

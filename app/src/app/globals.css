@@ -237,3 +237,27 @@ textarea {
 .tbl tr:last-child td {
   border-bottom: 0;
 }
+
+/* Dashboard header on narrow screens: the menu becomes its own
+   scrollable row under the logo instead of pushing the page sideways. */
+@media (max-width: 900px) {
+  .dash-head {
+    flex-wrap: wrap;
+    height: auto !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    row-gap: 8px;
+  }
+  .dash-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .dash-links > a {
+    flex: none;
+  }
+  .dash-user {
+    display: none !important;
+  }
+}

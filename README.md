@@ -12,3 +12,12 @@ UnyBase is one of its products. All apps share one Supabase project.
 
 Each folder is its own Vercel project, using that folder as its root
 directory. A push to `main` deploys whichever projects changed.
+
+## In-app help
+
+The UnyBase app has a getting-started tour at `/dashboard/tour` (Help in
+the menu) with a track for each kind of user, and a long-form guide at
+`/guide`. Both use real screenshots taken from a demo workspace. The
+build fails if a page has no tour step, and CI re-takes the screenshots
+on every push. See CLAUDE.md for how to keep them current.
+

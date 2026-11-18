@@ -1,30 +1,48 @@
 import shots from "@/lib/guideShots.json";
+import notes from "@/lib/shotNotes.json";
 import s from "@/app/guide/guide.module.css";
+import { inline } from "@/components/guide/inline";
 
 type Mark = { x: number; y: number; w: number; h: number };
 type ShotData = { w: number; h: number; marks: Mark[] };
 const SHOTS = shots as Record<string, ShotData>;
+const NOTES = notes as Record<string, { alt: string; items: string[] }>;
+
+export function shotExists(id: string): boolean {
+  return Boolean(SHOTS[id] && NOTES[id]);
+}
 
 // An annotated screenshot: the real screen (light and dark versions,
 // swapped by the theme toggle), numbered boxes over the controls, and
 // a matching numbered legend. Hovering a legend line highlights its box.
+//
+// The legend text and alt text come from src/lib/shotNotes.json, one
+// entry per screenshot, shared by the guide and the getting-started
+// tour. scripts/check-guide.mjs fails the build if a screenshot's
+// callout count and its notes ever disagree.
 export function Shot({
   id,
-  alt,
-  items,
+  alt: altOverride,
+  items: itemsOverride,
+  vars,
   caption,
   split = false,
   wideLegend = false,
 }: {
   id: string;
-  alt: string;
-  items: React.ReactNode[];
+  alt?: string;
+  items?: React.ReactNode[];
+  vars?: Record<string, string | number>;
   caption?: React.ReactNode;
   split?: boolean;
   wideLegend?: boolean;
 }) {
   const data = SHOTS[id];
+  const note = NOTES[id];
   if (!data) return null;
+  const alt = altOverride ?? note?.alt ?? "";
+  const items: React.ReactNode[] =
+    itemsOverride ?? (note?.items ?? []).map((t) => inline(t, vars, s.kbd));
   const marks = data.marks.slice(0, items.length);
 
   const frame = (

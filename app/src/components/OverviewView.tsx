@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TourNewBadge } from "@/components/TourNewBadge";
 
 // The dashboard overview, as a pure view. The page fetches the
 // numbers; this renders them. Kept separate so the user guide can
@@ -110,13 +111,16 @@ export function OverviewView({ data }: { data: OverviewData }) {
         </div>
 
         <div className="card" data-guide="guide-card">
-          <div style={cardLabel}>New to UnyBase?</div>
-          <div style={bigNumber}>The visual guide</div>
-          <div style={{ color: "var(--paper-dim)", fontSize: "0.85rem", marginBottom: 4 }}>
-            Every page and button, with screenshots.
+          <div style={cardLabel}>Getting started</div>
+          <div style={bigNumber}>
+            Take the tour
+            <TourNewBadge />
           </div>
-          <Link href="/guide" style={cardLink}>
-            Take the 10-minute tour →
+          <div style={{ color: "var(--paper-dim)", fontSize: "0.85rem", marginBottom: 4 }}>
+            Every screen, step by step, with screenshots.
+          </div>
+          <Link href="/dashboard/tour" style={cardLink}>
+            Start the tour →
           </Link>
         </div>
 
@@ -183,8 +187,8 @@ function WelcomeBanner() {
         <Link href="/dashboard/domains" className="btn btn-ghost" style={{ padding: "8px 14px" }}>
           2. Add your domains
         </Link>
-        <Link href="/guide" className="btn btn-ghost" style={{ padding: "8px 14px" }}>
-          3. Read the guide
+        <Link href="/dashboard/tour" className="btn btn-ghost" style={{ padding: "8px 14px" }}>
+          3. Take the tour
         </Link>
       </div>
     </div>

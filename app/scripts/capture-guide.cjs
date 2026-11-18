@@ -12,7 +12,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const BASE = 'http://localhost:3123';
+const BASE = process.env.GUIDE_BASE || 'http://localhost:3123';
 const OUT = process.argv[2];
 const DSF = 1.5;
 
@@ -302,6 +302,181 @@ const SHOTS = [
       await box(p.locator('.card', { hasText: 'support@pixelforge.dev' })),
     ],
   },
+
+  // ---- Admin tracks of the getting-started tour -------------------
+  {
+    id: 'admin', vw: 1280, url: '/guide/demo?shot=admin', vh: 1200,
+    clip: async (p) => {
+      const tabs = await box(p.locator('nav[aria-label="Admin sections"]'));
+      const t = await box(p.locator('[data-guide=admin-table]'));
+      return { x: 0, y: tabs.y - 16, width: p.viewportSize().width, height: t.y + t.height + 20 - (tabs.y - 16) };
+    },
+    marks: async (p) => {
+      const row = p.locator('[data-guide=admin-table] tbody tr').first();
+      const td = (n) => row.locator('td').nth(n);
+      return [
+        await box(p.locator('[data-guide=admin-scope]')),
+        await box(p.getByRole('button', { name: 'Import subscribers' })),
+        await box(p.locator('[data-guide=status-legend]')),
+        await box(td(0)),
+        await box(td(1)),
+        union(await box(td(2)), await box(td(3))),
+        await box(td(4)),
+        await box(td(5)),
+      ];
+    },
+  },
+  {
+    id: 'admin-audit', vw: 1280, url: '/guide/demo?shot=admin', vh: 2400,
+    clip: async (p) => pad(union(await box(p.locator('[data-guide=systeme-panel]')), await box(p.locator('[data-guide=admin-actions]'))), 12),
+    marks: async (p) => {
+      const panel = p.locator('[data-guide=systeme-panel]');
+      return [
+        union(await box(panel.getByText('systeme.io segments')), await box(panel.getByText(/^Signups get/))),
+        await box(panel.getByRole('button', { name: 'Sync tags now' })),
+        await box(panel.locator('table')),
+        await box(p.locator('[data-guide=admin-actions]')),
+      ];
+    },
+  },
+  {
+    id: 'admin-trial', vw: 1280, url: '/guide/demo?shot=admin', vh: 1100,
+    act: async (p) => {
+      const row = p.locator('[data-guide=admin-table] tbody tr', { hasText: 'sam@newbakery.co' });
+      await row.getByRole('button', { name: 'Trial' }).click();
+      const m = p.locator('h2', { hasText: 'Start a manual trial' }).locator('xpath=..');
+      await m.getByRole('button', { name: '30 days' }).click();
+      await field(m, 'Note (internal)').locator('input').fill('Demo call: wants to try it on 2 sites');
+    },
+    clip: async (p) => pad(await box(p.locator('h2', { hasText: 'Start a manual trial' }).locator('xpath=..')), 0),
+    marks: async (p) => {
+      const m = p.locator('h2', { hasText: 'Start a manual trial' }).locator('xpath=..');
+      return [
+        await box(m.getByRole('button', { name: '14 days' }).locator('xpath=..')),
+        await box(field(m, 'Trial ends on')),
+        await box(field(m, 'Note (internal)')),
+        await box(m.locator('label', { hasText: 'Email them that the trial is on' })),
+        await box(m.getByRole('button', { name: 'Start trial' })),
+      ];
+    },
+  },
+  {
+    id: 'admin-cutoff', vw: 1280, url: '/guide/demo?shot=admin', vh: 1100,
+    act: async (p) => {
+      const row = p.locator('[data-guide=admin-table] tbody tr', { hasText: 'owner@joestires.com' });
+      await row.getByRole('button', { name: 'Cut off' }).click();
+      const m = p.locator('h2', { hasText: 'Cut off automations?' }).locator('xpath=..');
+      await m.locator('textarea').fill('21 days lapsed, no reply to three reminders');
+      await field(m, 'to confirm').locator('input').fill('CUTOFF');
+    },
+    clip: async (p) => pad(await box(p.locator('h2', { hasText: 'Cut off automations?' }).locator('xpath=..')), 0),
+    marks: async (p) => {
+      const m = p.locator('h2', { hasText: 'Cut off automations?' }).locator('xpath=..');
+      return [
+        await box(m.locator('p').first()),
+        await box(field(m, 'Reason')),
+        await box(field(m, 'to confirm')),
+        await box(m.getByRole('button', { name: 'Cut off', exact: true })),
+      ];
+    },
+  },
+  {
+    id: 'admin-tech', vw: 1280, url: '/guide/demo?shot=admin-tech', vh: 1000,
+    clip: async (p) => {
+      const h1 = await box(p.locator('main h1'));
+      const a = await box(p.locator('[data-guide=admin-actions]'));
+      return { x: 0, y: h1.y - 20, width: p.viewportSize().width, height: a.y + a.height + 20 - (h1.y - 20) };
+    },
+    marks: async (p) => {
+      const row = p.locator('[data-guide=admin-table] tbody tr').first();
+      return [
+        await box(p.locator('[data-guide=admin-scope]')),
+        await box(row.locator('td').nth(0)),
+        await box(row.locator('td').nth(5)),
+        await box(p.locator('[data-guide=admin-actions]')),
+      ];
+    },
+  },
+  {
+    id: 'sites', vw: 1280, url: '/guide/demo?shot=sites', vh: 1100,
+    clip: async (p) => {
+      const tabs = await box(p.locator('nav[aria-label="Admin sections"]'));
+      const prompt = await box(p.locator('details', { hasText: 'Builder prompt' }));
+      return { x: 0, y: tabs.y - 16, width: p.viewportSize().width, height: prompt.y + prompt.height + 20 - (tabs.y - 16) };
+    },
+    marks: async (p) => {
+      const row = p.locator('table tbody tr').first();
+      const td = (n) => row.locator('td').nth(n);
+      return [
+        await box(p.getByRole('button', { name: 'Register a site' })),
+        await box(p.getByText(/^4 sites/)),
+        await box(td(0)),
+        await box(td(2)),
+        await box(td(3)),
+        await box(td(4)),
+        await box(td(5)),
+        await box(p.locator('details', { hasText: 'Builder prompt' })),
+      ];
+    },
+  },
+  {
+    id: 'sites-key', vw: 1280, url: '/guide/demo?shot=sites', vh: 1000,
+    act: async (p) => {
+      await p.route('**/api/admin/sites', (r) =>
+        r.fulfill({ json: { ok: true, id: '9', key: 'unyl_7b2e91c04f6a3d58e0b1c97a2f4d6e8b13c5a7f9e2d4b6c8' } })
+      );
+      await p.getByRole('button', { name: 'Register a site' }).click();
+      const d = p.getByRole('dialog');
+      await d.locator('label', { hasText: 'Site or app name' }).locator('input').fill('Lakeside Florist shop');
+      await d.locator('label', { hasText: 'Client or business name' }).locator('input').fill('Lakeside Florist');
+      await d.locator('label', { hasText: 'Domain' }).locator('input').fill('shop.lakesideflorist.com');
+      await d.getByRole('button', { name: 'Register and get key' }).click();
+      await p.getByRole('dialog', { name: /is registered/ }).waitFor();
+    },
+    clip: async (p) => pad(await box(p.getByRole('dialog')), 0),
+    marks: async (p) => {
+      const d = p.getByRole('dialog');
+      return [
+        await box(d.locator('input[readonly]').locator('xpath=..')),
+        await box(d.locator('ol')),
+        await box(d.getByRole('button', { name: 'Copy builder prompt' })),
+        await box(d.getByRole('button', { name: /saved the key/ })),
+      ];
+    },
+  },
+  {
+    id: 'sites-pause', vw: 1280, url: '/guide/demo?shot=sites', vh: 1000,
+    act: async (p) => {
+      const row = p.locator('table tbody tr', { hasText: 'Riverside Gym website' });
+      await row.getByRole('radio', { name: 'Paused' }).click();
+      const d = p.getByRole('dialog');
+      await d.locator('textarea').fill('Invoice 1077 unpaid 30 days after reminders');
+      await d.locator('label', { hasText: 'Type PAUSE' }).locator('input').fill('PAUSE');
+    },
+    clip: async (p) => pad(await box(p.getByRole('dialog')), 0),
+    marks: async (p) => {
+      const d = p.getByRole('dialog');
+      return [
+        await box(d.locator('p').first()),
+        await box(d.locator('label', { hasText: 'Reason' })),
+        await box(d.locator('label', { hasText: 'Type PAUSE' })),
+        await box(d.getByRole('button', { name: 'Pause site' })),
+      ];
+    },
+  },
+  {
+    id: 'vault-shared', vw: 960, url: '/guide/demo?shot=vault-shared', vh: 1600,
+    clip: async (p) => pad(await box(p.locator('.card', { hasText: 'Storefront deploy token' })), 12),
+    marks: async (p) => {
+      const card = p.locator('.card', { hasText: 'Storefront deploy token' });
+      return [
+        await box(card.getByText(/^Shared by/)),
+        union(await box(card.getByText('ghp_…9fQ2')), await box(card.getByRole('button', { name: 'Reveal', exact: true }))),
+        await box(card.getByText('Healthy', { exact: true })),
+        await box(card.getByRole('button', { name: 'Check' })),
+      ];
+    },
+  },
 ];
 
 function pad(b, n) {
@@ -333,7 +508,10 @@ if (process.argv[2] === '--convert') {
   for (const theme of ['dark', 'light']) {
     for (const s of SHOTS) {
       if (only && !only.includes(s.id)) continue;
-      const ctx = await browser.newContext({ viewport: { width: s.vw || 1280, height: s.vh }, deviceScaleFactor: DSF });
+      const ctx = await browser.newContext({ viewport: { width: s.vw || 1280, height: s.vh }, deviceScaleFactor: DSF, timezoneId: 'UTC', locale: 'en-US' });
+      // Same frozen instant as the server (scripts/fake-now.cjs), so
+      // client-side "x min ago" labels match and re-runs are identical.
+      await ctx.clock.setFixedTime(new Date(process.env.GUIDE_NOW || '2026-11-18T14:00:00Z'));
       await ctx.addInitScript((t) => { try { localStorage.setItem('unybase-theme', t); } catch (e) {} }, theme);
       const p = await ctx.newPage();
       await p.goto(BASE + s.url, { waitUntil: 'load' });
@@ -361,7 +539,14 @@ if (process.argv[2] === '--convert') {
       await ctx.close();
     }
   }
-  if (!only) fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 1));
-  else fs.writeFileSync(path.join(OUT, 'manifest.partial.json'), JSON.stringify(manifest, null, 1));
+  // A partial run (a comma-separated list of shot ids as the second
+  // argument) updates just those entries, starting from the existing
+  // manifest in OUT, or from src/lib/guideShots.json.
+  let full = manifest;
+  if (only) {
+    const prev = [path.join(OUT, 'manifest.json'), path.join(__dirname, '../src/lib/guideShots.json')].find((f) => fs.existsSync(f));
+    full = { ...(prev ? JSON.parse(fs.readFileSync(prev, 'utf8')) : {}), ...manifest };
+  }
+  fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify(full, null, 1));
   await browser.close();
 })().catch((e) => { console.error(e); process.exit(1); });

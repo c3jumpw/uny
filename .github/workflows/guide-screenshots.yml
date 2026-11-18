@@ -1,0 +1,74 @@
+name: Refresh guide screenshots
+
+# Keeps the in-app getting-started tour (/dashboard/tour) and the user
+# guide (/guide) in step with every update: when the app's screens
+# change, re-take every screenshot from the demo workspace and commit
+# the ones that differ. The clock is frozen during capture, so a run
+# with no visual change commits nothing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/src/**"
+      - "app/scripts/capture-guide.cjs"
+      - "app/scripts/refresh-guide.sh"
+      - "app/package.json"
+      - "app/package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: guide-screenshots
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    # Commits made here use GITHUB_TOKEN, which never re-triggers this
+    # workflow; the actor check is a second guard against loops.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        run: |
+          npm ci
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Re-take screenshots and check the tour
+        run: bash scripts/refresh-guide.sh "$RUNNER_TEMP/guide-shots"
+
+      - name: Commit changed screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/guide src/lib/guideShots.json
+          if git diff --cached --quiet; then
+            echo "Screenshots already match the app."
+            exit 0
+          fi
+          git commit -m "Refresh guide and tour screenshots" -m "Automated by .github/workflows/guide-screenshots.yml after ${GITHUB_SHA::7}."
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Keep the capture logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guide-capture-logs
+          path: ${{ runner.temp }}/guide-shots/server.log
+          if-no-files-found: ignore

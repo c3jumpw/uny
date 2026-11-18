@@ -1,0 +1,248 @@
+{
+ "signup": {
+  "alt": "The Create your account form with email, password and confirm password fields.",
+  "items": [
+   "**Progress.** Shows which of the four steps you're on.",
+   "**Email.** Use the address you'll pay with — that's how your payment is matched to your account.",
+   "**Show passwords.** Reveals both boxes so you can check for typos.",
+   "**Confirm password.** Type it again. You'll see a green *✓ Passwords match* when both agree.",
+   "**Create account.** Stays greyed out until both passwords match and are at least 8 characters."
+  ]
+ },
+ "inbox": {
+  "alt": "The Check your inbox page with a Resend confirmation email button.",
+  "items": [
+   "**What to do next.** Open the email from UnyBase and press *Confirm my email*.",
+   "**Resend.** Nothing arrived after a few minutes? Check spam, then send a fresh link. We also resend it once automatically after a day.",
+   "**Already confirmed?** Go straight to the login page."
+  ]
+ },
+ "login": {
+  "alt": "The login page showing an Email confirmed message.",
+  "items": [
+   "**Confirmation.** The link in your email lands here with this green note.",
+   "**Forgot password?** Emails you a link to set a new one.",
+   "**Log in.** New accounts go straight on to choosing a plan."
+  ]
+ },
+ "plans": {
+  "alt": "The plan picker with a Monthly / Yearly switch, Basic and Premium plans and checkout buttons.",
+  "items": [
+   "**Monthly or yearly.** Yearly saves {save}% compared with paying monthly.",
+   "**Your plan.** The one you picked on our website is already highlighted. Click the other card to switch.",
+   "**Continue to checkout.** Opens secure checkout in a new tab.",
+   "**Pick the matching option.** Monthly and yearly sit on the same checkout page — tick the one named here.",
+   "**Already paid?** Come back to this tab. It checks for your payment by itself for a few minutes; this button checks again immediately.",
+   "**Sign out.** You can leave and come back — you'll return to this page until checkout is done."
+  ]
+ },
+ "overview": {
+  "alt": "The Overview page with the top menu and summary cards for subscription, vault, domains, change requests and the guide.",
+  "items": [
+   "**Main menu.** Overview, Domains, Team, Vault, Changes, Settings and Help, which opens this getting-started tour and the full guide.",
+   "**Light / dark.** Switches the whole app between a light and a dark look. Your choice is remembered on this device.",
+   "**Your account.** The email you're logged in with.",
+   "**Sign out.** Always sign out on shared computers.",
+   "**Subscription.** Your plan's status. *Active* means everything is paid up.",
+   "**Vault.** How many credentials you store, and how many need attention.",
+   "**Domains.** How many you track, and the next one due for renewal.",
+   "**Change requests.** Edits still open, and how many haven't been sent to your developer yet.",
+   "**Getting started.** Opens the step-by-step tour of every screen. It shows *New* when steps have been added since your last visit."
+  ]
+ },
+ "vault": {
+  "alt": "The Vault page: a Sharing panel, a toolbar with filter, Check all and Add integration, and a credential card marked Failed.",
+  "items": [
+   "**Sharing.** Who else can see your credentials. [How sharing works](/guide#sharing)",
+   "**Attention summary.** How many credentials need a look. Problems are always sorted to the top.",
+   "**Filter by system.** Show only the credentials for one website or app.",
+   "**Check all.** Tests every credential right now. They're also tested automatically every night.",
+   "**Add integration.** Store a new credential. [Step by step](/guide#add-credential)",
+   "**Health.** The result of the last check (see the table below).",
+   "**System tag.** Which app or site it belongs to. Click it to filter by that system.",
+   "**Check · Edit · Delete.** Test this one now, change its details, or remove it.",
+   "**Last check result.** What the provider said, in plain words, and when."
+  ]
+ },
+ "vault-card": {
+  "alt": "A single credential card with the token revealed, a countdown, expiry, notes and the access history opened.",
+  "items": [
+   "**Provider.** The service the credential is for.",
+   "**Health.** Green means the last check passed.",
+   "**Whose account.** *Client account* means it belongs to you; *Agency account* means it's your agency's. Handy if you ever change agencies.",
+   "**Reveal.** Shows the full credential. It hides itself again after 45 seconds.",
+   "**Copy.** Copies it without ever showing it on screen — the safest way to use it.",
+   "**Expiry.** Turns orange two weeks before and red one week before it expires.",
+   "**Notes.** Anything the next person needs to know, like where to renew it.",
+   "**History.** Every check, edit and reveal — who did it and when."
+  ]
+ },
+ "vault-add": {
+  "alt": "The Add integration form filled in for a GitHub deploy token.",
+  "items": [
+   "**Name.** Something you'll recognise, like “Storefront deploy token”.",
+   "**App / tool / system.** Which site or app uses it. Reuse the same name to group things — it powers the filters and sharing.",
+   "**Provider.** Pick the service (GitHub, Supabase, Vercel, ClickUp, systeme.io…). Choose *Custom* for anything else and type its name.",
+   "**The credential.** Paste the key or token. It's encrypted as soon as you save.",
+   "**Account.** The username or email the key belongs to.",
+   "**Who owns that account?** You, or your agency.",
+   "**Expires on.** If the provider gave it an end date, add it here to get warnings.",
+   "**Notes.** Where to renew it, what uses it, who to ask.",
+   "**Add integration.** Saves it. Press *Check* on its card to test it straight away — it's also tested every night."
+  ]
+ },
+ "vault-share": {
+  "alt": "The Sharing panel with the share form filled in and an existing share listed.",
+  "items": [
+   "**Their email.** The address they'll log in with. They get an email letting them know.",
+   "**What to share.** One project / system, a single credential, or everything.",
+   "**Which one.** Pick the system (or credential) to share.",
+   "**Access expires.** In 7, 30 or 90 days, or until you revoke it.",
+   "**Share.** Takes effect immediately.",
+   "**Current shares.** Who has access, to what, and until when. *Revoke* ends it instantly."
+  ]
+ },
+ "domains": {
+  "alt": "The Domains page listing two domains with renewal dates, auto-renew status and edit buttons.",
+  "items": [
+   "**Add domain.** Track a new web address.",
+   "**Auto-renew.** Whether the registrar renews it by itself. *Off* means you must renew it by hand.",
+   "**Domain renewal.** Days until the domain expires. Domains due soonest are listed first.",
+   "**SSL.** When the security certificate (the padlock in the browser) expires.",
+   "**Whose account.** Registered under your account or your agency's.",
+   "**Edit · Delete.** Update the details or stop tracking it."
+  ]
+ },
+ "domains-add": {
+  "alt": "The Add domain form.",
+  "items": [
+   "**Domain name.** For example *yourbusiness.com*.",
+   "**App / tool / system.** Which site it points to.",
+   "**Registrar.** Where you bought it (Namecheap, GoDaddy…) and which login it's under.",
+   "**DNS.** Who manages its settings (often Cloudflare or the registrar).",
+   "**Expiry dates.** When the domain and the SSL certificate expire — both trigger warnings.",
+   "**Auto-renew.** Tick it if the registrar renews automatically.",
+   "**Add domain.** Saves it."
+  ]
+ },
+ "changes": {
+  "alt": "The Change requests page with the logging box, view tabs, bulk actions and a list grouped by date.",
+  "items": [
+   "**Log box.** One request per line. Paste a list straight from your notes — bullets and numbers are tidied up.",
+   "**App / type / priority.** Which site it's for, whether it's a *Fix*, *Change* or *New* feature, and how urgent.",
+   "**Add.** Adds every line as its own request. Shortcut: [[Ctrl]] + [[Enter]].",
+   "**Views.** *Backlog* is everything still open; *Changelog* is what's done, by date.",
+   "**Copy & mark sent.** Copies a numbered list to paste into an email, chat or AI tool, and marks those items as Sent.",
+   "**Status.** Move a single item along: Pending → Sent → Done (or Dropped).",
+   "**Copy · Edit · Delete.** Copy just this one, reword it, or remove it."
+  ]
+ },
+ "changes-done": {
+  "alt": "The Changelog view showing a done item with a resolution note.",
+  "items": [
+   "**Changelog.** Everything marked done, filed by the date it was finished.",
+   "**Copy changelog.** A dated list of what changed — ready to share as release notes.",
+   "**Done.** Finished and live.",
+   "**Resolution note.** Optional: the version, what was changed, or who did it."
+  ]
+ },
+ "settings": {
+  "alt": "The Settings page with the Grant access form and a list of who has access.",
+  "items": [
+   "**Their email.** The technical admin's UnyBase login.",
+   "**Access expires.** A set number of days, or until you revoke it.",
+   "**Grant access.** They're emailed and can see your workspace straight away.",
+   "**Who has access.** Everyone you've granted, with *Revoke* to end it instantly."
+  ]
+ },
+ "admin": {
+  "alt": "The Subscriptions admin: role and scope bar, status key, and a table of workspaces with status, plan, last payment, API key, events and actions.",
+  "items": [
+   "**Your role and scope.** Super admins see every workspace on the platform. A technical admin sees only the workspaces clients granted them.",
+   "**Import subscribers.** Add existing customers in bulk, so they get accounts without signing up themselves.",
+   "**Status key.** Every colour the status column can show. The worst cases sort to the top.",
+   "**Status.** Worked out live from the last failed payment: grace (0–3 days), warning (4–7), escalated (8–14), cutoff recommended (15+). Nothing cuts off on its own.",
+   "**Workspace.** The account email, its plan and billing cycle, and whether systeme.io has its signup and customer tags.",
+   "**Last payment and API key.** When money last arrived, and whether the account's UnyBase key is active or revoked.",
+   "**Recent events.** The latest payment events systeme.io sent for this account.",
+   "**Actions.** *Trial* gives free access until a date, *Exempt* marks an internal account that never pays, and *Cut off* pauses the account and every client site linked to it."
+  ]
+ },
+ "admin-audit": {
+  "alt": "The systeme.io segments panel with its Sync tags now button and sync log, above the Recent admin actions table.",
+  "items": [
+   "**systeme.io segments.** Signups get the signup tag and paying customers the customer tag. This line says whether the connection is set up.",
+   "**Sync tags now.** Re-checks every account against systeme.io and adds any missing tags. Safe to run any time.",
+   "**Sync log.** Each tagging attempt, its result, and the error if one failed.",
+   "**Recent admin actions.** Every cutoff, restore, trial, exemption and client-site change, with who did it, when and why."
+  ]
+ },
+ "admin-trial": {
+  "alt": "The Start a manual trial dialog with quick lengths, an end date, an internal note and an email option.",
+  "items": [
+   "**Quick lengths.** One click for a 14, 30, 60 or 90 day trial.",
+   "**Trial ends on.** Or pick any date. Access ends at the end of that day (UTC).",
+   "**Note.** For you and other admins, for example why the trial was given.",
+   "**Email them.** Tells the person their trial is on and when it ends. They're reminded 3 days and 1 day before.",
+   "**Start trial.** Full dashboard access straight away. When it ends they see the plan picker; nothing is deleted."
+  ]
+ },
+ "admin-cutoff": {
+  "alt": "The Cut off automations dialog, explaining that linked client sites will be paused, with a reason box and a type-CUTOFF confirmation.",
+  "items": [
+   "**What happens.** The account's automations pause, its API key is revoked, and every client site linked to it on Auto shows the unavailable page. The client is emailed.",
+   "**Reason.** Saved to the audit trail and included in the client's email.",
+   "**Type CUTOFF.** A deliberate extra step, so nobody is cut off by a stray click.",
+   "**Cut off.** Reversible: *Restore* on the same row brings everything back with the same key."
+  ]
+ },
+ "admin-tech": {
+  "alt": "The Subscriptions admin as a technical admin sees it: only the granted workspaces, with cut off and restore buttons.",
+  "items": [
+   "**Technical admin.** You see only the workspaces whose owners granted you access in their Settings.",
+   "**Status.** The same payment ladder super admins see, for your clients only.",
+   "**Cut off / Restore.** Available on workspaces you're granted. Trials, exemptions, imports and client sites stay with super admins.",
+   "**Recent admin actions.** What happened on your granted workspaces, by whom and why."
+  ]
+ },
+ "sites": {
+  "alt": "Admin, Client sites: a table of client apps with status, owner account, an Auto / Paused / Always on switch, last check-in and key actions.",
+  "items": [
+   "**Register a site.** Add a client app and get its licence key. The key is shown once.",
+   "**At a glance.** How many sites are paused, in grace, or not checking in.",
+   "**Status.** What the app is being told right now: Running, Grace (a billing notice for the client's staff only) or Paused.",
+   "**Owner account.** The UnyBase account the site follows on Auto, with that account's payment status. *Not linked* means the switch is manual only.",
+   "**Switch.** *Auto* follows the owner's account, *Paused* shows visitors a neutral “temporarily unavailable” page, *Always on* ignores the account.",
+   "**Last check-in.** When the app last asked, and from where. Amber means it isn't calling in, so it can't be paused yet.",
+   "**Key and actions.** Edit the details, issue a new key (the old one stops at once), or retire a site that's gone.",
+   "**Builder prompt.** Paste it into Claude when building or rebuilding a client app, so the app includes the check."
+  ]
+ },
+ "sites-key": {
+  "alt": "The site registered dialog showing the licence key once, the next steps, and buttons to copy the key and the builder prompt.",
+  "items": [
+   "**The key.** Shown once. Copy it straight into the app's hosting as `UNYBASE_LICENSE_KEY`.",
+   "**Next steps.** Set the key, add the check with the builder prompt, redeploy, then watch for the first check-in.",
+   "**Copy builder prompt.** The instructions to paste into Claude in the app's project.",
+   "**I've saved the key.** Closes the window. The key can't be shown again; issue a new one if it's lost."
+  ]
+ },
+ "sites-pause": {
+  "alt": "The Pause site dialog: what visitors will see, a reason box, and a type-PAUSE confirmation.",
+  "items": [
+   "**What visitors see.** A neutral “temporarily unavailable” page within about a minute. Data, webhooks and scheduled jobs keep running.",
+   "**Reason.** Saved to the audit trail and included in the owner's email.",
+   "**Type PAUSE.** A deliberate extra step, like the account cutoff.",
+   "**Pause site.** Switch back to *Auto* or *Always on* and the app returns within a minute."
+  ]
+ },
+ "vault-shared": {
+  "alt": "The Vault as someone with shared access sees it: credentials labelled Shared by the owner's email.",
+  "items": [
+   "**Shared by.** Credentials shared with you, or a client's credentials you manage, show whose workspace they belong to.",
+   "**Credential.** Reveal it when you need it. It hides again on its own, and every reveal shows in the owner's history.",
+   "**Health.** The result of the last live check, so you know a key still works before you deploy.",
+   "**Check.** Re-test the credential now. *History*, under its details, shows who changed or revealed it."
+  ]
+ }
+}

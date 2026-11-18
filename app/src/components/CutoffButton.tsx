@@ -90,6 +90,9 @@ export function CutoffButton({
               padding: 24,
               maxWidth: 480,
               width: "100%",
+              // The button sits in a right-aligned table cell; without
+              // this the whole dialog inherits right-aligned text.
+              textAlign: "left",
             }}
           >
             <h2 style={{ margin: "0 0 6px", fontSize: "1.2rem" }}>

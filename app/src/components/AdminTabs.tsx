@@ -8,8 +8,10 @@ const TABS = [
   { href: "/admin/sites", label: "Client sites" },
 ];
 
-export function AdminTabs() {
-  const pathname = usePathname();
+// `current` lets the tour's demo screens show the right tab as active.
+export function AdminTabs({ current }: { current?: string } = {}) {
+  const routePath = usePathname();
+  const pathname = current ?? routePath;
   return (
     <nav aria-label="Admin sections" style={{ display: "flex", gap: 6, marginBottom: 24, borderBottom: "1px solid var(--line)" }}>
       {TABS.map((t) => {

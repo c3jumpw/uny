@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/check-guide.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:guide": "node scripts/check-guide.mjs",
+    "capture:guide": "bash scripts/refresh-guide.sh"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.10",

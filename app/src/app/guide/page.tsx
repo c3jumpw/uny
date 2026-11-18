@@ -139,9 +139,14 @@ export default async function GuidePage() {
           <div className={s.topActions}>
             <ThemeToggle compact />
             {user ? (
-              <Link href="/dashboard" className="btn btn-ghost" style={{ padding: "7px 14px", fontSize: "0.85rem" }}>
-                ← Back to dashboard
-              </Link>
+              <>
+                <Link href="/dashboard/tour" className={`btn btn-ghost ${s.hideSm}`} style={{ padding: "7px 14px", fontSize: "0.85rem" }}>
+                  Step-by-step tour
+                </Link>
+                <Link href="/dashboard" className="btn btn-ghost" style={{ padding: "7px 14px", fontSize: "0.85rem" }}>
+                  ← Back to dashboard
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/login" className="btn btn-ghost" style={{ padding: "7px 14px", fontSize: "0.85rem" }}>
@@ -243,99 +248,16 @@ export default async function GuidePage() {
             </div>
 
             <h3>Create your account</h3>
-            <Shot
-              id="signup"
-              split
-              alt="The Create your account form with email, password and confirm password fields."
-              items={[
-                <>
-                  <strong>Progress.</strong> Shows which of the four steps you&apos;re on.
-                </>,
-                <>
-                  <strong>Email.</strong> Use the address you&apos;ll pay with — that&apos;s how your payment is
-                  matched to your account.
-                </>,
-                <>
-                  <strong>Show passwords.</strong> Reveals both boxes so you can check for typos.
-                </>,
-                <>
-                  <strong>Confirm password.</strong> Type it again. You&apos;ll see a green{" "}
-                  <em>✓ Passwords match</em> when both agree.
-                </>,
-                <>
-                  <strong>Create account.</strong> Stays greyed out until both passwords match and are at least 8
-                  characters.
-                </>,
-              ]}
-            />
+            <Shot id="signup" split />
 
             <h3>Confirm your email</h3>
-            <Shot
-              id="inbox"
-              split
-              alt="The Check your inbox page with a Resend confirmation email button."
-              items={[
-                <>
-                  <strong>What to do next.</strong> Open the email from UnyBase and press <em>Confirm my email</em>.
-                </>,
-                <>
-                  <strong>Resend.</strong> Nothing arrived after a few minutes? Check spam, then send a fresh link.
-                  We also resend it once automatically after a day.
-                </>,
-                <>
-                  <strong>Already confirmed?</strong> Go straight to the login page.
-                </>,
-              ]}
-            />
+            <Shot id="inbox" split />
 
             <h3>Log in</h3>
-            <Shot
-              id="login"
-              split
-              alt="The login page showing an Email confirmed message."
-              items={[
-                <>
-                  <strong>Confirmation.</strong> The link in your email lands here with this green note.
-                </>,
-                <>
-                  <strong>Forgot password?</strong> Emails you a link to set a new one.
-                </>,
-                <>
-                  <strong>Log in.</strong> New accounts go straight on to choosing a plan.
-                </>,
-              ]}
-            />
+            <Shot id="login" split />
 
             <h3>Choose your plan and pay</h3>
-            <Shot
-              id="plans"
-              wideLegend
-              alt="The plan picker with a Monthly / Yearly switch, Basic and Premium plans and checkout buttons."
-              items={[
-                <>
-                  <strong>Monthly or yearly.</strong> Yearly saves {save}% compared with paying monthly.
-                </>,
-                <>
-                  <strong>Your plan.</strong> The one you picked on our website is already highlighted. Click
-                  the other card to switch.
-                </>,
-                <>
-                  <strong>Continue to checkout.</strong> Opens secure checkout in a new tab.
-                </>,
-                <>
-                  <strong>Pick the matching option.</strong> Monthly and yearly sit on the same checkout page
-                  — tick the one named here.
-                </>,
-                <>
-                  <strong>Already paid?</strong> Come back to this tab. It checks for your payment by itself
-                  for a few minutes; this button checks again immediately.
-                </>,
-                <>
-                  <strong>Sign out.</strong> You can leave and come back — you&apos;ll return to this page until
-                  checkout is done.
-                </>,
-              ]}
-            />
+            <Shot id="plans" wideLegend vars={{ save }} />
             <div className={s.tableWrap}>
               <table className={s.statusTable}>
                 <thead>
@@ -368,44 +290,7 @@ export default async function GuidePage() {
               Every page has the same bar along the top. The <strong>Overview</strong> is your home page: a
               summary of your workspace, with anything that needs a look called out in orange.
             </p>
-            <Shot
-              id="overview"
-              wideLegend
-              alt="The Overview page with the top menu and summary cards for subscription, vault, domains, change requests and the guide."
-              items={[
-                <>
-                  <strong>Main menu.</strong> Overview, Domains, Team, Vault, Changes, Settings and this Guide (see
-                  the table below).
-                </>,
-                <>
-                  <strong>Light / dark.</strong> Switches the whole app between a light and a dark look. Your
-                  choice is remembered on this device.
-                </>,
-                <>
-                  <strong>Your account.</strong> The email you&apos;re logged in with.
-                </>,
-                <>
-                  <strong>Sign out.</strong> Always sign out on shared computers.
-                </>,
-                <>
-                  <strong>Subscription.</strong> Your plan&apos;s status. <em>Active</em> means everything is paid
-                  up.
-                </>,
-                <>
-                  <strong>Vault.</strong> How many credentials you store, and how many need attention.
-                </>,
-                <>
-                  <strong>Domains.</strong> How many you track, and the next one due for renewal.
-                </>,
-                <>
-                  <strong>Change requests.</strong> Edits still open, and how many haven&apos;t been sent to your
-                  developer yet.
-                </>,
-                <>
-                  <strong>The guide.</strong> A shortcut back to this page.
-                </>,
-              ]}
-            />
+            <Shot id="overview" wideLegend />
             <div className={s.tableWrap}>
               <table className={`${s.statusTable} ${s.menuTable}`}>
                 <thead>
@@ -443,8 +328,11 @@ export default async function GuidePage() {
                     <td>Who can access your whole workspace. <a href="#settings" style={{ color: "var(--sky)" }}>More ↓</a></td>
                   </tr>
                   <tr>
-                    <td>Guide</td>
-                    <td>This page.</td>
+                    <td>Help</td>
+                    <td>
+                      The getting-started tour: every screen step by step, with a track for each kind of user. It
+                      links back to this full guide.
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -458,42 +346,7 @@ export default async function GuidePage() {
               tokens, service logins. UnyBase checks each one still works and warns you before it expires, so
               a forgotten key never quietly takes your site down.
             </p>
-            <Shot
-              id="vault"
-              wideLegend
-              alt="The Vault page: a Sharing panel, a toolbar with filter, Check all and Add integration, and a credential card marked Failed."
-              items={[
-                <>
-                  <strong>Sharing.</strong> Who else can see your credentials. <a href="#sharing" style={{ color: "var(--sky)" }}>How sharing works ↓</a>
-                </>,
-                <>
-                  <strong>Attention summary.</strong> How many credentials need a look. Problems are always
-                  sorted to the top.
-                </>,
-                <>
-                  <strong>Filter by system.</strong> Show only the credentials for one website or app.
-                </>,
-                <>
-                  <strong>Check all.</strong> Tests every credential right now. They&apos;re also tested
-                  automatically every night.
-                </>,
-                <>
-                  <strong>Add integration.</strong> Store a new credential. <a href="#add-credential" style={{ color: "var(--sky)" }}>Step by step ↓</a>
-                </>,
-                <>
-                  <strong>Health.</strong> The result of the last check (see the table below).
-                </>,
-                <>
-                  <strong>System tag.</strong> Which app or site it belongs to. Click it to filter by that system.
-                </>,
-                <>
-                  <strong>Check · Edit · Delete.</strong> Test this one now, change its details, or remove it.
-                </>,
-                <>
-                  <strong>Last check result.</strong> What the provider said, in plain words, and when.
-                </>,
-              ]}
-            />
+            <Shot id="vault" wideLegend />
 
             <h3>What the colours mean</h3>
             <div className={s.tableWrap}>
@@ -531,38 +384,7 @@ export default async function GuidePage() {
             </div>
 
             <h3>Reading a credential card</h3>
-            <Shot
-              id="vault-card"
-              wideLegend
-              alt="A single credential card with the token revealed, a countdown, expiry, notes and the access history opened."
-              items={[
-                <>
-                  <strong>Provider.</strong> The service the credential is for.
-                </>,
-                <>
-                  <strong>Health.</strong> Green means the last check passed.
-                </>,
-                <>
-                  <strong>Whose account.</strong> <em>Client account</em> means it belongs to you;{" "}
-                  <em>Agency account</em> means it&apos;s your agency&apos;s. Handy if you ever change agencies.
-                </>,
-                <>
-                  <strong>Reveal.</strong> Shows the full credential. It hides itself again after 45 seconds.
-                </>,
-                <>
-                  <strong>Copy.</strong> Copies it without ever showing it on screen — the safest way to use it.
-                </>,
-                <>
-                  <strong>Expiry.</strong> Turns orange two weeks before and red one week before it expires.
-                </>,
-                <>
-                  <strong>Notes.</strong> Anything the next person needs to know, like where to renew it.
-                </>,
-                <>
-                  <strong>History.</strong> Every check, edit and reveal — who did it and when.
-                </>,
-              ]}
-            />
+            <Shot id="vault-card" wideLegend />
             <Note>
               <strong>Your credentials are encrypted</strong> before they&apos;re saved, are hidden unless you
               press Reveal, and every reveal is recorded in the card&apos;s History.
@@ -597,43 +419,7 @@ export default async function GuidePage() {
               Press <strong>Add integration</strong> on the Vault page. Only the name is required — fill in what
               you know and come back to the rest later.
             </p>
-            <Shot
-              id="vault-add"
-              split
-              alt="The Add integration form filled in for a GitHub deploy token."
-              items={[
-                <>
-                  <strong>Name.</strong> Something you&apos;ll recognise, like “Storefront deploy token”.
-                </>,
-                <>
-                  <strong>App / tool / system.</strong> Which site or app uses it. Reuse the same name to group
-                  things — it powers the filters and sharing.
-                </>,
-                <>
-                  <strong>Provider.</strong> Pick the service (GitHub, Supabase, Vercel, ClickUp, systeme.io…).
-                  Choose <em>Custom</em> for anything else and type its name.
-                </>,
-                <>
-                  <strong>The credential.</strong> Paste the key or token. It&apos;s encrypted as soon as you save.
-                </>,
-                <>
-                  <strong>Account.</strong> The username or email the key belongs to.
-                </>,
-                <>
-                  <strong>Who owns that account?</strong> You, or your agency.
-                </>,
-                <>
-                  <strong>Expires on.</strong> If the provider gave it an end date, add it here to get warnings.
-                </>,
-                <>
-                  <strong>Notes.</strong> Where to renew it, what uses it, who to ask.
-                </>,
-                <>
-                  <strong>Add integration.</strong> Saves it. Press <em>Check</em> on its card to test it straight
-                  away — it&apos;s also tested every night.
-                </>,
-              ]}
-            />
+            <Shot id="vault-add" split />
             <Tip>
               <strong>Where do I find my keys?</strong> In each service&apos;s settings, usually under
               “Developer”, “API” or “Tokens”. If someone else set up your site, ask them to add the credentials
@@ -648,33 +434,7 @@ export default async function GuidePage() {
               They log in with their own UnyBase account (free to create with the same email) and see only what
               you shared.
             </p>
-            <Shot
-              id="vault-share"
-              wideLegend
-              alt="The Sharing panel with the share form filled in and an existing share listed."
-              items={[
-                <>
-                  <strong>Their email.</strong> The address they&apos;ll log in with. They get an email letting
-                  them know.
-                </>,
-                <>
-                  <strong>What to share.</strong> One project / system, a single credential, or everything.
-                </>,
-                <>
-                  <strong>Which one.</strong> Pick the system (or credential) to share.
-                </>,
-                <>
-                  <strong>Access expires.</strong> In 7, 30 or 90 days, or until you revoke it.
-                </>,
-                <>
-                  <strong>Share.</strong> Takes effect immediately.
-                </>,
-                <>
-                  <strong>Current shares.</strong> Who has access, to what, and until when. <em>Revoke</em> ends it
-                  instantly.
-                </>,
-              ]}
-            />
+            <Shot id="vault-share" wideLegend />
             <h3>Sharing or Settings — which should I use?</h3>
             <div className={s.tableWrap}>
               <table className={s.statusTable}>
@@ -717,62 +477,8 @@ export default async function GuidePage() {
               A lapsed domain takes your whole site offline, so domains get their own page: where each one is
               registered, who manages its DNS, and when the domain and its security certificate (SSL) renew.
             </p>
-            <Shot
-              id="domains"
-              wideLegend
-              alt="The Domains page listing two domains with renewal dates, auto-renew status and edit buttons."
-              items={[
-                <>
-                  <strong>Add domain.</strong> Track a new web address.
-                </>,
-                <>
-                  <strong>Auto-renew.</strong> Whether the registrar renews it by itself. <em>Off</em> means you
-                  must renew it by hand.
-                </>,
-                <>
-                  <strong>Domain renewal.</strong> Days until the domain expires. Domains due soonest are listed
-                  first.
-                </>,
-                <>
-                  <strong>SSL.</strong> When the security certificate (the padlock in the browser) expires.
-                </>,
-                <>
-                  <strong>Whose account.</strong> Registered under your account or your agency&apos;s.
-                </>,
-                <>
-                  <strong>Edit · Delete.</strong> Update the details or stop tracking it.
-                </>,
-              ]}
-            />
-            <Shot
-              id="domains-add"
-              split
-              alt="The Add domain form."
-              items={[
-                <>
-                  <strong>Domain name.</strong> For example <em>yourbusiness.com</em>.
-                </>,
-                <>
-                  <strong>App / tool / system.</strong> Which site it points to.
-                </>,
-                <>
-                  <strong>Registrar.</strong> Where you bought it (Namecheap, GoDaddy…) and which login it&apos;s under.
-                </>,
-                <>
-                  <strong>DNS.</strong> Who manages its settings (often Cloudflare or the registrar).
-                </>,
-                <>
-                  <strong>Expiry dates.</strong> When the domain and the SSL certificate expire — both trigger
-                  warnings.
-                </>,
-                <>
-                  <strong>Auto-renew.</strong> Tick it if the registrar renews automatically.
-                </>,
-                <>
-                  <strong>Add domain.</strong> Saves it.
-                </>,
-              ]}
-            />
+            <Shot id="domains" wideLegend />
+            <Shot id="domains-add" split />
             <p>
               Domains get earlier warnings than credentials, because moving or rescuing a domain can take weeks:
             </p>
@@ -829,39 +535,7 @@ export default async function GuidePage() {
                 <div className={s.flowText}>Decided against — kept for the record.</div>
               </div>
             </div>
-            <Shot
-              id="changes"
-              wideLegend
-              alt="The Change requests page with the logging box, view tabs, bulk actions and a list grouped by date."
-              items={[
-                <>
-                  <strong>Log box.</strong> One request per line. Paste a list straight from your notes — bullets
-                  and numbers are tidied up.
-                </>,
-                <>
-                  <strong>App / type / priority.</strong> Which site it&apos;s for, whether it&apos;s a{" "}
-                  <em>Fix</em>, <em>Change</em> or <em>New</em> feature, and how urgent.
-                </>,
-                <>
-                  <strong>Add.</strong> Adds every line as its own request. Shortcut: <span className={s.kbd}>Ctrl</span>{" "}
-                  + <span className={s.kbd}>Enter</span>.
-                </>,
-                <>
-                  <strong>Views.</strong> <em>Backlog</em> is everything still open; <em>Changelog</em> is what&apos;s
-                  done, by date.
-                </>,
-                <>
-                  <strong>Copy &amp; mark sent.</strong> Copies a numbered list to paste into an email, chat or AI
-                  tool, and marks those items as Sent.
-                </>,
-                <>
-                  <strong>Status.</strong> Move a single item along: Pending → Sent → Done (or Dropped).
-                </>,
-                <>
-                  <strong>Copy · Edit · Delete.</strong> Copy just this one, reword it, or remove it.
-                </>,
-              ]}
-            />
+            <Shot id="changes" wideLegend />
             <h3>What gets copied</h3>
             <p>Paste it anywhere — it reads cleanly in an email, a chat message or an AI coding tool:</p>
             <div className={s.clip}>
@@ -879,25 +553,7 @@ Please reply with the item numbers as each one is done, and flag anything that n
             </div>
 
             <h3>Your changelog</h3>
-            <Shot
-              id="changes-done"
-              wideLegend
-              alt="The Changelog view showing a done item with a resolution note."
-              items={[
-                <>
-                  <strong>Changelog.</strong> Everything marked done, filed by the date it was finished.
-                </>,
-                <>
-                  <strong>Copy changelog.</strong> A dated list of what changed — ready to share as release notes.
-                </>,
-                <>
-                  <strong>Done.</strong> Finished and live.
-                </>,
-                <>
-                  <strong>Resolution note.</strong> Optional: the version, what was changed, or who did it.
-                </>,
-              ]}
-            />
+            <Shot id="changes-done" wideLegend />
             <Tip>
               People you&apos;ve shared a system with can see that system&apos;s change requests and mark them
               done themselves — so the list stays up to date without chasing.
@@ -911,26 +567,7 @@ Please reply with the item numbers as each one is done, and flag anything that n
               your whole workspace. Use it for people you trust with everything; for anyone else, share
               specific credentials instead.
             </p>
-            <Shot
-              id="settings"
-              wideLegend
-              alt="The Settings page with the Grant access form and a list of who has access."
-              items={[
-                <>
-                  <strong>Their email.</strong> The technical admin&apos;s UnyBase login.
-                </>,
-                <>
-                  <strong>Access expires.</strong> A set number of days, or until you revoke it.
-                </>,
-                <>
-                  <strong>Grant access.</strong> They&apos;re emailed and can see your workspace straight away.
-                </>,
-                <>
-                  <strong>Who has access.</strong> Everyone you&apos;ve granted, with <em>Revoke</em> to end it
-                  instantly.
-                </>,
-              ]}
-            />
+            <Shot id="settings" wideLegend />
           </Section>
 
           {/* ------------------------------------------------------------ */}
