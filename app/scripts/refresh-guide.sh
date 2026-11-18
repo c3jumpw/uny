@@ -9,6 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 OUT="${1:-$(mktemp -d)}"
+mkdir -p "$OUT"
 PORT=3123
 export GUIDE_CAPTURE=1
 # The demo screens never call Supabase; the auth pages only need a URL
@@ -34,10 +35,16 @@ stop
 npx next build
 NODE_OPTIONS="--require $PWD/scripts/fake-now.cjs" npx next start -p "$PORT" > "$OUT/server.log" 2>&1 &
 SERVER_PID=$!
-for _ in $(seq 1 60); do
-  curl -sf -o /dev/null "http://localhost:$PORT/guide/demo?shot=overview" && break
+up=""
+for _ in $(seq 1 90); do
+  if curl -sf -o /dev/null "http://localhost:$PORT/guide/demo?shot=overview"; then up=1; break; fi
   sleep 1
 done
+if [ -z "$up" ]; then
+  echo "The capture server did not start. Its log:" >&2
+  cat "$OUT/server.log" >&2
+  exit 1
+fi
 
 node scripts/capture-guide.cjs "$OUT"
 node scripts/capture-guide.cjs --convert "$OUT"
