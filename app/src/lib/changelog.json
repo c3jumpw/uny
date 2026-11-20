@@ -1,0 +1,620 @@
+{
+ "_comment": "Change log for the UnyBase app. Append-only and oldest first: add each new change at the END, dated the day it ships, in the same commit as the change. Audiences: everyone, client, shared (people a client shared credentials with), technical_admin, super_admin, internal (admin change log only, never in the What's new popup). Types: new, improved, fixed, security, removed. A new screen's tour step ids go in tourSteps; scripts/check-guide.mjs fails the build if a tour step has no change log entry or the log is out of order. See CLAUDE.md.",
+ "entries": [
+  {
+   "id": "2026-09-25-dashboard-launch",
+   "date": "2026-09-25",
+   "type": "new",
+   "area": "Account",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "The UnyBase dashboard is live",
+   "summary": "Sign up, log in and land on your own workspace at unybase.unywebs.com.",
+   "commits": [
+    "4fa8bfe"
+   ]
+  },
+  {
+   "id": "2026-09-26-roles",
+   "date": "2026-09-26",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin",
+    "technical_admin"
+   ],
+   "title": "Three kinds of account",
+   "summary": "Super admins run the platform, technical admins work in the client workspaces they're granted, and clients manage their own.",
+   "details": [
+    "Roles come from the user_roles table and the SUPER_ADMIN_EMAILS / TECHNICAL_ADMIN_EMAILS settings."
+   ],
+   "commits": [
+    "5fea50e"
+   ]
+  },
+  {
+   "id": "2026-09-26-subscription-admin",
+   "date": "2026-09-26",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin",
+    "technical_admin"
+   ],
+   "title": "Subscription admin",
+   "summary": "One table of every workspace's payment status, worst first, with a cut-off switch that always needs a person to confirm it.",
+   "details": [
+    "Grace, warning, escalated and cutoff-recommended stages, worked out live from the last failed payment.",
+    "Type CUTOFF to confirm; Restore brings everything back with the same key.",
+    "Every cutoff and restore is kept in an audit trail."
+   ],
+   "link": {
+    "href": "/admin",
+    "label": "Open Subscriptions"
+   },
+   "shot": "admin",
+   "tourSteps": [
+    "a-admin",
+    "a-cutoff",
+    "t-admin",
+    "t-cutoff"
+   ],
+   "commits": [
+    "2d7d256"
+   ]
+  },
+  {
+   "id": "2026-09-26-overview-status",
+   "date": "2026-09-26",
+   "type": "new",
+   "area": "Overview",
+   "audiences": [
+    "client"
+   ],
+   "title": "Your subscription at a glance",
+   "summary": "The Overview page shows whether your plan is paid up, along with your workspace key.",
+   "link": {
+    "href": "/dashboard",
+    "label": "Open Overview"
+   },
+   "shot": "overview",
+   "tourSteps": [
+    "c-overview"
+   ],
+   "commits": [
+    "2d7d256"
+   ]
+  },
+  {
+   "id": "2026-09-27-vault",
+   "date": "2026-09-27",
+   "type": "new",
+   "area": "Vault",
+   "audiences": [
+    "client",
+    "technical_admin"
+   ],
+   "title": "The credential vault",
+   "summary": "Keep every key, token and login your apps depend on in one place, encrypted before it is stored and tested against the provider.",
+   "details": [
+    "Live checks for GitHub, Supabase, systeme.io, ClickUp, Vercel and any web address.",
+    "Expiry dates tracked, with problems sorted to the top.",
+    "Record whose account each credential belongs to: yours or the agency's."
+   ],
+   "link": {
+    "href": "/dashboard/vault",
+    "label": "Open Vault"
+   },
+   "shot": "vault",
+   "tourSteps": [
+    "c-vault",
+    "c-vault-add"
+   ],
+   "commits": [
+    "c643061"
+   ]
+  },
+  {
+   "id": "2026-09-27-emails",
+   "date": "2026-09-27",
+   "type": "new",
+   "area": "Notifications",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "Email warnings before things break",
+   "summary": "UnyBase now re-checks your credentials every night and emails you before anything expires or after something fails.",
+   "details": [
+    "Expiry warnings 14, 7 and 1 days ahead.",
+    "An alert as soon as a working credential starts failing.",
+    "Payment, trial and access emails at each step of your account."
+   ],
+   "commits": [
+    "5438ed1"
+   ]
+  },
+  {
+   "id": "2026-09-27-grants",
+   "date": "2026-09-27",
+   "type": "new",
+   "area": "Settings",
+   "audiences": [
+    "client",
+    "technical_admin"
+   ],
+   "title": "Give your developer access",
+   "summary": "Grant a technical admin access to your workspace from Settings, with an optional end date, and take it back any time.",
+   "link": {
+    "href": "/dashboard/settings",
+    "label": "Open Settings"
+   },
+   "shot": "settings",
+   "tourSteps": [
+    "c-settings",
+    "t-vault"
+   ],
+   "commits": [
+    "5438ed1"
+   ]
+  },
+  {
+   "id": "2026-09-27-import",
+   "date": "2026-09-27",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "Import existing subscribers",
+   "summary": "Add existing customers in bulk from the Subscriptions page, so they get accounts without signing up themselves.",
+   "commits": [
+    "5438ed1"
+   ]
+  },
+  {
+   "id": "2026-09-27-systems",
+   "date": "2026-09-27",
+   "type": "improved",
+   "area": "Vault",
+   "audiences": [
+    "client"
+   ],
+   "title": "Group credentials by app or system",
+   "summary": "Tag each credential with the app, tool or system it belongs to, then filter the vault by it.",
+   "commits": [
+    "91f4448"
+   ]
+  },
+  {
+   "id": "2026-09-28-password-reset",
+   "date": "2026-09-28",
+   "type": "new",
+   "area": "Account",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "Reset a forgotten password",
+   "summary": "Use Forgot password? on the login page to get a link to set a new one. Replies to our emails now reach support.",
+   "commits": [
+    "508dcd4"
+   ]
+  },
+  {
+   "id": "2026-09-28-exempt",
+   "date": "2026-09-28",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "Billing exemption for internal accounts",
+   "summary": "Mark a company workspace as internal so it never shows up as unpaid.",
+   "commits": [
+    "1b2f92e"
+   ]
+  },
+  {
+   "id": "2026-09-28-sharing",
+   "date": "2026-09-28",
+   "type": "new",
+   "area": "Vault",
+   "audiences": [
+    "client",
+    "shared"
+   ],
+   "title": "Share credentials with your developer",
+   "summary": "Give someone access to all your credentials or just one system, for as long as you choose. They see exactly what you shared, labelled with your email.",
+   "link": {
+    "href": "/dashboard/vault",
+    "label": "Open Vault"
+   },
+   "shot": "vault-share",
+   "tourSteps": [
+    "c-vault-share",
+    "s-login",
+    "s-vault"
+   ],
+   "commits": [
+    "8f7e614"
+   ]
+  },
+  {
+   "id": "2026-09-28-domains-theme",
+   "date": "2026-09-28",
+   "type": "new",
+   "area": "Domains",
+   "audiences": [
+    "client"
+   ],
+   "title": "Domains, any provider, and light or dark",
+   "summary": "Track where each domain is registered and when it renews, store credentials for any provider, and switch the whole app between light and dark.",
+   "link": {
+    "href": "/dashboard/domains",
+    "label": "Open Domains"
+   },
+   "shot": "domains",
+   "tourSteps": [
+    "c-domains",
+    "c-domains-add"
+   ],
+   "commits": [
+    "7a2310d"
+   ]
+  },
+  {
+   "id": "2026-09-28-reveal",
+   "date": "2026-09-28",
+   "type": "new",
+   "area": "Vault",
+   "audiences": [
+    "client",
+    "shared",
+    "technical_admin"
+   ],
+   "title": "Reveal a stored credential",
+   "summary": "Show or copy a credential when you need it. It hides again by itself, and every reveal is logged in its history.",
+   "shot": "vault-card",
+   "tourSteps": [
+    "c-vault-card"
+   ],
+   "commits": [
+    "5546ebf"
+   ]
+  },
+  {
+   "id": "2026-10-10-pricing-saving",
+   "date": "2026-10-10",
+   "type": "improved",
+   "area": "Website",
+   "audiences": [
+    "internal"
+   ],
+   "title": "Pricing shows the yearly saving in dollars",
+   "summary": "The UnyBase website's pricing cards show how much yearly billing saves, and browsers no longer hold on to old prices.",
+   "commits": [
+    "d828d9f",
+    "c3e2400"
+   ]
+  },
+  {
+   "id": "2026-10-28-signup",
+   "date": "2026-10-28",
+   "type": "improved",
+   "area": "Account",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "Clearer sign-up and email confirmation",
+   "summary": "Type your password twice when signing up, confirm your email from your inbox, and land on the right next step.",
+   "shot": "signup",
+   "tourSteps": [
+    "c-signup",
+    "c-login"
+   ],
+   "commits": [
+    "ff64139"
+   ]
+  },
+  {
+   "id": "2026-10-28-plans",
+   "date": "2026-10-28",
+   "type": "new",
+   "area": "Billing",
+   "audiences": [
+    "client"
+   ],
+   "title": "Choose your plan before you start",
+   "summary": "New accounts pick Basic or Premium, monthly or yearly, and pay at the secure checkout. The dashboard opens as soon as the payment arrives.",
+   "link": {
+    "href": "/plans",
+    "label": "See plans"
+   },
+   "shot": "plans",
+   "tourSteps": [
+    "c-plans"
+   ],
+   "commits": [
+    "ff64139"
+   ]
+  },
+  {
+   "id": "2026-10-28-trials",
+   "date": "2026-10-28",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "Manual trials",
+   "summary": "Give an account free access until a date you choose. They're reminded before it ends, and see the plan picker afterwards.",
+   "shot": "admin-trial",
+   "tourSteps": [
+    "a-trial"
+   ],
+   "commits": [
+    "ff64139"
+   ]
+  },
+  {
+   "id": "2026-10-28-changes",
+   "date": "2026-10-28",
+   "type": "new",
+   "area": "Change requests",
+   "audiences": [
+    "client",
+    "technical_admin"
+   ],
+   "title": "Change requests",
+   "summary": "Write down every edit you want made to your apps, send a batch to your developer in one copy, and tick them off when they're done.",
+   "link": {
+    "href": "/dashboard/changes",
+    "label": "Open Changes"
+   },
+   "shot": "changes",
+   "tourSteps": [
+    "c-changes",
+    "c-changes-done"
+   ],
+   "commits": [
+    "ff64139"
+   ]
+  },
+  {
+   "id": "2026-10-28-systeme-tags",
+   "date": "2026-10-28",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "systeme.io tags for signups and customers",
+   "summary": "Signups and paying customers are tagged in systeme.io automatically, with a Sync tags now button and a log of every attempt.",
+   "shot": "admin-audit",
+   "tourSteps": [
+    "a-audit"
+   ],
+   "commits": [
+    "ff64139"
+   ]
+  },
+  {
+   "id": "2026-10-30-plan-tags",
+   "date": "2026-10-30",
+   "type": "improved",
+   "area": "Admin",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "Plan, billing cycle and cancellation tags",
+   "summary": "systeme.io contacts are also tagged with their plan (Basic or Premium), billing cycle and cancellation, so each can be emailed separately.",
+   "commits": [
+    "03f43b9"
+   ]
+  },
+  {
+   "id": "2026-10-30-prices",
+   "date": "2026-10-30",
+   "type": "fixed",
+   "area": "Billing",
+   "audiences": [
+    "client"
+   ],
+   "title": "Yearly prices match checkout",
+   "summary": "The yearly prices shown in UnyBase now match what checkout charges: $299.95 for Basic and $499.95 for Premium.",
+   "commits": [
+    "35fb49e"
+   ]
+  },
+  {
+   "id": "2026-10-30-guide",
+   "date": "2026-10-30",
+   "type": "new",
+   "area": "Help",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "A visual user guide",
+   "summary": "Every page and button explained with annotated screenshots, in light and dark.",
+   "link": {
+    "href": "/guide",
+    "label": "Open the guide"
+   },
+   "commits": [
+    "e94f15c"
+   ]
+  },
+  {
+   "id": "2026-10-31-website",
+   "date": "2026-10-31",
+   "type": "improved",
+   "area": "Website",
+   "audiences": [
+    "internal"
+   ],
+   "title": "Website shows the real dashboard",
+   "summary": "The UnyBase website now has a tour of the real dashboard, copy that matches the product, and the same plan lists as the app.",
+   "commits": [
+    "3a4785f",
+    "3695a72"
+   ]
+  },
+  {
+   "id": "2026-11-15-client-sites",
+   "date": "2026-11-15",
+   "type": "new",
+   "area": "Client sites",
+   "audiences": [
+    "super_admin"
+   ],
+   "title": "Client sites: the kill switch",
+   "summary": "Every client app Unywebs builds can check in with UnyBase and be paused from Admin, Client sites, without logging into the client's tool.",
+   "details": [
+    "Auto follows the owner's account; Paused shows visitors a neutral unavailable page; Always on ignores the account.",
+    "Keys are shown once, and every switch is logged and emailed to the owner.",
+    "Nothing pauses on its own: a failed payment only shows the client's staff a notice."
+   ],
+   "link": {
+    "href": "/admin/sites",
+    "label": "Open Client sites"
+   },
+   "shot": "sites",
+   "tourSteps": [
+    "a-sites",
+    "a-sites-key",
+    "a-sites-pause"
+   ],
+   "commits": [
+    "38d5aae"
+   ]
+  },
+  {
+   "id": "2026-11-15-cutoff-sites",
+   "date": "2026-11-15",
+   "type": "improved",
+   "area": "Admin",
+   "audiences": [
+    "super_admin",
+    "technical_admin"
+   ],
+   "title": "Cutting off an account also pauses its sites",
+   "summary": "The cut-off dialog now says how many client sites are linked to the account. Those on Auto show the unavailable page until you restore.",
+   "shot": "admin-cutoff",
+   "commits": [
+    "38d5aae"
+   ]
+  },
+  {
+   "id": "2026-11-15-licence-endpoint",
+   "date": "2026-11-15",
+   "type": "new",
+   "area": "Client sites",
+   "audiences": [
+    "internal"
+   ],
+   "title": "Licence check for client apps",
+   "summary": "A public status endpoint, a drop-in script for static sites, and a builder prompt that adds the check to any app Claude builds.",
+   "commits": [
+    "38d5aae"
+   ]
+  },
+  {
+   "id": "2026-11-18-tour",
+   "date": "2026-11-18",
+   "type": "new",
+   "area": "Help",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "A step-by-step getting-started tour",
+   "summary": "Help in the menu now opens a tour of every screen with real screenshots, with a track for each kind of user.",
+   "details": [
+    "Getting started for everyone, plus Shared access, Technical admin and Super admin tracks.",
+    "Steps added since your last visit are marked New."
+   ],
+   "link": {
+    "href": "/dashboard/tour",
+    "label": "Take the tour"
+   },
+   "commits": [
+    "96dd89d"
+   ]
+  },
+  {
+   "id": "2026-11-18-header",
+   "date": "2026-11-18",
+   "type": "fixed",
+   "area": "Layout",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "Menu readable in light mode and on phones",
+   "summary": "The top menu now follows the light theme, and on a phone it scrolls on its own row instead of pushing the page sideways.",
+   "commits": [
+    "96dd89d"
+   ]
+  },
+  {
+   "id": "2026-11-18-guide-checks",
+   "date": "2026-11-18",
+   "type": "new",
+   "area": "Help",
+   "audiences": [
+    "internal"
+   ],
+   "title": "The tour can't fall behind the app",
+   "summary": "Every build checks that each page has a tour step, and GitHub re-takes all screenshots on every push, committing only real changes.",
+   "commits": [
+    "96dd89d",
+    "4295b76"
+   ]
+  },
+  {
+   "id": "2026-11-20-whats-new",
+   "date": "2026-11-20",
+   "type": "new",
+   "area": "Help",
+   "audiences": [
+    "everyone"
+   ],
+   "title": "What's new, the first time you log in after an update",
+   "summary": "When UnyBase changes in a way that affects you, a short walkthrough of the changes opens the next time you log in. It shows once, on any device.",
+   "details": [
+    "You only see changes that apply to your kind of account.",
+    "Every past update is listed on the What's new page, linked from Help."
+   ],
+   "link": {
+    "href": "/dashboard/whats-new",
+    "label": "See every update"
+   },
+   "tourSteps": [
+    "c-whats-new"
+   ]
+  },
+  {
+   "id": "2026-11-20-admin-changelog",
+   "date": "2026-11-20",
+   "type": "new",
+   "area": "Admin",
+   "audiences": [
+    "super_admin",
+    "technical_admin"
+   ],
+   "title": "Change log in Admin",
+   "summary": "Admin has a Change log tab: every change to UnyBase in date order, with who it affects, searchable and exportable as CSV or JSON.",
+   "details": [
+    "Super admins also see internal notes about the website, builds and infrastructure.",
+    "Technical admins now get the admin tabs too, with Subscriptions and Change log."
+   ],
+   "link": {
+    "href": "/admin/changelog",
+    "label": "Open the change log"
+   },
+   "shot": "changelog",
+   "tourSteps": [
+    "a-changelog",
+    "t-changelog"
+   ]
+  }
+ ]
+}

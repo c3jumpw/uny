@@ -35,6 +35,32 @@ also updates the tour in the same commit:
    behaviour you changed, update its text too. Its screenshots and
    callout text come from the same files as the tour.
 
+## Logging every change (required, same commit as the change)
+
+`app/src/lib/changelog.json` is the permanent record of every change to
+UnyBase. It drives Admin → Change log (`/admin/changelog`), the What's
+new page (`/dashboard/whats-new`) and the popup people see the first
+time they log in after a change that applies to them.
+
+- Append one entry per user-visible change at the **end** of `entries`
+  (the file is oldest first), dated the day it ships: `id`
+  (`YYYY-MM-DD-short-name`), `date`, `type` (new, improved, fixed,
+  security, removed), `area`, `audiences`, `title`, `summary`, and
+  where useful `details`, `link`, `shot` (a screenshot id) and
+  `tourSteps`.
+- `audiences` decides who sees it in What's new: `everyone`, `client`,
+  `shared` (people a client shared credentials with), `technical_admin`,
+  `super_admin`. Use `internal` for website, build or infrastructure
+  changes: they appear only in the super-admin change log, never in the
+  popup.
+- Write titles and summaries for the people in `audiences`, in plain
+  words; they read them in the popup.
+- New tour steps must be named in an entry's `tourSteps`, and a tour
+  update needs a log entry on or after its date. `npm run check:guide`
+  (and so every build) fails otherwise.
+- Never edit or delete past entries except to fix a mistake; never
+  reorder them.
+
 ## Other rules
 
 - Never set `auth.users.is_super_admin`; roles live in `public.user_roles`

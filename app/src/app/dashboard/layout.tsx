@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserRole } from "@/lib/admin";
 import { getAccess } from "@/lib/access";
 import { DashboardNav } from "@/components/DashboardNav";
+import { WhatsNewModal } from "@/components/changelog/WhatsNewModal";
+import { whatsNewFor } from "@/lib/changelog";
 
 export default async function DashboardLayout({
   children,
@@ -23,6 +25,9 @@ export default async function DashboardLayout({
   if (!access.allowed) redirect("/plans");
 
   const role = getUserRole(user.email);
+  // First visit after changes that apply to this person: show them.
+  const news = whatsNewFor(user, role, { collaboratorOnly: access.reason === "collaborator" });
+  const isAdmin = role === "super_admin" || role === "technical_admin";
 
   return (
     <>
@@ -30,6 +35,12 @@ export default async function DashboardLayout({
       <main className="wrap" style={{ paddingTop: 32, paddingBottom: 64 }}>
         {children}
       </main>
+      <WhatsNewModal
+        entries={news.entries}
+        total={news.total}
+        latestId={news.latestId}
+        seeAllHref={isAdmin ? "/admin/changelog" : "/dashboard/whats-new"}
+      />
     </>
   );
 }

@@ -244,5 +244,29 @@
    "**Health.** The result of the last live check, so you know a key still works before you deploy.",
    "**Check.** Re-test the credential now. *History*, under its details, shows who changed or revealed it."
   ]
+ },
+ "changelog": {
+  "alt": "Admin, Change log: search, type filters, audience filter, order switch and export buttons above a month-by-month timeline of changes.",
+  "items": [
+   "**Change log tab.** Next to Subscriptions and Client sites. Technical admins see it too, with the changes that affect them.",
+   "**Search and type.** Find a change by any word, or show only what's new, improved or fixed.",
+   "**Who it affects and order.** Filter by audience, and read it newest first or oldest first.",
+   "**Export.** Download what's shown as a CSV for a spreadsheet, or as JSON to keep or reuse.",
+   "**Summary.** How many changes, the dates they span, and how many are new since your last visit.",
+   "**Each change.** Its type, the area of UnyBase, *New for you* if you haven't seen it, and who it affects.",
+   "**Open it.** A link to the page that changed, and the code commits behind it."
+  ]
+ },
+ "whats-new": {
+  "alt": "The What's new window over the Overview: a count of updates, the current change with its type, title and details, dots for each update, and Next.",
+  "items": [
+   "**Since your last visit.** Opens once, the first time you log in after an update that affects you.",
+   "**What kind of change.** New, improved or fixed, the part of UnyBase it touches, and when it shipped.",
+   "**What changed.** A plain description, with the details that matter to you.",
+   "**Try it.** Jumps straight to the page that changed.",
+   "**Each update.** Use the dots or the arrow keys to move between them.",
+   "**Everything else.** The full list of updates that apply to you.",
+   "**Next, then Got it.** Closing it records that you've seen these, on every device."
+  ]
  }
 }

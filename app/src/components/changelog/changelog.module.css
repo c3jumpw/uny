@@ -1,0 +1,338 @@
+/* Change log timeline (admin + What's new page) and the What's new popup. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+}
+.chip {
+  display: inline-flex;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--paper-dim);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.newChip {
+  color: var(--amber-ink);
+  background: var(--amber);
+  border-color: var(--amber);
+  font-weight: 700;
+}
+
+/* ---- Controls ---- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.search {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.seg button {
+  padding: 7px 11px;
+  font-size: 0.8rem;
+  border: 0;
+  background: transparent;
+  color: var(--paper-dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg button + button {
+  border-left: 1px solid var(--line);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--paper);
+  font-weight: 600;
+}
+.summaryLine {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 22px;
+}
+
+/* ---- Timeline ---- */
+.month {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.monthBlock {
+  margin-bottom: 26px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 64px 22px minmax(0, 1fr);
+  gap: 0 12px;
+}
+.date {
+  padding-top: 18px;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+  white-space: nowrap;
+}
+.rail {
+  position: relative;
+}
+.rail::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--line);
+}
+.dot {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: var(--tone);
+  box-shadow: 0 0 0 4px var(--ink);
+}
+.card {
+  margin: 8px 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.cardFresh {
+  border-color: color-mix(in srgb, var(--amber) 55%, var(--line));
+}
+.cardTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.title {
+  margin: 0 0 4px;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.summary {
+  margin: 0;
+  color: var(--paper-dim);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+.details {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  list-style: disc;
+  color: var(--paper-dim);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+.cardFoot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.82rem;
+}
+.cardFoot a {
+  color: var(--sky);
+}
+.commits {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.commits a {
+  color: var(--muted);
+}
+.empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--paper-dim);
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 0 10px;
+  }
+  .date {
+    grid-column: 2;
+    padding-top: 6px;
+    text-align: left;
+  }
+  .rail {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+  .card {
+    grid-column: 2;
+  }
+}
+
+/* ---- What's new popup ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(3px);
+}
+.modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.modalHead {
+  padding: 22px 24px 16px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--amber) 22%, var(--ink)) 0%,
+    color-mix(in srgb, var(--sky) 14%, var(--ink)) 100%
+  );
+  border-bottom: 1px solid var(--line);
+}
+.kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 4px;
+}
+.modalTitle {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.modalSub {
+  margin: 4px 0 0;
+  color: var(--paper-dim);
+  font-size: 0.88rem;
+}
+.modalBody {
+  padding: 20px 24px 8px;
+}
+.thumb {
+  margin: 0 0 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  line-height: 0;
+  max-height: 240px;
+}
+.thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: top;
+}
+.entryTitle {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.modalFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 24px 20px;
+}
+.dots {
+  display: flex;
+  gap: 6px;
+}
+.dots button {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border-radius: 999px;
+  border: 0;
+  background: var(--line);
+  cursor: pointer;
+}
+.dots button[aria-current="step"] {
+  background: var(--amber);
+  border-color: var(--amber);
+}
+.seeAll {
+  font-size: 0.85rem;
+  color: var(--sky);
+}
+
+/* Art panel for an update without a screenshot. */
+.art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--tone) 35%, var(--line));
+  background:
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--tone) 30%, transparent) 0, transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--tone) 16%, var(--surface)) 0%, var(--surface) 100%);
+}
+.artIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 18%, var(--ink));
+  border: 1px solid color-mix(in srgb, var(--tone) 40%, transparent);
+}
+.artText {
+  font-size: 0.82rem;
+  color: var(--paper-dim);
+  line-height: 1.4;
+}
+.artText strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--paper);
+}

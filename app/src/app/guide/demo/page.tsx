@@ -24,6 +24,9 @@ import { SitesClient, type SiteView } from "@/components/SitesClient";
 import { computeStatus, sortByPriority, type StatusRow } from "@/lib/subscriptionStatus";
 import { BUILDER_PROMPT, BUILDER_PROMPT_VERSION } from "@/lib/builderPrompt";
 import type { UserRole } from "@/lib/admin";
+import { ChangelogView } from "@/components/changelog/ChangelogView";
+import { WhatsNewModal } from "@/components/changelog/WhatsNewModal";
+import { audiencesFor, entriesFor } from "@/lib/changelog";
 
 const ME = "user-jane";
 const DAY = 86_400_000;
@@ -344,7 +347,7 @@ export default async function GuidePreview({
     const rows = adminRows(tech ? ["u-joes", "u-river"] : undefined);
     return (
       <Shell role={tech ? "technical_admin" : "super_admin"} email={tech ? "support@pixelforge.dev" : "admin@unywebs.com"}>
-        {tech ? null : <AdminTabs current="/admin" />}
+        <AdminTabs current="/admin" role={tech ? "technical_admin" : "super_admin"} />
         <AdminSubscriptionsView
           rows={rows}
           isSuperAdmin={!tech}
@@ -354,6 +357,47 @@ export default async function GuidePreview({
           systemeOn
           sitesByOwner={{ "u-joes": 1, "u-bright": 1 }}
         />
+      </Shell>
+    );
+  }
+
+  if (shot === "changelog") {
+    const all = entriesFor(audiencesFor("super_admin"), { includeInternal: true });
+    return (
+      <Shell role="super_admin" email="admin@unywebs.com">
+        <AdminTabs current="/admin/changelog" />
+        <div style={{ marginBottom: 20 }}>
+          <h1 style={{ margin: "0 0 6px", fontSize: "1.6rem", fontWeight: 600 }}>Change log</h1>
+          <p style={{ margin: 0, color: "var(--paper-dim)", maxWidth: 760, lineHeight: 1.6 }}>
+            Every change to UnyBase, in date order, with who it affects. Internal notes (website, build and
+            infrastructure changes) show only here. People see the changes that apply to them in a What&apos;s new
+            window the first time they log in afterwards.
+          </p>
+        </div>
+        <ChangelogView entries={all} freshIds={all.slice(-2).map((e) => e.id)} admin />
+      </Shell>
+    );
+  }
+
+  if (shot === "whats-new") {
+    // The popup a client sees after updates: the newest client-facing
+    // changes, exactly as the real window shows them.
+    const news = entriesFor(audiencesFor("client")).slice(-3).reverse();
+    return (
+      <Shell>
+        <OverviewView
+          data={{
+            name: "jane",
+            welcome: false,
+            status: { label: "Active", color: "#7CC084", bg: "rgba(120,180,120,.15)", actionHint: "Paying on schedule" },
+            trial: null,
+            apiKey: { key: "unyb_live_3f9c…e21a", revoked_at: null },
+            vault: { total: 4, attention: 2 },
+            domains: { total: 2, next: { name: "acmestudio.com", label: "Renews in 12d", color: "#ffb066" } },
+            changes: { open: 4, pending: 2 },
+          }}
+        />
+        <WhatsNewModal entries={news} total={news.length} latestId={null} seeAllHref="/dashboard/whats-new" demo />
       </Shell>
     );
   }

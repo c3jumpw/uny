@@ -305,6 +305,27 @@ console instead of by logging into their tool.
   light mode and overflowed on phones; the account cutoff dialog
   inherited right-aligned text.
 
+## Phase 13 — Change log and What's new ✅
+
+- `src/lib/changelog.json`: the record of every change since launch
+  (backfilled from the git history), append-only, each entry with its
+  type, area, audiences and commits. `src/lib/changelog.ts` filters it
+  by role.
+- Admin → Change log (`/admin/changelog`): a month-by-month timeline
+  with search, type and audience filters, newest/oldest order, and
+  CSV/JSON export. Super admins also see internal notes; technical
+  admins see what affects them. Technical admins now get admin tabs.
+- What's new: the first time someone opens UnyBase after changes that
+  apply to their role, a popup walks through them (up to 6, newest
+  first, with screenshots or art). Closing it stores the latest change
+  id in their `user_metadata.changelog_seen` (via
+  `/api/changelog/seen`), so it shows once across devices. New
+  accounts start caught up. `/dashboard/whats-new` lists everything
+  that applies to them.
+- `scripts/check-guide.mjs` now validates the log (order, fields,
+  audiences) and fails the build if a tour step has no entry. The rule
+  for future changes is in `/CLAUDE.md`.
+
 ## Phase 5+ (backlog)
 
 - Rebuild `/dashboard/domains` with real domain-management UX.

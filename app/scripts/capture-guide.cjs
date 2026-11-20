@@ -383,9 +383,9 @@ const SHOTS = [
   {
     id: 'admin-tech', vw: 1280, url: '/guide/demo?shot=admin-tech', vh: 1000,
     clip: async (p) => {
-      const h1 = await box(p.locator('main h1'));
+      const tabs = await box(p.locator('nav[aria-label="Admin sections"]'));
       const a = await box(p.locator('[data-guide=admin-actions]'));
-      return { x: 0, y: h1.y - 20, width: p.viewportSize().width, height: a.y + a.height + 20 - (h1.y - 20) };
+      return { x: 0, y: tabs.y - 16, width: p.viewportSize().width, height: a.y + a.height + 20 - (tabs.y - 16) };
     },
     marks: async (p) => {
       const row = p.locator('[data-guide=admin-table] tbody tr').first();
@@ -474,6 +474,44 @@ const SHOTS = [
         union(await box(card.getByText('ghp_…9fQ2')), await box(card.getByRole('button', { name: 'Reveal', exact: true }))),
         await box(card.getByText('Healthy', { exact: true })),
         await box(card.getByRole('button', { name: 'Check' })),
+      ];
+    },
+  },
+
+  // ---- Change log and What's new ------------------------------------
+  {
+    id: 'changelog', vw: 1280, url: '/guide/demo?shot=changelog', vh: 2000,
+    clip: async (p) => {
+      const tabs = await box(p.locator('nav[aria-label="Admin sections"]'));
+      const fourth = await box(p.locator('article').nth(3));
+      return { x: 0, y: tabs.y - 16, width: p.viewportSize().width, height: fourth.y + fourth.height + 16 - (tabs.y - 16) };
+    },
+    marks: async (p) => {
+      const first = p.locator('article').first();
+      return [
+        await box(p.locator('nav[aria-label="Admin sections"]').getByRole('link', { name: 'Change log' })),
+        union(await box(p.getByRole('searchbox', { name: 'Search changes' })), await box(p.getByRole('group', { name: 'Type of change' }))),
+        union(await box(p.getByRole('combobox', { name: 'Who it affects' })), await box(p.getByRole('group', { name: 'Order' }))),
+        union(await box(p.getByRole('button', { name: 'Export CSV' })), await box(p.getByRole('button', { name: 'Export JSON' }))),
+        await box(p.getByText(/changes · /).first()),
+        await box(first.locator('div').nth(2).locator('div').first()),
+        await box(first.getByRole('link').first()),
+      ];
+    },
+  },
+  {
+    id: 'whats-new', vw: 1100, url: '/guide/demo?shot=whats-new', vh: 1000,
+    clip: async (p) => pad(await box(p.getByRole('dialog')), 24),
+    marks: async (p) => {
+      const d = p.getByRole('dialog');
+      return [
+        await box(d.locator('div').first()),
+        await box(d.locator('h3').locator('xpath=preceding-sibling::div[1]')),
+        union(await box(d.locator('h3')), await box(d.locator('h3').locator('xpath=following-sibling::p[1]'))),
+        await box(d.locator('h3').locator('xpath=following-sibling::div').getByRole('link')),
+        await box(d.getByRole('navigation', { name: 'Updates' })),
+        await box(d.getByRole('link', { name: /See (all|the full)/ })),
+        await box(d.getByRole('button', { name: /^Next/ })),
       ];
     },
   },

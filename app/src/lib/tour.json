@@ -1,6 +1,6 @@
 {
  "_comment": "The in-app getting-started tour (/dashboard/tour). Every page route in src/app must be covered by a step's routes or listed in exempt with a reason; every step's shot must exist with callout notes. scripts/check-guide.mjs enforces this on every build. When you ship a new screen or change one, add or update its step here and bump 'updated'.",
- "updated": "2026-11-18",
+ "updated": "2026-11-20",
  "tracks": [
   {
    "id": "client",
@@ -164,6 +164,20 @@
       "href": "/dashboard/settings",
       "label": "Open Settings"
      }
+    },
+    {
+     "id": "c-whats-new",
+     "shot": "whats-new",
+     "title": "See what's new after an update",
+     "summary": "After an update that affects you, a short walkthrough of the changes opens the first time you log in. Every past update is on the What's new page.",
+     "routes": [
+      "/dashboard/whats-new"
+     ],
+     "added": "2026-11-20",
+     "link": {
+      "href": "/dashboard/whats-new",
+      "label": "Open What's new"
+     }
     }
    ]
   },
@@ -241,6 +255,18 @@
      "summary": "Nothing cuts off on its own. When a client hasn't paid, you decide, and Restore brings everything back.",
      "routes": [],
      "added": "2026-11-18"
+    },
+    {
+     "id": "t-changelog",
+     "shot": "changelog",
+     "title": "The change log",
+     "summary": "Admin, Change log lists every change that affects you and your clients, in date order, so you can see what changed and when.",
+     "routes": [],
+     "added": "2026-11-20",
+     "link": {
+      "href": "/admin/changelog",
+      "label": "Open the change log"
+     }
     }
    ]
   },
@@ -319,6 +345,20 @@
      "summary": "Type PAUSE to confirm. The owner is emailed, and switching back brings the app back within a minute.",
      "routes": [],
      "added": "2026-11-18"
+    },
+    {
+     "id": "a-changelog",
+     "shot": "changelog",
+     "title": "The change log",
+     "summary": "Every change to UnyBase in date order, including internal notes, with who it affects. Search it, filter it, or export it as CSV or JSON.",
+     "routes": [
+      "/admin/changelog"
+     ],
+     "added": "2026-11-20",
+     "link": {
+      "href": "/admin/changelog",
+      "label": "Open the change log"
+     }
     }
    ]
   }

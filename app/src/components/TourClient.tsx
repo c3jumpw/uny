@@ -119,6 +119,9 @@ export function TourClient({
           Updated {niceDate(updated)}.{" "}
           <Link href="/guide" style={{ color: "var(--sky)" }}>
             Prefer to read it all on one page? Open the full guide →
+          </Link>{" "}
+          <Link href="/dashboard/whats-new" style={{ color: "var(--sky)" }}>
+            See what&apos;s new →
           </Link>
         </p>
       </div>
