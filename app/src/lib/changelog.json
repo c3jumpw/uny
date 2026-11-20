@@ -589,6 +589,9 @@
    },
    "tourSteps": [
     "c-whats-new"
+   ],
+   "commits": [
+    "d1c0113"
    ]
   },
   {
@@ -614,6 +617,9 @@
    "tourSteps": [
     "a-changelog",
     "t-changelog"
+   ],
+   "commits": [
+    "d1c0113"
    ]
   }
  ]
